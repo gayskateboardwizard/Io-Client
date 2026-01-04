@@ -1,0 +1,366 @@
+package io.client;
+
+import io.client.clickgui.CategoryPanel;
+import io.client.clickgui.SavedPanelConfig;
+import io.client.clickgui.Theme;
+import io.client.commands.CommandManager;
+import io.client.modules.*;
+import io.client.settings.*;
+import net.minecraft.client.Minecraft;
+
+import java.io.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class ModuleManager {
+    public static final ModuleManager INSTANCE = new ModuleManager();
+    private static final String CLIENT_FOLDER_NAME = "io";
+    private static final String MODULE_CONFIG_FILE = "modules.cfg";
+    private static final String UI_CONFIG_FILE = "ui.cfg";
+    private static final String KEYBIND_CONFIG_FILE = "keybinds.cfg";
+    private static final String THEME_CONFIG_FILE = "theme.cfg";
+    private static final String FRIENDS_CONFIG_FILE = "friends.cfg";
+    private static final String TARGETS_CONFIG_FILE = "targets.cfg";
+    private final List<Module> modules = new ArrayList<>();
+    private boolean initialized = false;
+
+    private ModuleManager() {
+    }
+
+    public void initTheme() {
+        Theme saved = loadTheme();
+        ClickGuiScreen.currentTheme = saved != null ? saved : Theme.IO;
+        ClickGuiScreen.opened = true;
+    }
+
+    public void init() {
+        if (initialized) return;
+        initialized = true;
+
+        initTheme();
+
+        modules.add(new ElytraFlight());
+        modules.add(new BoatFlight());
+        modules.add(new Speed());
+        modules.add(new NoFall());
+        modules.add(new Step());
+        modules.add(new Jesus());
+        modules.add(new Spider());
+        modules.add(new AutoSprint());
+        modules.add(new Killaura());
+        modules.add(new Velocity());
+        modules.add(new Criticals());
+        modules.add(new OffHand());
+        modules.add(new Fullbright());
+        modules.add(new Nuker());
+        modules.add(new Scaffold());
+        modules.add(new AutoMine());
+        modules.add(new AutoTool());
+        modules.add(new IoSwag());
+        modules.add(new CrystalAura());
+        modules.add(new AutoEat());
+        modules.add(new AntiAFK());
+        modules.add(new MessageSpammer());
+        modules.add(new GuiMove());
+        modules.add(new Safety());
+        modules.add(new ThemeChanger());
+        modules.add(new HUD());
+        modules.add(new ESP());
+        modules.add(new ArsonAura());
+        modules.add(new Surround());
+        modules.add(new Burrow());
+        modules.add(new DonkeyBoatDupe());
+        modules.add(new NBTThrottle());
+
+        System.out.println("Loaded " + modules.size() + " modules");
+
+        loadModules();
+        loadKeybinds();
+        TargetManager.INSTANCE.loadTargets();
+        TargetManager.INSTANCE.loadFriends();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            saveModules();
+            saveKeybinds();
+            TargetManager.INSTANCE.saveFriends();
+            TargetManager.INSTANCE.saveTargets();
+        }));
+    }
+
+    private File getFile(String fileName) {
+        Path gameDir = Minecraft.getInstance().gameDirectory.toPath();
+        File clientFolder = gameDir.resolve(CLIENT_FOLDER_NAME).toFile();
+        if (!clientFolder.exists()) clientFolder.mkdirs();
+        return clientFolder.toPath().resolve(fileName).toFile();
+    }
+
+    public void saveKeybinds() {
+        File configFile = getFile(KEYBIND_CONFIG_FILE);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+            for (Module module : modules) {
+                if (module.getKey() != -1) {
+                    writer.write(module.getName() + ":" + module.getKey());
+                    writer.newLine();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to save keybinds: " + e.getMessage());
+        }
+    }
+
+    public void loadKeybinds() {
+        File configFile = getFile(KEYBIND_CONFIG_FILE);
+        if (!configFile.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length != 2) continue;
+
+                Module module = getModuleByName(parts[0]);
+                if (module == null) continue;
+
+                try {
+                    int key = Integer.parseInt(parts[1]);
+                    module.setKey(key);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load keybinds: " + e.getMessage());
+        }
+    }
+
+    public void saveModules() {
+        File configFile = getFile(MODULE_CONFIG_FILE);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+            for (Module module : modules) {
+                writer.write(module.getName() + ":enabled:" + module.isEnabled());
+                writer.newLine();
+                writer.write(module.getName() + ":extended:" + module.isExtended());
+                writer.newLine();
+                for (Setting setting : module.getSettings()) {
+                    saveSetting(writer, module.getName(), setting);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to save module configs: " + e.getMessage());
+        }
+    }
+
+    private void saveSetting(BufferedWriter writer, String moduleName, Setting setting) throws IOException {
+        if (setting instanceof NumberSetting) {
+            writer.write(moduleName + ":setting:" + setting.getName() + ":" + ((NumberSetting) setting).getValue());
+            writer.newLine();
+        } else if (setting instanceof BooleanSetting) {
+            writer.write(moduleName + ":setting:" + setting.getName() + ":" + ((BooleanSetting) setting).isEnabled());
+            writer.newLine();
+        } else if (setting instanceof StringSetting) {
+            writer.write(moduleName + ":setting:" + setting.getName() + ":" + ((StringSetting) setting).getValue());
+            writer.newLine();
+        } else if (setting instanceof RadioSetting) {
+            writer.write(moduleName + ":setting:" + setting.getName() + ":" + ((RadioSetting) setting).getSelectedOption());
+            writer.newLine();
+        } else if (setting instanceof CategorySetting) {
+            CategorySetting catSetting = (CategorySetting) setting;
+            for (Object catItem : catSetting.getSettings()) {
+                if (catItem instanceof Setting catItemSetting) {
+                    saveSetting(writer, moduleName, catItemSetting);
+                }
+            }
+        }
+    }
+
+    public void loadModules() {
+        File configFile = getFile(MODULE_CONFIG_FILE);
+        if (!configFile.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length < 3) continue;
+
+                Module module = getModuleByName(parts[0]);
+                if (module == null) continue;
+
+                switch (parts[1]) {
+                    case "enabled" -> {
+                        boolean enabled = Boolean.parseBoolean(parts[2]);
+                        if (enabled && !module.isEnabled()) module.toggle();
+                    }
+                    case "extended" -> module.setExtended(Boolean.parseBoolean(parts[2]));
+                    case "setting" -> {
+                        if (parts.length < 4) continue;
+                        Setting setting = findSettingByName(module, parts[2]);
+                        if (setting != null) {
+                            loadSetting(setting, parts);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load module configs: " + e.getMessage());
+        }
+    }
+
+    private void loadSetting(Setting setting, String[] parts) {
+        if (parts.length < 4) return;
+
+        if (setting instanceof NumberSetting) {
+            try {
+                ((NumberSetting) setting).setValue(Float.parseFloat(parts[3]));
+            } catch (NumberFormatException ignored) {
+            }
+        } else if (setting instanceof BooleanSetting) {
+            ((BooleanSetting) setting).setEnabled(Boolean.parseBoolean(parts[3]));
+        } else if (setting instanceof StringSetting) {
+            String value = parts[3];
+            for (int i = 4; i < parts.length; i++) {
+                value += ":" + parts[i];
+            }
+            ((StringSetting) setting).setValue(value);
+        } else if (setting instanceof RadioSetting) {
+            ((RadioSetting) setting).setSelectedOption(parts[3]);
+        }
+    }
+
+    private Setting findSettingByName(Module module, String name) {
+        for (Setting setting : module.getSettings()) {
+            if (setting.getName().equals(name)) {
+                return setting;
+            }
+            if (setting instanceof CategorySetting) {
+                Setting found = findSettingInCategory((CategorySetting) setting, name);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private Setting findSettingInCategory(CategorySetting catSetting, String name) {
+        for (Object catItem : catSetting.getSettings()) {
+            if (catItem instanceof Setting itemSetting) {
+                if (itemSetting.getName().equals(name)) {
+                    return itemSetting;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void saveUiConfig(Map<Category, CategoryPanel> panels) {
+        File configFile = getFile(UI_CONFIG_FILE);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+            for (CategoryPanel panel : panels.values()) {
+                writer.write(panel.category.name() + ":" + panel.x + ":" + panel.y + ":" + panel.collapsed);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to save UI config: " + e.getMessage());
+        }
+    }
+
+    public Map<Category, SavedPanelConfig> loadUiConfig() {
+        File configFile = getFile(UI_CONFIG_FILE);
+        Map<Category, SavedPanelConfig> configMap = new HashMap<>();
+        if (!configFile.exists()) return configMap;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 4) {
+                    try {
+                        Category category = Category.valueOf(parts[0]);
+                        int x = Integer.parseInt(parts[1]);
+                        int y = Integer.parseInt(parts[2]);
+                        boolean collapsed = Boolean.parseBoolean(parts[3]);
+                        configMap.put(category, new SavedPanelConfig(x, y, collapsed));
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load UI config: " + e.getMessage());
+        }
+        return configMap;
+    }
+
+    public void saveTheme(Theme theme) {
+        File configFile = getFile(THEME_CONFIG_FILE);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+            writer.write(theme.name());
+            writer.newLine();
+        } catch (IOException e) {
+            System.err.println("Failed to save theme: " + e.getMessage());
+        }
+    }
+
+    public Theme loadTheme() {
+        File configFile = getFile(THEME_CONFIG_FILE);
+        if (!configFile.exists()) return Theme.IO;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+            String line = reader.readLine();
+            if (line != null) {
+                try {
+                    return Theme.valueOf(line);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to load theme: " + e.getMessage());
+        }
+        return Theme.IO;
+    }
+
+    public File getFriendsFile() {
+        return getFile(FRIENDS_CONFIG_FILE);
+    }
+
+    public File getTargetsFile() {
+        return getFile(TARGETS_CONFIG_FILE);
+    }
+
+    public List<Module> getModules() {
+        return modules;
+    }
+
+    public List<Module> getModulesByCategory(Category category) {
+        return modules.stream().filter(m -> m.getCategory() == category).collect(Collectors.toList());
+    }
+
+    public Module getModuleByName(String name) {
+        for (Module module : modules) if (module.getName().equalsIgnoreCase(name)) return module;
+        return null;
+    }
+
+    public void onUpdate() {
+        for (Module module : modules) if (module.isEnabled()) module.onUpdate();
+    }
+
+    public <T extends Module> T getModule(Class<T> clazz) {
+        for (Module m : modules) if (clazz.isInstance(m)) return clazz.cast(m);
+        return null;
+    }
+
+    public void onKeyPress(int key) {
+        for (Module module : modules) {
+            if (module.getKey() == key) {
+                module.toggle();
+                saveModules();
+
+                CommandManager.INSTANCE.sendMessage(
+                        "§a" + module.getName() + " is now " +
+                                (module.isEnabled() ? "enabled" : "§cdisabled")
+                );
+            }
+        }
+    }
+}

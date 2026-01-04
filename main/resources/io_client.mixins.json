@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "package": "io.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "io_client.refmap.json",
+
+  "mixins": [
+    "BlockItemMixin",
+    "BoneMealItemMixin",
+    "CommandsMixin",
+    "ExperienceOrbMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "PlayerMixin"
+  ],
+
+  "injectors": {
+    "defaultRequire": 1
+  },
+
+  "client": [
+    "MixinItemStack",
+  ],
+
+  "minVersion": "0.8.4",
+  "excludeClasses": [
+    "javax.crypto.**"
+  ]
+}
