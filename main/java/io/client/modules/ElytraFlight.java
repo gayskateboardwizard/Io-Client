@@ -55,7 +55,7 @@ public class ElytraFlight extends Module {
             } else if (mc.options.keyShift.isDown()) {
                 motionY = -verticalSpeed.getValue();
             } else if (lockY.isEnabled()) {
-                motionY = 0.02;  
+                motionY = 0.02;
             }
 
             player.setDeltaMovement(motionX, motionY, motionZ);

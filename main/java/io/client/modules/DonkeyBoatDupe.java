@@ -2,17 +2,13 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import io.client.settings.NumberSetting;
-import io.client.settings.BooleanSetting;
-import io.client.settings.CategorySetting;
-import io.client.settings.RadioSetting;
-import io.client.settings.StringSetting;
+import io.client.settings.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -24,10 +20,10 @@ public class DonkeyBoatDupe extends Module {
     private final Minecraft mc = Minecraft.getInstance();
     private final Random random = new Random();
 
-     
+
     private final RadioSetting modeSetting = new RadioSetting("Mode", "Boat");
 
-     
+
     private final CategorySetting boatCategory = new CategorySetting("Boat Settings");
     private final NumberSetting distanceSetting = new NumberSetting("Distance", 128.0f, 1.0f, 256.0f);
     private final BooleanSetting useForwardDistance = new BooleanSetting("UseForwardDistanceForReturn", true);
@@ -35,13 +31,13 @@ public class DonkeyBoatDupe extends Module {
     private final NumberSetting boatSpeed = new NumberSetting("BoatSpeed", 0.5f, 0.1f, 2.0f);
     private final NumberSetting exitGracePeriod = new NumberSetting("ExitGraceTicks", 5.0f, 1.0f, 20.0f);
 
-     
+
     private final CategorySetting homeCategory = new CategorySetting("Home Settings");
     private final StringSetting home1Setting = new StringSetting("Home1", "home1");
     private final StringSetting home2Setting = new StringSetting("Home2", "home2");
     private final RadioSetting chestLocationSetting = new RadioSetting("ChestLocation", "Home1");
 
-     
+
     private final NumberSetting invDelay = new NumberSetting("Delay", 2.0f, 1.0f, 10.0f);
     private final NumberSetting delayRandom = new NumberSetting("AddRandomTickDelay", 2.0f, 0.0f, 5.0f);
 
@@ -54,7 +50,7 @@ public class DonkeyBoatDupe extends Module {
         EXIT_BOAT, WAIT_BOAT_EXIT,
         APPROACH_CHEST, WAIT_CHEST_OPEN, DUMP_ITEMS,
         CHECK_CHEST,
-         
+
         HOME_TELEPORT_1, HOME_WAIT_TP1, HOME_WAIT_DONKEY_OPEN,
         HOME_TAKE_ITEMS, HOME_TELEPORT_2, HOME_WAIT_TP2,
         HOME_APPROACH_CHEST, HOME_WAIT_CHEST_OPEN, HOME_DUMP_ITEMS,
@@ -148,51 +144,115 @@ public class DonkeyBoatDupe extends Module {
         }
     }
 
-     
+
     private void updateBoatMode() {
         switch (state) {
-            case FIND_DONKEY: findDonkey(); break;
-            case APPROACH_DONKEY: approachDonkey(); break;
-            case OPEN_DONKEY: openDonkey(); break;
-            case WAIT_DONKEY_OPEN: waitDonkeyOpen(); break;
-            case FIND_BOAT: findBoat(); break;
-            case APPROACH_BOAT: approachBoat(); break;
-            case WAIT_BOAT_MOUNT: waitBoatMount(); break;
-            case MOVE_FORWARD: moveForward(); break;
-            case WAIT_FORWARD_STOP: waitForwardStop(); break;
-            case WAIT_INV_OPEN: waitInventoryOpen(); break;
-            case TAKE_ITEMS: takeItems(); break;
-            case MOVE_BACKWARD: moveBackward(); break;
-            case WAIT_BACKWARD_STOP: waitBackwardStop(); break;
-            case EXIT_BOAT: exitBoat(); break;
-            case WAIT_BOAT_EXIT: waitBoatExit(); break;
-            case APPROACH_CHEST: approachChest(); break;
-            case WAIT_CHEST_OPEN: waitChestOpen(); break;
-            case DUMP_ITEMS: dumpItems(); break;
-            case CHECK_CHEST: checkChest(); break;
+            case FIND_DONKEY:
+                findDonkey();
+                break;
+            case APPROACH_DONKEY:
+                approachDonkey();
+                break;
+            case OPEN_DONKEY:
+                openDonkey();
+                break;
+            case WAIT_DONKEY_OPEN:
+                waitDonkeyOpen();
+                break;
+            case FIND_BOAT:
+                findBoat();
+                break;
+            case APPROACH_BOAT:
+                approachBoat();
+                break;
+            case WAIT_BOAT_MOUNT:
+                waitBoatMount();
+                break;
+            case MOVE_FORWARD:
+                moveForward();
+                break;
+            case WAIT_FORWARD_STOP:
+                waitForwardStop();
+                break;
+            case WAIT_INV_OPEN:
+                waitInventoryOpen();
+                break;
+            case TAKE_ITEMS:
+                takeItems();
+                break;
+            case MOVE_BACKWARD:
+                moveBackward();
+                break;
+            case WAIT_BACKWARD_STOP:
+                waitBackwardStop();
+                break;
+            case EXIT_BOAT:
+                exitBoat();
+                break;
+            case WAIT_BOAT_EXIT:
+                waitBoatExit();
+                break;
+            case APPROACH_CHEST:
+                approachChest();
+                break;
+            case WAIT_CHEST_OPEN:
+                waitChestOpen();
+                break;
+            case DUMP_ITEMS:
+                dumpItems();
+                break;
+            case CHECK_CHEST:
+                checkChest();
+                break;
         }
     }
 
-     
+
     private void updateHomeMode() {
         switch (state) {
-            case FIND_DONKEY: findDonkeyHome(); break;
-            case APPROACH_DONKEY: approachDonkeyHome(); break;
-            case OPEN_DONKEY: openDonkeyHome(); break;
-            case HOME_WAIT_DONKEY_OPEN: homeWaitDonkeyOpen(); break;
-            case HOME_TELEPORT_1: homeTeleport1(); break;
-            case HOME_WAIT_TP1: homeWaitTp1(); break;
-            case HOME_TAKE_ITEMS: homeTakeItems(); break;
-            case HOME_TELEPORT_2: homeTeleport2(); break;
-            case HOME_WAIT_TP2: homeWaitTp2(); break;
-            case HOME_APPROACH_CHEST: homeApproachChest(); break;
-            case HOME_WAIT_CHEST_OPEN: homeWaitChestOpen(); break;
-            case HOME_DUMP_ITEMS: homeDumpItems(); break;
-            case HOME_CHECK_CHEST: homeCheckChest(); break;
+            case FIND_DONKEY:
+                findDonkeyHome();
+                break;
+            case APPROACH_DONKEY:
+                approachDonkeyHome();
+                break;
+            case OPEN_DONKEY:
+                openDonkeyHome();
+                break;
+            case HOME_WAIT_DONKEY_OPEN:
+                homeWaitDonkeyOpen();
+                break;
+            case HOME_TELEPORT_1:
+                homeTeleport1();
+                break;
+            case HOME_WAIT_TP1:
+                homeWaitTp1();
+                break;
+            case HOME_TAKE_ITEMS:
+                homeTakeItems();
+                break;
+            case HOME_TELEPORT_2:
+                homeTeleport2();
+                break;
+            case HOME_WAIT_TP2:
+                homeWaitTp2();
+                break;
+            case HOME_APPROACH_CHEST:
+                homeApproachChest();
+                break;
+            case HOME_WAIT_CHEST_OPEN:
+                homeWaitChestOpen();
+                break;
+            case HOME_DUMP_ITEMS:
+                homeDumpItems();
+                break;
+            case HOME_CHECK_CHEST:
+                homeCheckChest();
+                break;
         }
     }
 
-     
+
     private void findDonkeyHome() {
         List<AbstractChestedHorse> horses = mc.level.getEntitiesOfClass(AbstractChestedHorse.class,
                 new AABB(mc.player.blockPosition()).inflate(32), h -> h.hasChest() && h.isAlive());
@@ -424,7 +484,7 @@ public class DonkeyBoatDupe extends Module {
         }
     }
 
-     
+
     private void findDonkey() {
         List<AbstractChestedHorse> horses = mc.level.getEntitiesOfClass(AbstractChestedHorse.class,
                 new AABB(mc.player.blockPosition()).inflate(32), h -> h.hasChest() && h.isAlive());
@@ -790,7 +850,7 @@ public class DonkeyBoatDupe extends Module {
         }
     }
 
-     
+
     private void applyVelocity(Entity entity, boolean forward, float speed) {
         float yaw = entity.getYRot();
         float targetYaw = forward ? yaw : yaw + 180;
@@ -798,7 +858,7 @@ public class DonkeyBoatDupe extends Module {
         Vec3 moveVec = new Vec3(-Math.sin(rad), 0, Math.cos(rad)).scale(speed);
         entity.setDeltaMovement(moveVec.x, entity.getDeltaMovement().y, moveVec.z);
         if (entity instanceof net.minecraft.client.player.LocalPlayer) {
-            ((net.minecraft.client.player.LocalPlayer)entity).hurtMarked = true;
+            ((net.minecraft.client.player.LocalPlayer) entity).hurtMarked = true;
         }
     }
 

@@ -31,7 +31,7 @@ public class TargetsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-         
+
         if (this.parentScreen != null) {
             this.parentScreen.render(graphics, 0, 0, partialTicks);
         }

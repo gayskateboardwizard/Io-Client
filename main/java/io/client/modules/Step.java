@@ -59,13 +59,13 @@ public class Step extends Module {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
 
-         
+
         if (mode.getSelectedOption().equals("Vanilla")) {
             handleVanillaMode(mc);
             return;
         }
 
-         
+
         handleNormalMode(mc);
     }
 
@@ -83,7 +83,7 @@ public class Step extends Module {
     }
 
     private void handleNormalMode(Minecraft mc) {
-         
+
         if (mc.player.isInWater() || mc.player.isInLava() || mc.player.isFallFlying()) {
             setStepHeight(mc, 0.6f);
             return;
@@ -95,7 +95,7 @@ public class Step extends Module {
             setStepHeight(mc, 0.6f);
         }
 
-         
+
         double height = mc.player.getY() - mc.player.yo;
         if (height <= 0.5 || height > stepHeight.getValue()) {
             return;
@@ -105,7 +105,7 @@ public class Step extends Module {
             return;
         }
 
-         
+
         double[] offsets = getStepOffsets(height);
         for (double off : offsets) {
             mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
@@ -129,7 +129,7 @@ public class Step extends Module {
 
         AABB playerBox = mc.player.getBoundingBox();
 
-         
+
         if (isCollisionFree(mc, playerBox.move(dir[0], 2.1, dir[1])) &&
                 !isCollisionFree(mc, playerBox.move(dir[0], 1.9, dir[1]))) {
             two = true;

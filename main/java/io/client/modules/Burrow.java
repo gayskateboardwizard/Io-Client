@@ -23,10 +23,10 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class Burrow extends Module {
-     
+
     public final RadioSetting mode = new RadioSetting("Mode", "Default");
 
-     
+
     public final CategorySetting offsetCategory = new CategorySetting("Offset");
     public final RadioSetting offsetMode = new RadioSetting("OffsetMode", "Smart");
     public final NumberSetting vClip = new NumberSetting("VClip", -9.0F, -256.0F, 256.0F);
@@ -37,7 +37,7 @@ public class Burrow extends Module {
     public final BooleanSetting fallback = new BooleanSetting("Fallback", true);
     public final BooleanSetting skipZero = new BooleanSetting("SkipZero", true);
 
-     
+
     public final CategorySetting behaviorCategory = new CategorySetting("Behavior");
     public final BooleanSetting scaleDown = new BooleanSetting("ScaleDown", false);
     public final BooleanSetting attack = new BooleanSetting("Attack", true);
@@ -57,12 +57,12 @@ public class Burrow extends Module {
         offsetMode.addOption("Smart");
         offsetMode.addOption("Constant");
 
-         
+
         addSetting(mode);
         addSetting(offsetMode);
         addSetting(scaleDown);
 
-         
+
         addSetting(offsetCategory);
         offsetCategory.addSetting(vClip);
         offsetCategory.addSetting(evade);
@@ -72,7 +72,7 @@ public class Burrow extends Module {
         offsetCategory.addSetting(fallback);
         offsetCategory.addSetting(skipZero);
 
-         
+
         addSetting(behaviorCategory);
         behaviorCategory.addSetting(attack);
         behaviorCategory.addSetting(wait);
@@ -109,7 +109,7 @@ public class Burrow extends Module {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
 
-         
+
         if (wait.isEnabled()) {
             BlockPos currentPos = getPlayerPos(mc);
             if (!currentPos.equals(startPos)) {
@@ -128,13 +128,13 @@ public class Burrow extends Module {
             return;
         }
 
-         
+
         AABB box = new AABB(pos);
         List<Entity> entities = mc.level.getEntities(mc.player, box);
 
         for (Entity entity : entities) {
             if (entity instanceof EndCrystal && attack.isEnabled()) {
-                 
+
                 mc.gameMode.attack(mc.player, entity);
                 mc.player.swing(InteractionHand.MAIN_HAND);
                 continue;
@@ -145,7 +145,7 @@ public class Burrow extends Module {
             return;
         }
 
-         
+
         if (mode.getSelectedOption().equals("Web")) {
             handleWeb(mc, pos);
         } else {
@@ -154,7 +154,7 @@ public class Burrow extends Module {
     }
 
     private void handleWeb(Minecraft mc, BlockPos pos) {
-         
+
         int webSlot = findBlockInHotbar(mc, Blocks.COBWEB);
         if (webSlot == -1) {
             toggle();
@@ -163,14 +163,14 @@ public class Burrow extends Module {
 
         if (System.currentTimeMillis() - lastPlaceTime < 250) return;
 
-         
+
         if (rotate.isEnabled()) {
             mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(
                     mc.player.getYRot(), 90.0F, onGround.isEnabled(), false
             ));
         }
 
-         
+
         int prevSlot = mc.player.getInventory().getSelectedSlot();
         mc.player.getInventory().setSelectedSlot(webSlot);
 
@@ -185,12 +185,12 @@ public class Burrow extends Module {
     }
 
     private void handleDefault(Minecraft mc, BlockPos pos) {
-         
+
         if (!mc.player.verticalCollision) {
             return;
         }
 
-         
+
         if (!allowUp.isEnabled()) {
             BlockPos headPos = pos.above(2);
             BlockState headState = mc.level.getBlockState(headPos);
@@ -202,7 +202,7 @@ public class Burrow extends Module {
             }
         }
 
-         
+
         int obbySlot = findBlockInHotbar(mc, Blocks.OBSIDIAN);
         int echestSlot = findBlockInHotbar(mc, Blocks.ENDER_CHEST);
         int slot = obbySlot != -1 ? obbySlot : echestSlot;
@@ -214,14 +214,14 @@ public class Burrow extends Module {
 
         if (System.currentTimeMillis() - lastPlaceTime < 1000) return;
 
-         
+
         double y = getY(mc.player, offsetMode.getSelectedOption().equals("Smart"));
 
         if (Double.isNaN(y)) {
             return;
         }
 
-         
+
         if (rotate.isEnabled()) {
             float[] angles = calculateAngles(mc.player.getEyePosition(), Vec3.atCenterOf(pos));
             mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(
@@ -229,7 +229,7 @@ public class Burrow extends Module {
             ));
         }
 
-         
+
         mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
                 mc.player.getX(), mc.player.getY() + 0.42, mc.player.getZ(), onGround.isEnabled(), false
         ));
@@ -243,7 +243,7 @@ public class Burrow extends Module {
                 mc.player.getX(), mc.player.getY() + 1.16, mc.player.getZ(), onGround.isEnabled(), false
         ));
 
-         
+
         int prevSlot = mc.player.getInventory().getSelectedSlot();
         mc.player.getInventory().setSelectedSlot(slot);
 
@@ -251,7 +251,7 @@ public class Burrow extends Module {
 
         mc.player.getInventory().setSelectedSlot(prevSlot);
 
-         
+
         mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
                 mc.player.getX(), y, mc.player.getZ(), false, false
         ));
@@ -265,7 +265,7 @@ public class Burrow extends Module {
 
     private double getY(Entity entity, boolean smart) {
         if (!smart) {
-             
+
             double y = entity.getY() + vClip.getValue();
             if (evade.isEnabled() && Math.abs(y) < 1) {
                 y = -1;
@@ -273,7 +273,7 @@ public class Burrow extends Module {
             return y;
         }
 
-         
+
         double d = getYOffset(entity, 3, 10, true);
         if (Double.isNaN(d)) {
             d = getYOffset(entity, -3, -10, false);
@@ -333,7 +333,7 @@ public class Burrow extends Module {
     }
 
     private void placeBlock(Minecraft mc, BlockPos pos) {
-         
+
         for (Direction dir : Direction.values()) {
             BlockPos neighbor = pos.relative(dir);
             BlockState neighborState = mc.level.getBlockState(neighbor);

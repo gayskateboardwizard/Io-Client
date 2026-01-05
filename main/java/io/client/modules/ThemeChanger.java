@@ -20,7 +20,7 @@ public class ThemeChanger extends Module {
 
         addSetting(themeSelect);
 
-         
+
         Theme savedTheme = ModuleManager.INSTANCE.loadTheme();
         if (savedTheme != null) {
             ClickGuiScreen.currentTheme = savedTheme;

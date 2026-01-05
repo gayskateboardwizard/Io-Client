@@ -15,9 +15,6 @@
   "icon": "logo.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "io.client.IoClientMod"
-    ],
     "client": [
       "io.client.IoClientModClient"
     ]

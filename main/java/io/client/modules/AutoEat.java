@@ -15,7 +15,6 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.inventory.ClickType;
 
 import java.util.Set;
 
@@ -31,14 +30,14 @@ public class AutoEat extends Module {
             Items.SUSPICIOUS_STEW
     );
 
-     
+
     public final NumberSetting minHunger = new NumberSetting("Min Hunger", 16.0F, 0.0F, 20.0F);
     public final NumberSetting minHealth = new NumberSetting("Min Health", 14.0F, 0.0F, 20.0F);
     public final RadioSetting handMode = new RadioSetting("Hand", "Auto");
     public final BooleanSetting prioritizeGapples = new BooleanSetting("Prioritize Gapples", true);
     public final BooleanSetting eatWhileMoving = new BooleanSetting("Eat While Moving", true);
 
-     
+
     private int previousSlot = -1;
     private ItemStack previousOffhand = ItemStack.EMPTY;
     private boolean hasSwitchedSlot = false;
@@ -71,17 +70,17 @@ public class AutoEat extends Module {
         float health = player.getHealth();
         long now = System.currentTimeMillis();
 
-         
+
         if (hunger >= minHunger.getValue() && health >= minHealth.getValue()) {
             stopEating(mc, player);
             return;
         }
 
-         
+
         if (player.isUsingItem()) {
             isEating = true;
             if (!eatWhileMoving.isEnabled()) {
-                 
+
                 mc.options.keyUp.setDown(false);
                 mc.options.keyDown.setDown(false);
                 mc.options.keyLeft.setDown(false);
@@ -90,13 +89,13 @@ public class AutoEat extends Module {
             return;
         }
 
-         
+
         if (isEating && !player.isUsingItem()) {
             isEating = false;
             eatingHand = null;
         }
 
-         
+
         if (!isEating && (hunger < minHunger.getValue() || health < minHealth.getValue())) {
             if (now - lastEatPacketTime < EAT_DELAY_MS) return;
             if (now - lastSwapTime < SWAP_DELAY_MS) return;
@@ -115,14 +114,14 @@ public class AutoEat extends Module {
         FoodSlot bestMainhand = null;
         FoodSlot bestOffhand = null;
 
-         
+
         ItemStack offhandStack = player.getOffhandItem();
         if (isValidFood(offhandStack)) {
             int priority = getFoodPriority(offhandStack);
             bestOffhand = new FoodSlot(-1, InteractionHand.OFF_HAND, priority);
         }
 
-         
+
         for (int slot = 0; slot < 9; slot++) {
             ItemStack stack = inv.getItem(slot);
             if (isValidFood(stack)) {
@@ -133,7 +132,7 @@ public class AutoEat extends Module {
             }
         }
 
-         
+
         switch (mode) {
             case "Mainhand":
                 return bestMainhand;
@@ -141,7 +140,7 @@ public class AutoEat extends Module {
                 return bestOffhand;
             case "Auto":
             default:
-                 
+
                 if (bestOffhand != null && bestMainhand != null) {
                     return bestOffhand.priority >= bestMainhand.priority ? bestOffhand : bestMainhand;
                 }
@@ -169,7 +168,7 @@ public class AutoEat extends Module {
         Inventory inv = player.getInventory();
 
         if (foodSlot.hand == InteractionHand.MAIN_HAND) {
-             
+
             int currSlot = getCurrentSlot(inv);
             if (currSlot != foodSlot.slot) {
                 previousSlot = currSlot;
@@ -178,14 +177,14 @@ public class AutoEat extends Module {
                 lastSwapTime = now;
             }
 
-             
+
             player.connection.send(
                     new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, 0, player.getXRot(), player.getYRot())
             );
             mc.gameMode.useItem(player, InteractionHand.MAIN_HAND);
 
         } else {
-             
+
             player.connection.send(
                     new ServerboundUseItemPacket(InteractionHand.OFF_HAND, 0, player.getXRot(), player.getYRot())
             );
@@ -202,7 +201,7 @@ public class AutoEat extends Module {
             player.stopUsingItem();
         }
 
-         
+
         if (hasSwitchedSlot && previousSlot != -1) {
             setSelectedSlot(mc, player.getInventory(), previousSlot);
             previousSlot = -1;
@@ -249,7 +248,7 @@ public class AutoEat extends Module {
         }
     }
 
-     
+
     private static class FoodSlot {
         final int slot;
         final InteractionHand hand;

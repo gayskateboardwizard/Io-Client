@@ -17,7 +17,7 @@ public class SetKeyCommand implements Command {
 
         String moduleName = args[0];
         String settingName = args[1];
-         
+
         StringBuilder valueBuilder = new StringBuilder();
         for (int i = 2; i < args.length; i++) {
             if (i > 2) valueBuilder.append(" ");

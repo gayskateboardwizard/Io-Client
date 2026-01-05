@@ -1,7 +1,6 @@
 package io.client.commands;
 
 import io.client.ModuleManager;
-import io.client.Module;
 import io.client.modules.DonkeyBoatDupe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -14,7 +13,7 @@ public class MarkChestCommand implements Command {
 
     @Override
     public void execute(String[] args) throws Exception {
-        
+
         DonkeyBoatDupe dupeModule = ModuleManager.INSTANCE.getModule(DonkeyBoatDupe.class);
 
         if (dupeModule == null) {
@@ -28,7 +27,7 @@ public class MarkChestCommand implements Command {
             return;
         }
 
-        
+
         HitResult hit = mc.hitResult;
 
         if (hit == null || hit.getType() != HitResult.Type.BLOCK) {

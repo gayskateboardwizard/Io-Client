@@ -1,13 +1,13 @@
 package io.client.modules;
 
-import io.client.Module;
 import io.client.Category;
+import io.client.Module;
 import io.client.settings.RadioSetting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class OffHand extends Module {
 
@@ -32,23 +32,23 @@ public class OffHand extends Module {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.player == null || mc.getConnection() == null || mc.player.containerMenu == null) return;
-        if (isSwapping) return;  
+        if (isSwapping) return;
 
         ItemStack offhand = mc.player.getOffhandItem();
         String selectedItem = itemSetting.getSelectedOption();
 
-         
+
         if (!isCorrectItem(offhand, selectedItem) && mc.player.containerMenu.getCarried().isEmpty()) {
 
-             
+
             if (selectedItem.equals("Empty")) {
                 if (!offhand.isEmpty()) {
-                    swapItem(mc, -1);  
+                    swapItem(mc, -1);
                 }
                 return;
             }
 
-             
+
             int itemSlot = findItemSlot(mc.player.getInventory(), selectedItem);
 
             if (itemSlot != -1) {
@@ -94,7 +94,7 @@ public class OffHand extends Module {
                 return -1;
         }
 
-         
+
         for (int i = 0; i < 36; i++) {
             if (inventory.getItem(i).is(targetItem)) {
                 return i;
@@ -108,7 +108,7 @@ public class OffHand extends Module {
         isSwapping = true;
 
         if (inventorySlot == -1) {
-             
+
             mc.gameMode.handleInventoryMouseClick(
                     mc.player.containerMenu.containerId,
                     OFFHAND_CONTAINER_SLOT,
@@ -117,21 +117,21 @@ public class OffHand extends Module {
                     mc.player
             );
         } else {
-             
+
             int containerSlot;
 
             if (inventorySlot >= 0 && inventorySlot <= 8) {
-                 
+
                 containerSlot = inventorySlot + 36;
             } else if (inventorySlot >= 9 && inventorySlot <= 35) {
-                 
+
                 containerSlot = inventorySlot;
             } else {
                 isSwapping = false;
                 return;
             }
 
-             
+
             mc.gameMode.handleInventoryMouseClick(
                     mc.player.containerMenu.containerId,
                     containerSlot,
@@ -140,7 +140,7 @@ public class OffHand extends Module {
                     mc.player
             );
 
-             
+
             mc.gameMode.handleInventoryMouseClick(
                     mc.player.containerMenu.containerId,
                     OFFHAND_CONTAINER_SLOT,
@@ -149,7 +149,7 @@ public class OffHand extends Module {
                     mc.player
             );
 
-             
+
             if (!mc.player.containerMenu.getCarried().isEmpty()) {
                 mc.gameMode.handleInventoryMouseClick(
                         mc.player.containerMenu.containerId,
@@ -161,7 +161,7 @@ public class OffHand extends Module {
             }
         }
 
-         
+
         new Thread(() -> {
             try {
                 Thread.sleep(100);

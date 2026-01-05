@@ -41,10 +41,10 @@ public class Scaffold extends Module {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.gameMode == null) return;
 
-         
+
         if (!(mc.player.getMainHandItem().getItem() instanceof BlockItem)) return;
 
-         
+
         BlockPos targetPos;
         if (lockY.isEnabled() && lockYLevel != -999) {
             targetPos = new BlockPos(
@@ -60,20 +60,20 @@ public class Scaffold extends Module {
             );
         }
 
-         
+
         if (mc.options.keyJump.isDown() && !isMoving()) {
             lockYLevel = (int) Math.floor(mc.player.getY() - 1);
         }
 
-         
+
         BlockState targetState = mc.level.getBlockState(targetPos);
         if (!targetState.isAir() && !targetState.canBeReplaced()) return;
 
-         
+
         BlockPosWithFacing placeInfo = findPlaceablePosition(mc, targetPos);
         if (placeInfo == null) return;
 
-         
+
         if (rotate.isEnabled()) {
             Vec3 hitVec = Vec3.atCenterOf(placeInfo.pos).add(Vec3.atLowerCornerOf(placeInfo.facing.getUnitVec3i()).scale(0.5));
             float[] angles = calculateAngles(mc.player.getEyePosition(), hitVec);
@@ -81,7 +81,7 @@ public class Scaffold extends Module {
             mc.player.setXRot(angles[1]);
         }
 
-         
+
         if (tower.isEnabled() && mc.options.keyJump.isDown() && !isMoving() && mc.player.onGround()) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastTowerTime > 1500) {
@@ -90,32 +90,32 @@ public class Scaffold extends Module {
             }
         }
 
-         
+
         Vec3 hitVec = Vec3.atCenterOf(placeInfo.pos).add(Vec3.atLowerCornerOf(placeInfo.facing.getUnitVec3i()).scale(0.5));
         BlockHitResult hitResult = new BlockHitResult(hitVec, placeInfo.facing, placeInfo.pos, false);
 
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hitResult);
         mc.player.swing(InteractionHand.MAIN_HAND);
 
-         
+
         lockYLevel = targetPos.getY();
     }
 
     private BlockPosWithFacing findPlaceablePosition(Minecraft mc, BlockPos targetPos) {
-         
+
         Direction[] directions = {Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP};
 
         for (Direction dir : directions) {
             BlockPos neighborPos = targetPos.relative(dir);
             BlockState neighborState = mc.level.getBlockState(neighborPos);
 
-             
+
             if (!neighborState.isAir() && !neighborState.canBeReplaced()) {
                 return new BlockPosWithFacing(neighborPos, dir.getOpposite());
             }
         }
 
-         
+
         for (int x = -2; x <= 2; x++) {
             for (int y = -1; y <= 0; y++) {
                 for (int z = -2; z <= 2; z++) {
@@ -125,7 +125,7 @@ public class Scaffold extends Module {
                     BlockState extendedState = mc.level.getBlockState(extendedPos);
 
                     if (!extendedState.isAir() && !extendedState.canBeReplaced()) {
-                         
+
                         for (Direction dir : directions) {
                             BlockPos checkPos = extendedPos.relative(dir);
                             BlockState checkState = mc.level.getBlockState(checkPos);

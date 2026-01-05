@@ -59,7 +59,7 @@ public class Surround extends Module {
         delay = 0;
         prevY = mc.player.getY();
 
-         
+
         if (centerMode.getSelectedOption().equals("Teleport")) {
             double centerX = Math.floor(mc.player.getX()) + 0.5;
             double centerZ = Math.floor(mc.player.getZ()) + 0.5;
@@ -72,13 +72,13 @@ public class Surround extends Module {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.gameMode == null) return;
 
-         
+
         if (onDeath.isEnabled() && (mc.player.isDeadOrDying() || mc.player.getHealth() <= 0)) {
             toggle();
             return;
         }
 
-         
+
         if (onYChange.isEnabled() && prevY != mc.player.getY()) {
             toggle();
             return;
@@ -86,7 +86,7 @@ public class Surround extends Module {
 
         prevY = mc.player.getY();
 
-         
+
         if (centerMode.getSelectedOption().equals("Motion")) {
             Vec3 centerVec = new Vec3(
                     Math.floor(mc.player.getX()) + 0.5,
@@ -110,14 +110,14 @@ public class Surround extends Module {
             }
         }
 
-         
+
         int obsidianSlot = findObsidian(mc);
         if (obsidianSlot == -1) {
             switchBack(mc);
             return;
         }
 
-         
+
         int currentSlot = mc.player.getInventory().getSelectedSlot();
         if (obsidianSlot != currentSlot) {
             if (!hasSwitched) {
@@ -127,20 +127,20 @@ public class Surround extends Module {
             mc.player.getInventory().setSelectedSlot(obsidianSlot);
         }
 
-         
+
         List<BlockPos> blocks = getBlocks(mc);
         if (blocks.isEmpty()) {
             switchBack(mc);
             return;
         }
 
-         
+
         if (delay > 0) {
             delay--;
             return;
         }
 
-         
+
         int placed = 0;
         while (placed < blocksPerTick.getValue() && !blocks.isEmpty()) {
             BlockPos targetBlock = getNextPosition(mc, blocks);
@@ -186,7 +186,7 @@ public class Surround extends Module {
         List<BlockPos> offsets = new ArrayList<>();
 
         if (centerMode.getSelectedOption().equals("Disabled")) {
-             
+
             double decimalX = Math.abs(mc.player.getX()) - Math.floor(Math.abs(mc.player.getX()));
             double decimalZ = Math.abs(mc.player.getZ()) - Math.floor(Math.abs(mc.player.getZ()));
 
@@ -198,7 +198,7 @@ public class Surround extends Module {
             List<BlockPos> tempOffsets = new ArrayList<>();
             offsets.addAll(getOverlapPos(mc));
 
-             
+
             for (int x = 1; x < lengthXPos + 1; x++) {
                 tempOffsets.add(playerPos.offset(x, 0, 1 + lengthZPos));
                 tempOffsets.add(playerPos.offset(x, 0, -(1 + lengthZNeg)));
@@ -223,7 +223,7 @@ public class Surround extends Module {
                 offsets.add(pos);
             }
         } else {
-             
+
             offsets.add(playerPos.below());
 
             for (Vec3i pattern : SURROUND_PATTERN) {
@@ -252,7 +252,7 @@ public class Surround extends Module {
     }
 
     private boolean placeBlock(Minecraft mc, BlockPos pos) {
-         
+
         for (Direction dir : Direction.values()) {
             BlockPos neighbor = pos.relative(dir);
             BlockState neighborState = mc.level.getBlockState(neighbor);
@@ -261,7 +261,7 @@ public class Surround extends Module {
                 Vec3 hitVec = Vec3.atCenterOf(neighbor).add(Vec3.atLowerCornerOf(dir.getOpposite().getUnitVec3i()).scale(0.5));
                 BlockHitResult hitResult = new BlockHitResult(hitVec, dir.getOpposite(), neighbor, false);
 
-                 
+
                 if (rotate.isEnabled()) {
                     float[] angles = calculateAngles(mc.player.getEyePosition(), hitVec);
                     mc.player.setYRot(angles[0]);

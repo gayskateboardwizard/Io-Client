@@ -22,39 +22,27 @@ public class Jesus extends Module {
         BlockPos playerPos = mc.player.blockPosition();
         BlockState blockBelowState = mc.level.getBlockState(playerPos.below());
 
-         
         boolean isSinking = mc.player.getDeltaMovement().y < 0.0;
 
-         
-         
         if (mc.player.isInWater() && !mc.options.keyJump.isDown()) {
             Vec3 motion = mc.player.getDeltaMovement();
-
-             
-             
             mc.player.setDeltaMovement(motion.x, 0.1, motion.z);
         }
 
-         
-         
         if (isSinking &&
-                !mc.player.isInWater() &&  
+                !mc.player.isInWater() &&
                 blockBelowState.is(Blocks.WATER)) {
 
-             
             Vec3 motion = mc.player.getDeltaMovement();
             mc.player.setDeltaMovement(motion.x, 0, motion.z);
 
-             
-             
             double targetY = playerPos.below().getY() + 0.95;
 
-             
+
             if (mc.player.getY() < targetY) {
                 mc.player.setPos(mc.player.getX(), targetY, mc.player.getZ());
             }
 
-             
             mc.player.setOnGround(true);
         }
     }

@@ -26,6 +26,7 @@ public class TargetManager {
     public static final TargetManager INSTANCE = new TargetManager();
     private final Map<TargetType, Boolean> targetStates = new EnumMap<>(TargetType.class);
     private final Set<String> friends = new HashSet<>();
+
     private TargetManager() {
         for (TargetType type : TargetType.values()) {
             targetStates.put(type, true);

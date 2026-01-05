@@ -41,8 +41,6 @@ public class ModuleManager {
         if (initialized) return;
         initialized = true;
 
-        initTheme();
-
         modules.add(new ElytraFlight());
         modules.add(new BoatFlight());
         modules.add(new Speed());
@@ -74,7 +72,8 @@ public class ModuleManager {
         modules.add(new Surround());
         modules.add(new Burrow());
         modules.add(new DonkeyBoatDupe());
-        modules.add(new NBTThrottle());
+        modules.add(new ExtraItemInfo());
+        modules.add(new ArmorHud());
 
         System.out.println("Loaded " + modules.size() + " modules");
 
@@ -82,6 +81,7 @@ public class ModuleManager {
         loadKeybinds();
         TargetManager.INSTANCE.loadTargets();
         TargetManager.INSTANCE.loadFriends();
+        initTheme();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             saveModules();

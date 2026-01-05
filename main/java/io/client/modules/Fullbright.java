@@ -15,7 +15,7 @@ public class Fullbright extends Module {
     public Fullbright() {
         super("FullBright", "Brights up the entire world", -1, Category.RENDER);
 
-         
+
         modeSetting = new RadioSetting("Mode", "Gamma");
         modeSetting.addOption("Gamma");
         modeSetting.addOption("Potion");

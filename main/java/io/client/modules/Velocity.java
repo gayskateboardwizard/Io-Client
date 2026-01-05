@@ -21,7 +21,7 @@ public class Velocity extends Module {
 
             mc.player.setDeltaMovement(0.0, motion.y, 0.0);
 
-             
+
         }
     }
 }

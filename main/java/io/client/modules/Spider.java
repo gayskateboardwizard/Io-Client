@@ -16,16 +16,15 @@ public class Spider extends Module {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
-         
+
         if (mc.player.horizontalCollision) {
 
-             
+
             if (mc.options.keyJump.isDown()) return;
 
             Vec3 motion = mc.player.getDeltaMovement();
 
-             
-             
+
             mc.player.setDeltaMovement(motion.x, 0.2, motion.z);
         }
     }

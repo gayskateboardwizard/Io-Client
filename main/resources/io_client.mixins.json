@@ -3,7 +3,6 @@
   "package": "io.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "refmap": "io_client.refmap.json",
-
   "mixins": [
     "BlockItemMixin",
     "BoneMealItemMixin",
@@ -11,17 +10,17 @@
     "ExperienceOrbMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
-    "PlayerMixin"
+    "PlayerMixin",
+    "PanoramaRendererMixin",
+    "ForceSplashMixin",
+    "EntityRenderMixin"
   ],
-
   "injectors": {
     "defaultRequire": 1
   },
-
   "client": [
-    "MixinItemStack",
+    "ItemStackMixin"
   ],
-
   "minVersion": "0.8.4",
   "excludeClasses": [
     "javax.crypto.**"

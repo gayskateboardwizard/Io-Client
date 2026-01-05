@@ -1,6 +1,7 @@
 package io.client;
 
 import io.client.commands.CommandManager;
+import io.client.modules.ArmorHud;
 import io.client.modules.ESP;
 import io.client.modules.IoSwag;
 import net.fabricmc.api.EnvType;
@@ -26,12 +27,12 @@ public class IoClientEventHandler {
     }
 
     public void registerEvents() {
-         
+
         ClientSendMessageEvents.ALLOW_CHAT.register(message -> {
             return !CommandManager.INSTANCE.handleMessage(message);
         });
 
-         
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null)
                 return;
@@ -39,11 +40,11 @@ public class IoClientEventHandler {
             ModuleManager.INSTANCE.onUpdate();
         });
 
-         
+
         ClientSendMessageEvents.MODIFY_CHAT.register(message -> {
             IoSwag ioSwag = ModuleManager.INSTANCE.getModule(IoSwag.class);
             String prefix = " ";
-             
+
             if (ioSwag.isEnabled()
                     && !message.startsWith(".")
                     && !message.startsWith("/")
@@ -58,7 +59,7 @@ public class IoClientEventHandler {
             return message;
         });
 
-         
+
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             io.client.modules.HUD hud =
                     ModuleManager.INSTANCE.getModule(io.client.modules.HUD.class);
@@ -69,21 +70,23 @@ public class IoClientEventHandler {
             if (esp != null && esp.isEnabled()) {
                 esp.render(drawContext, tickDelta.getGameTimeDeltaTicks());
             }
+            // add this part
+            ArmorHud armorHud = ModuleManager.INSTANCE.getModule(ArmorHud.class);
+            if (armorHud != null && armorHud.isEnabled()) {
+                armorHud.render(drawContext, tickDelta.getGameTimeDeltaTicks());
+            }
         });
     }
 
-    /**
-     * Handle key presses - requires window to be initialized
-     */
     private void handleKeys(Minecraft mc) {
-         
+
         if (mc.getWindow() == null) {
             return;
         }
 
         long window = mc.getWindow().getWindow();
 
-         
+
         if (mc.screen == null) {
             if (isPressed(window, GLFW.GLFW_KEY_BACKSLASH)) {
                 if (!KeyManager.INSTANCE.isKeyPressed(GLFW.GLFW_KEY_BACKSLASH)) {
@@ -95,7 +98,7 @@ public class IoClientEventHandler {
             }
         }
 
-         
+
         if (mc.screen == null) {
             for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_LAST; key++) {
                 if (isPressed(window, key)) {
@@ -109,7 +112,7 @@ public class IoClientEventHandler {
             }
         }
 
-         
+
         if (mc.screen instanceof ChatScreen chat) {
             if (chat.getFocused() instanceof EditBox editBox) {
                 if (isPressed(window, GLFW.GLFW_KEY_TAB)) {

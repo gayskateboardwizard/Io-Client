@@ -21,12 +21,12 @@ public class Speed extends Module {
 
         Player player = mc.player;
 
-         
+
         if (speed.getValue() <= 1.0F) return;
 
-         
-        double forward = player.zza;  
-        double strafe = player.xxa;   
+
+        double forward = player.zza;
+        double strafe = player.xxa;
 
         if (forward == 0.0 && strafe == 0.0) return;
 
@@ -36,7 +36,7 @@ public class Speed extends Module {
         double motionZ = forward * speed.getValue() * Math.cos(Math.toRadians(yaw))
                 + strafe * speed.getValue() * Math.sin(Math.toRadians(yaw));
 
-         
+
         player.setDeltaMovement(motionX, player.getDeltaMovement().y, motionZ);
     }
 }

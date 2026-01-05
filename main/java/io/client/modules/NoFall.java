@@ -32,13 +32,13 @@ public class NoFall extends Module {
 
         switch (mode.getSelectedOption()) {
             case "Packet":
-                 
+
                 mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, true));
                 mc.player.fallDistance = 0.0f;
                 break;
 
             case "Grim":
-                 
+
                 mc.player.connection.send(new ServerboundMovePlayerPacket.PosRot(
                         mc.player.getX(),
                         mc.player.getY() + 1.0e-9,
@@ -52,7 +52,7 @@ public class NoFall extends Module {
                 break;
 
             case "Latency":
-                 
+
                 if (mc.level.dimension() == Level.NETHER) {
                     mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
                             mc.player.getX(), 0, mc.player.getZ(), true, true
@@ -66,7 +66,7 @@ public class NoFall extends Module {
                 break;
 
             case "Spoof":
-                 
+
                 if (predict(mc) && mc.player.fallDistance >= 3) {
                     mc.player.setDeltaMovement(
                             mc.player.getDeltaMovement().x,
