@@ -1,0 +1,70 @@
+name: Build and Pre-Release
+
+on: 
+  push:
+    branches: 
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution:  'temurin'
+          cache: gradle
+      
+      - name: Make Gradle wrapper executable
+        run:  chmod +x ./main/gradlew
+      
+      - name: Build with Gradle
+        working-directory: ./main
+        run: ./gradlew build
+      
+      - name: Find build artifacts
+        id: artifacts
+        run: |
+          ARTIFACT=$(find ./main/build/libs -name "*.jar" -type f | head -1)
+          if [ -z "$ARTIFACT" ]; then
+            ARTIFACT=$(find ./main/build -name "*.jar" -o -name "*.zip" | head -1)
+          fi
+          echo "artifact_path=$ARTIFACT" >> $GITHUB_OUTPUT
+          echo "artifact_name=$(basename $ARTIFACT)" >> $GITHUB_OUTPUT
+      
+      - name: Get version from gradle
+        id: version
+        working-directory: ./main
+        run: |
+          VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
+          if [ -z "$VERSION" ]; then
+            VERSION="dev"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+      
+      - name: Create Pre-Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with: 
+          files: ${{ steps.artifacts.outputs.artifact_path }}
+          tag_name: v${{ steps.version. outputs.version }}-build.${{ steps.version.outputs.build_number }}
+          name: Pre-Release v${{ steps.version.outputs.version }} (Build #${{ steps.version.outputs. build_number }})
+          body: |
+            **Pre-release Build**
+            
+            - **Commit:** ${{ github.sha }}
+            - **Branch:** ${{ github.ref }}
+            - **Build Number:** ${{ steps.version.outputs.build_number }}
+            
+            This is an automated pre-release build. 
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
