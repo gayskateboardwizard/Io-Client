@@ -1,0 +1,66 @@
+plugins {
+    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = 'indev'
+group = 'io.client'
+base.archivesName = 'IoClient'
+
+repositories {
+    mavenCentral()
+    maven {
+        name "FDD Maven"
+        url "https://maven.firstdark.dev/releases"
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:1.21.8"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:0.18.2"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.136.1+1.21.8"
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "io_client.refmap.json"
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+def targetJavaVersion = 21
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    it.options.release = targetJavaVersion
+}
+
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${base.archivesName.get()}"}
+    }
+}
