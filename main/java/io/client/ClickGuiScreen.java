@@ -126,4 +126,4 @@ public class ClickGuiScreen extends Screen {
             this.minecraft.setScreen(null);
         }
     }
-}\
+}
