@@ -70,7 +70,6 @@ public class IoClientEventHandler {
             if (esp != null && esp.isEnabled()) {
                 esp.render(drawContext, tickDelta.getGameTimeDeltaTicks());
             }
-            // add this part
             ArmorHud armorHud = ModuleManager.INSTANCE.getModule(ArmorHud.class);
             if (armorHud != null && armorHud.isEnabled()) {
                 armorHud.render(drawContext, tickDelta.getGameTimeDeltaTicks());
