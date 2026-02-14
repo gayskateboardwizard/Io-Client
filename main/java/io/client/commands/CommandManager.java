@@ -49,6 +49,9 @@ public class CommandManager {
         commands.put("unfriend", new UnfriendCommand());
         commands.put("friendlist", new FriendListCommand());
         commands.put("markchest", new MarkChestCommand());
+        commands.put("bindlist", new BindListCommand());
+        commands.put("macro", new MacroCommand());
+
     }
 
     public Set<String> getCommandNames() {
