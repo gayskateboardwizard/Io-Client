@@ -70,6 +70,7 @@ public class IoClientEventHandler {
             if (esp != null && esp.isEnabled()) {
                 esp.render(drawContext, tickDelta.getGameTimeDeltaTicks());
             }
+
             ArmorHud armorHud = ModuleManager.INSTANCE.getModule(ArmorHud.class);
             if (armorHud != null && armorHud.isEnabled()) {
                 armorHud.render(drawContext, tickDelta.getGameTimeDeltaTicks());
@@ -87,13 +88,13 @@ public class IoClientEventHandler {
 
 
         if (mc.screen == null) {
-            if (isPressed(window, GLFW.GLFW_KEY_BACKSLASH)) {
-                if (!KeyManager.INSTANCE.isKeyPressed(GLFW.GLFW_KEY_BACKSLASH)) {
+            if (isPressed(window, ClickGuiScreen.clickGuiKey)) {
+                if (!KeyManager.INSTANCE.isKeyPressed(ClickGuiScreen.clickGuiKey)) {
                     mc.setScreen(new ClickGuiScreen());
-                    KeyManager.INSTANCE.addKey(GLFW.GLFW_KEY_BACKSLASH);
+                    KeyManager.INSTANCE.addKey(ClickGuiScreen.clickGuiKey);
                 }
             } else {
-                KeyManager.INSTANCE.removeKey(GLFW.GLFW_KEY_BACKSLASH);
+                KeyManager.INSTANCE.removeKey(ClickGuiScreen.clickGuiKey);
             }
         }
 
