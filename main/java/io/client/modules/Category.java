@@ -6,5 +6,6 @@ public enum Category {
     RENDER,
     WORLD,
     SETTINGS,
-    MISC;
+    MISC,
+    MACROS;
 }
