@@ -16,7 +16,7 @@ public class ClickGuiScreen extends Screen {
     private static final int TITLE_BAR_HEIGHT = 13;
     private static final int PANEL_GAP = 10;
 
-    public static int clickGuiKey = GLFW.GLFW_KEY_GRAVE_ACCENT; // Default keybinding for ClickGUI
+    public static int clickGuiKey = GLFW.GLFW_KEY_BACKSLASH; 
 
     public static boolean opened = false;
     public static Theme currentTheme = Theme.IO;
