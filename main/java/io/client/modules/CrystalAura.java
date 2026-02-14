@@ -252,19 +252,12 @@ public class CrystalAura extends Module {
     }
 
     private void doSequential(Minecraft mc) {
-        if (sequential.getSelectedOption().equals("None")) {
-            if (bestCrystal != null && breakTimer <= 0) {
-                breakCrystal(mc);
-            } else if (bestPlacePos != null && placeTimer <= 0) {
-                placeCrystal(mc);
-            }
-        } else {
-            if (bestCrystal != null && breakTimer <= 0) {
-                breakCrystal(mc);
-            }
-            if (bestPlacePos != null && placeTimer <= 0) {
-                placeCrystal(mc);
-            }
+	if (bestCrystal != null && breakTimer <= 0) {
+  	    breakCrystal(mc);
+    	    if (sequential.getSelectedOption().equals("None")) return; 
+	}
+    	if (bestPlacePos != null && placeTimer <= 0) {
+      	    placeCrystal(mc);
         }
     }
 
@@ -273,14 +266,13 @@ public class CrystalAura extends Module {
         double bestValue = Double.MAX_VALUE;
         double maxRangeSq = sq(targetRange.getValue());
 
-        for (Entity e : mc.level.entitiesForRendering()) {
-            if (!(e instanceof LivingEntity living)) continue;
-            if (e == mc.player) continue;
-            if (living.getHealth() <= 0) continue;
-            if (e instanceof EndCrystal || e instanceof ItemEntity) continue;
-            if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
+	for (Entity e : mc.level.entitiesForRendering()) {
+    		if (e == mc.player || e instanceof EndCrystal || e instanceof ItemEntity) continue;
+    		if (e instanceof LivingEntity living && living.getHealth() <= 0) continue;
+   	 	if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
+	}
 
-            double distSq = mc.player.distanceToSqr(e);
+	double distSq = mc.player.distanceToSqr(e);
             if (distSq > maxRangeSq) continue;
 
             double value = targetLogic.getSelectedOption().equals("Distance") ? distSq : living.getHealth();
@@ -306,7 +298,7 @@ public class CrystalAura extends Module {
         long worldTick = mc.level.getGameTime();
 
         for (Entity e : mc.level.entitiesForRendering()) {
-            if (!(e instanceof EndCrystal crystal)) continue;
+            if (!(e instanceof EndCrystal crystal)  continue;
 
             if (crystalAge.getValue() > 0 && crystal.tickCount < crystalAge.getValue()) continue;
 
@@ -371,19 +363,16 @@ public class CrystalAura extends Module {
         }
     }
 
-    private boolean hasObbyNearby(Minecraft mc, BlockPos pos) {
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                if (x == 0 && z == 0) continue;
-                BlockPos checkPos = pos.offset(x, 0, z);
-                if (mc.level.getBlockState(checkPos).is(Blocks.OBSIDIAN) ||
-                        mc.level.getBlockState(checkPos).is(Blocks.BEDROCK)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+   private boolean hasObbyNearby(Minecraft mc, BlockPos pos) {
+      for (Direction dir : Direction.values()) {
+          if (dir == Direction.UP || dir == Direction.DOWN) continue;
+       	 	BlockState state = mc.level.getBlockState(pos.relative(dir));
+        	if (state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK)) {
+            		return true;
+        	}
+    	}
+    	return false;
+   }
 
     private double scoreObbyPosition(Minecraft mc, BlockPos obbyPos) {
         if (target == null) return 0;
@@ -446,11 +435,9 @@ public class CrystalAura extends Module {
         if (needSwitch) {
             if (autoSwitch.getSelectedOption().equals("None")) return;
 
-            if (!autoSwitch.getSelectedOption().equals("Silent")) {
-                if (!hasSwitched) {
-                    previousSlot = oldSlot;
-                    hasSwitched = true;
-                }
+            if (!autoSwitch.getSelectedOption().equals("Silent") && !hasSwitched) {
+                previousSlot = oldSlot;
+                hasSwitched = true;
             }
 
             switchToSlot(mc, obbySlot);
@@ -682,16 +669,15 @@ public class CrystalAura extends Module {
     }
 
     private boolean canPlaceCrystal(Minecraft mc, BlockPos pos) {
-        if (!mc.level.getBlockState(pos).is(Blocks.OBSIDIAN) &&
-                !mc.level.getBlockState(pos).is(Blocks.BEDROCK)) {
+        if (!mc.level.getBlockState(pos).is(Blocks.OBSIDIAN) && !mc.level.getBlockState(pos).is(Blocks.BEDROCK)) {
             return false;
         }
 
         BlockPos above = pos.above();
         if (!mc.level.getBlockState(above).isAir()) return false;
 
-        if (oldPlace.isEnabled()) {
-            if (!mc.level.getBlockState(above.above()).isAir()) return false;
+        if (oldPlace.isEnabled() && !mc.level.getBlockState(above.above()).isAir()) {
+            return false;
         }
 
         AABB box = new AABB(above);
@@ -785,14 +771,13 @@ public class CrystalAura extends Module {
     }
 
     private void switchBack(Minecraft mc) {
-        if (hasSwitched && previousSlot != -1) {
-            if (autoSwitch.getSelectedOption().equals("Silent")) {
+        if (!hasSwitched || previousSlot == -1) return; 
+ 	if (autoSwitch.getSelectedOption().equals("Silent")) {
                 mc.player.connection.send(new ServerboundSetCarriedItemPacket(previousSlot));
-            } else {
-                mc.player.getInventory().setSelectedSlot(previousSlot);
-            }
+    	} else {
+             mc.player.getInventory().selected = previousSlot;
+	    }        
             previousSlot = -1;
             hasSwitched = false;
-        }
     }
 }
