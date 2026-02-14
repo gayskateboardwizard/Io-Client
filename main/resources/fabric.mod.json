@@ -1,15 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "io_client",
-  "version": "Indev",
+  "version": "Indev V1.3",
   "name": "Io Client",
-  "description": "If you read this, you have been ratted",
+  "description": "A fabric utility client mod made for anarchy servers.",
   "authors": [
-    "Withered Knights"
+    "MAD"
   ],
   "contact": {
-    "homepage": "https://en.wikipedia.org/wiki/Cool_(aesthetic)",
-    "sources": ""
+    "sources": "https://github.com/gayskateboardwizard/Io-Client"
   },
   "license": "All Rights Reserved",
   "icon": "logo.png",
