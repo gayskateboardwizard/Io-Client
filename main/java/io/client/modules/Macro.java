@@ -2,6 +2,7 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
+import io.client.commands.CommandManager;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
@@ -28,7 +29,13 @@ public class Macro extends Module {
     @Override
     public void onEnable() {
         if (Minecraft.getInstance().player != null) {
-            Minecraft.getInstance().player.connection.sendChat(command);
+            if (command.startsWith("|")) {
+                CommandManager.INSTANCE.handleMessage(command);
+            } else if (command.startsWith("/")) {
+                Minecraft.getInstance().player.connection.sendCommand(command.substring(1));
+            } else {
+                Minecraft.getInstance().player.connection.sendChat(command);
+            }
         }
         setEnabled(false);
     }
