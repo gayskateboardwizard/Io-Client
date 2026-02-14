@@ -3,6 +3,7 @@ package io.client.commands;
 import io.client.ClickGuiScreen;
 import io.client.Module;
 import io.client.ModuleManager;
+import io.client.modules.Macro;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -13,16 +14,19 @@ public class BindListCommand implements Command {
     public void execute(String[] args) throws Exception {
         List<String> binds = new ArrayList<>();
 
-        binds.add("§7- §e" + getKeyName(ClickGuiScreen.clickGuiKey) + " §7> ClickGui");
+        binds.add("§7- §e" + getKeyName(ClickGuiScreen.clickGuiKey) + " §6> ClickGui");
 
         for (Module module : ModuleManager.INSTANCE.getModules()) {
-            if (module.getKey() != -1) {
+            if (module instanceof Macro macro) {
+                String keyBind = formatKeybind(macro.getKeyCodes());
+                binds.add("§7- §e" + keyBind + " §d> " + macro.getName());
+            } else if (module.getKey() != -1) {
                 binds.add("§7- §e" + getKeyName(module.getKey()) + " §7> " + module.getName());
             }
         }
 
-        if (binds.isEmpty()) {
-            CommandManager.INSTANCE.sendMessage("§7No keybinds set");
+        if (binds.size() == 1) {
+            CommandManager.INSTANCE.sendMessage("§7No keybinds, go make them");
             return;
         }
 
@@ -30,6 +34,19 @@ public class BindListCommand implements Command {
         for (String bind : binds) {
             CommandManager.INSTANCE.sendMessage(bind);
         }
+    }
+
+    private String formatKeybind(int[] keys) {
+        if (keys.length == 1) {
+            return getKeyName(keys[0]);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < keys.length; i++) {
+            if (i > 0) sb.append("+");
+            sb.append(getKeyName(keys[i]));
+        }
+        return sb.toString();
     }
 
     private String getKeyName(int keyCode) {
@@ -50,6 +67,9 @@ public class BindListCommand implements Command {
             default -> {
                 if (keyCode >= GLFW.GLFW_KEY_A && keyCode <= GLFW.GLFW_KEY_Z) {
                     yield String.valueOf((char) ('A' + (keyCode - GLFW.GLFW_KEY_A)));
+                }
+                if (keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
+                    yield String.valueOf((char) ('0' + (keyCode - GLFW.GLFW_KEY_0)));
                 }
                 yield "KEY_" + keyCode;
             }

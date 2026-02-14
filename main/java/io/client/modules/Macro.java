@@ -28,16 +28,35 @@ public class Macro extends Module {
 
     @Override
     public void onEnable() {
-        if (Minecraft.getInstance().player != null) {
-            if (command.startsWith("|")) {
-                CommandManager.INSTANCE.handleMessage(command);
-            } else if (command.startsWith("/")) {
-                Minecraft.getInstance().player.connection.sendCommand(command.substring(1));
+        if (Minecraft.getInstance().player == null) {
+            setEnabled(false);
+            return;
+        }
+
+        String[] commands = parseCommands(command);
+
+        for (String cmd : commands) {
+            cmd = cmd.trim();
+            if (cmd.isEmpty()) continue;
+
+            if (cmd.startsWith("|")) {
+                CommandManager.INSTANCE.handleMessage(cmd);
+            } else if (cmd.startsWith("/")) {
+                Minecraft.getInstance().player.connection.sendCommand(cmd.substring(1));
             } else {
-                Minecraft.getInstance().player.connection.sendChat(command);
+                Minecraft.getInstance().player.connection.sendChat(cmd);
             }
         }
+
         setEnabled(false);
+    }
+
+    private String[] parseCommands(String input) {
+        if (!input.contains("}+{")) {
+            return new String[]{input};
+        }
+
+        return input.split("\\}\\+\\{");
     }
 
     public String getCommand() {
