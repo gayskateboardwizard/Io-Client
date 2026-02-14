@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,8 @@ public class ClickGuiScreen extends Screen {
     private static final int PANEL_WIDTH = 90;
     private static final int TITLE_BAR_HEIGHT = 13;
     private static final int PANEL_GAP = 10;
+
+    public static int clickGuiKey = GLFW.GLFW_KEY_GRAVE_ACCENT; // Default keybinding for ClickGUI
 
     public static boolean opened = false;
     public static Theme currentTheme = Theme.IO;

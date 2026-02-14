@@ -1,0 +1,92 @@
+{
+  "mappings": {
+    "io/client/mixin/BlockItemMixin": {
+      "useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;": "Lnet/minecraft/class_1747;method_7884(Lnet/minecraft/class_1838;)Lnet/minecraft/class_1269;"
+    },
+    "io/client/mixin/BoneMealItemMixin": {
+      "useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;": "Lnet/minecraft/class_1752;method_7884(Lnet/minecraft/class_1838;)Lnet/minecraft/class_1269;"
+    },
+    "io/client/mixin/CommandsMixin": {
+      "performCommand(Lcom/mojang/brigadier/ParseResults;Ljava/lang/String;)V": "Lnet/minecraft/class_2170;method_9249(Lcom/mojang/brigadier/ParseResults;Ljava/lang/String;)V"
+    },
+    "io/client/mixin/EntityRenderMixin": {
+      "shouldShowName": "Lnet/minecraft/class_897;method_3921(Lnet/minecraft/class_1297;D)Z"
+    },
+    "io/client/mixin/ExperienceOrbMixin": {
+      "playerTouch(Lnet/minecraft/world/entity/player/Player;)V": "Lnet/minecraft/class_1303;method_5694(Lnet/minecraft/class_1657;)V"
+    },
+    "io/client/mixin/ForceSplashMixin": {
+      "init()V": "Lnet/minecraft/class_442;method_25426()V"
+    },
+    "io/client/mixin/IMinecraftAccessor": {
+      "rightClickDelay": "field_1752:I"
+    },
+    "io/client/mixin/ItemStackMixin": {
+      "getTooltipLines": "Lnet/minecraft/class_1799;method_7950(Lnet/minecraft/class_1792$class_9635;Lnet/minecraft/class_1657;Lnet/minecraft/class_1836;)Ljava/util/List;"
+    },
+    "io/client/mixin/LivingEntityMixin": {
+      "applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F": "Lnet/minecraft/class_1309;method_67346(Lnet/minecraft/class_3218;Lnet/minecraft/class_1282;F)F",
+      "causeFallDamage(DFLnet/minecraft/world/damagesource/DamageSource;)Z": "Lnet/minecraft/class_1309;method_5747(DFLnet/minecraft/class_1282;)Z",
+      "dropExperience(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V": "Lnet/minecraft/class_1309;method_23883(Lnet/minecraft/class_3218;Lnet/minecraft/class_1297;)V",
+      "heal(F)V": "Lnet/minecraft/class_1309;method_6025(F)V",
+      "jumpFromGround()V": "Lnet/minecraft/class_1309;method_6043()V",
+      "onItemPickup(Lnet/minecraft/world/entity/item/ItemEntity;)V": "Lnet/minecraft/class_1309;method_29499(Lnet/minecraft/class_1542;)V",
+      "startUsingItem(Lnet/minecraft/world/InteractionHand;)V": "Lnet/minecraft/class_1309;method_6019(Lnet/minecraft/class_1268;)V",
+      "swing(Lnet/minecraft/world/InteractionHand;Z)V": "Lnet/minecraft/class_1309;method_23667(Lnet/minecraft/class_1268;Z)V"
+    },
+    "io/client/mixin/PanoramaRendererMixin": {
+      "render": "Lnet/minecraft/class_766;method_3317(Lnet/minecraft/class_332;IIZ)V"
+    },
+    "io/client/mixin/PlayerMixin": {
+      "giveExperienceLevels(I)V": "Lnet/minecraft/class_1657;method_7316(I)V",
+      "giveExperiencePoints(I)V": "Lnet/minecraft/class_1657;method_7255(I)V",
+      "tick()V": "Lnet/minecraft/class_1657;method_5773()V"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "io/client/mixin/BlockItemMixin": {
+        "useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;": "Lnet/minecraft/class_1747;method_7884(Lnet/minecraft/class_1838;)Lnet/minecraft/class_1269;"
+      },
+      "io/client/mixin/BoneMealItemMixin": {
+        "useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;": "Lnet/minecraft/class_1752;method_7884(Lnet/minecraft/class_1838;)Lnet/minecraft/class_1269;"
+      },
+      "io/client/mixin/CommandsMixin": {
+        "performCommand(Lcom/mojang/brigadier/ParseResults;Ljava/lang/String;)V": "Lnet/minecraft/class_2170;method_9249(Lcom/mojang/brigadier/ParseResults;Ljava/lang/String;)V"
+      },
+      "io/client/mixin/EntityRenderMixin": {
+        "shouldShowName": "Lnet/minecraft/class_897;method_3921(Lnet/minecraft/class_1297;D)Z"
+      },
+      "io/client/mixin/ExperienceOrbMixin": {
+        "playerTouch(Lnet/minecraft/world/entity/player/Player;)V": "Lnet/minecraft/class_1303;method_5694(Lnet/minecraft/class_1657;)V"
+      },
+      "io/client/mixin/ForceSplashMixin": {
+        "init()V": "Lnet/minecraft/class_442;method_25426()V"
+      },
+      "io/client/mixin/IMinecraftAccessor": {
+        "rightClickDelay": "field_1752:I"
+      },
+      "io/client/mixin/ItemStackMixin": {
+        "getTooltipLines": "Lnet/minecraft/class_1799;method_7950(Lnet/minecraft/class_1792$class_9635;Lnet/minecraft/class_1657;Lnet/minecraft/class_1836;)Ljava/util/List;"
+      },
+      "io/client/mixin/LivingEntityMixin": {
+        "applyItemBlocking(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)F": "Lnet/minecraft/class_1309;method_67346(Lnet/minecraft/class_3218;Lnet/minecraft/class_1282;F)F",
+        "causeFallDamage(DFLnet/minecraft/world/damagesource/DamageSource;)Z": "Lnet/minecraft/class_1309;method_5747(DFLnet/minecraft/class_1282;)Z",
+        "dropExperience(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)V": "Lnet/minecraft/class_1309;method_23883(Lnet/minecraft/class_3218;Lnet/minecraft/class_1297;)V",
+        "heal(F)V": "Lnet/minecraft/class_1309;method_6025(F)V",
+        "jumpFromGround()V": "Lnet/minecraft/class_1309;method_6043()V",
+        "onItemPickup(Lnet/minecraft/world/entity/item/ItemEntity;)V": "Lnet/minecraft/class_1309;method_29499(Lnet/minecraft/class_1542;)V",
+        "startUsingItem(Lnet/minecraft/world/InteractionHand;)V": "Lnet/minecraft/class_1309;method_6019(Lnet/minecraft/class_1268;)V",
+        "swing(Lnet/minecraft/world/InteractionHand;Z)V": "Lnet/minecraft/class_1309;method_23667(Lnet/minecraft/class_1268;Z)V"
+      },
+      "io/client/mixin/PanoramaRendererMixin": {
+        "render": "Lnet/minecraft/class_766;method_3317(Lnet/minecraft/class_332;IIZ)V"
+      },
+      "io/client/mixin/PlayerMixin": {
+        "giveExperienceLevels(I)V": "Lnet/minecraft/class_1657;method_7316(I)V",
+        "giveExperiencePoints(I)V": "Lnet/minecraft/class_1657;method_7255(I)V",
+        "tick()V": "Lnet/minecraft/class_1657;method_5773()V"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+v1	named	intermediary
+FIELD	io/client/mixin/LivingEntityMixin	I	lastHurtByPlayerMemoryTime	field_6238
+FIELD	io/client/mixin/ForceSplashMixin	Lnet/minecraft/client/gui/components/SplashRenderer;	splash	field_2586
+METHOD	io/client/mixin/LivingEntityMixin	()Z	isAlwaysExperienceDropper	method_6071

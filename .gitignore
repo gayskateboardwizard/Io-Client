@@ -1,0 +1,28 @@
+# Gradle build output
+build/
+.gradle/
+
+# IntelliJ IDEA files
+.idea/
+
+# Local settings
+.vscode/
+.DS_Store
+*.iml
+*.ipr
+*.iws
+
+# Log files
+*.log
+*.log.*
+
+# Compiled class files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# macOS specific files
+.DS_Store
