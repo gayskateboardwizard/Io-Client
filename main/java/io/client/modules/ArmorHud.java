@@ -1,10 +1,12 @@
 package io.client.modules;
 
 import io.client.Category;
+import io.client.ClickGuiScreen;
 import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
+import io.client.settings.RadioSetting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.tags.FluidTags;
@@ -16,7 +18,7 @@ import java.awt.*;
 public class ArmorHud extends Module {
     private final BooleanSetting percentIcon;
     private final BooleanSetting small;
-    private final BooleanSetting triColor;
+    private final RadioSetting colorMode;
 
     private final CategorySetting highColorCategory;
     private final NumberSetting highR;
@@ -35,11 +37,14 @@ public class ArmorHud extends Module {
 
     public ArmorHud() {
         super("ArmorHud", "Shows armor durability on HUD", -1, Category.RENDER);
-        // removed pos settings cause ill just make it a draggable in the clickgui
-        percentIcon = new BooleanSetting("Percent Icon", false);
+
+        percentIcon = new BooleanSetting("PercentIcon", false);
         small = new BooleanSetting("Small", false);
-        triColor = new BooleanSetting("Tri Color", false);
- 
+        colorMode = new RadioSetting("ColorMode", "TriColor");
+        colorMode.addOption("TriColor");
+        colorMode.addOption("Theme");
+        colorMode.addOption("None");
+
         highColorCategory = new CategorySetting("High Color");
         highR = new NumberSetting("HighR", 10, 0, 255);
         highG = new NumberSetting("HighG", 255, 0, 255);
@@ -66,7 +71,7 @@ public class ArmorHud extends Module {
 
         addSetting(percentIcon);
         addSetting(small);
-        addSetting(triColor);
+        addSetting(colorMode);
         addSetting(highColorCategory);
         addSetting(midColorCategory);
         addSetting(lowColorCategory);
@@ -82,7 +87,7 @@ public class ArmorHud extends Module {
         int centerX = width / 2;
         int iteration = 0;
         int y = height - 55 - (mc.player.isEyeInFluid(FluidTags.WATER) ? 10 : 0);
-        
+
         for (int i = 0; i < 4; i++) {
             ItemStack armor = mc.player.getInventory().getItem(36 + i);
             iteration++;
@@ -100,7 +105,7 @@ public class ArmorHud extends Module {
                         y + 9, 0xFFFFFF);
             }
 
-            if (armor.isDamageableItem()) {
+            if (armor.isDamageableItem() && !colorMode.isSelected("None")) {
                 float durabilityPercent = ((float) armor.getMaxDamage() - (float) armor.getDamageValue()) / (float) armor.getMaxDamage();
                 int dmg = Math.round(durabilityPercent * 100);
 
@@ -126,28 +131,28 @@ public class ArmorHud extends Module {
     }
 
     private Color getArmorColor(int dmg) {
-        if (!triColor.isEnabled()) {
+        if (colorMode.isSelected("Theme")) {
+            return new Color(ClickGuiScreen.currentTheme.moduleEnabled);
+        }
+
+        if (colorMode.isSelected("None")) {
             return Color.WHITE;
         }
 
         Color highColor = new Color((int) highR.getValue(), (int) highG.getValue(), (int) highB.getValue());
         Color midColor = new Color((int) midR.getValue(), (int) midG.getValue(), (int) midB.getValue());
         Color lowColor = new Color((int) lowR.getValue(), (int) lowG.getValue(), (int) lowB.getValue());
-        // fixed color blending
+
         if (dmg > 75) {
-            float t = Mth.clamp(normalize(dmg, 75, 100), 0, 1);
             return highColor;
         } else if (dmg > 66) {
             float t = Mth.clamp(normalize(dmg, 66, 75), 0, 1);
             return interpolate(t, highColor, midColor);
         } else if (dmg > 50) {
-            float t = Mth.clamp(normalize(dmg, 66, 50), 0, 1);
             return midColor;
         } else if (dmg > 33) {
             float t = Mth.clamp(normalize(dmg, 33, 50), 0, 1);
             return interpolate(t, midColor, lowColor);
-        } else if (dmg > 25) {
-            return lowColor;
         } else {
             return lowColor;
         }
