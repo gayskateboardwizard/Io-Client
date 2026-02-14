@@ -12,8 +12,8 @@ public class MacroManager {
 
     private MacroManager() {}
 
-    public void addMacro(String name, String command, int key) {
-        Macro macro = new Macro(name, command, key);
+    public void addMacro(String name, String command, int[] keys) {
+        Macro macro = new Macro(name, command, keys);
         macros.add(macro);
         ModuleManager.INSTANCE.addModule(macro);
         saveMacros();
@@ -45,7 +45,13 @@ public class MacroManager {
         File configFile = new File(ModuleManager.INSTANCE.getConfigDir(), "macros.txt");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             for (Macro macro : macros) {
-                writer.write(macro.getName() + ":" + macro.getCommand() + ":" + macro.getKey());
+                StringBuilder keysStr = new StringBuilder();
+                int[] keys = macro.getKeyCodes();
+                for (int i = 0; i < keys.length; i++) {
+                    if (i > 0) keysStr.append(",");
+                    keysStr.append(keys[i]);
+                }
+                writer.write(macro.getName() + ":" + macro.getCommand() + ":" + keysStr);
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -60,7 +66,7 @@ public class MacroManager {
         }
 
         macros.clear();
-        
+
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -68,9 +74,13 @@ public class MacroManager {
                 if (parts.length == 3) {
                     String name = parts[0];
                     String command = parts[1];
-                    int key = Integer.parseInt(parts[2]);
-                    
-                    Macro macro = new Macro(name, command, key);
+                    String[] keyStrs = parts[2].split(",");
+                    int[] keys = new int[keyStrs.length];
+                    for (int i = 0; i < keyStrs.length; i++) {
+                        keys[i] = Integer.parseInt(keyStrs[i]);
+                    }
+
+                    Macro macro = new Macro(name, command, keys);
                     macros.add(macro);
                     ModuleManager.INSTANCE.addModule(macro);
                 }
