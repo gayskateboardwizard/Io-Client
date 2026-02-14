@@ -20,9 +20,7 @@ public class DonkeyBoatDupe extends Module {
     private final Minecraft mc = Minecraft.getInstance();
     private final Random random = new Random();
 
-
     private final RadioSetting modeSetting = new RadioSetting("Mode", "Boat");
-
 
     private final CategorySetting boatCategory = new CategorySetting("Boat Settings");
     private final NumberSetting distanceSetting = new NumberSetting("Distance", 128.0f, 1.0f, 256.0f);
@@ -31,12 +29,10 @@ public class DonkeyBoatDupe extends Module {
     private final NumberSetting boatSpeed = new NumberSetting("BoatSpeed", 0.5f, 0.1f, 2.0f);
     private final NumberSetting exitGracePeriod = new NumberSetting("ExitGraceTicks", 5.0f, 1.0f, 20.0f);
 
-
     private final CategorySetting homeCategory = new CategorySetting("Home Settings");
     private final StringSetting home1Setting = new StringSetting("Home1", "home1");
     private final StringSetting home2Setting = new StringSetting("Home2", "home2");
     private final RadioSetting chestLocationSetting = new RadioSetting("ChestLocation", "Home1");
-
 
     private final NumberSetting invDelay = new NumberSetting("Delay", 2.0f, 1.0f, 10.0f);
     private final NumberSetting delayRandom = new NumberSetting("AddRandomTickDelay", 2.0f, 0.0f, 5.0f);
@@ -48,12 +44,12 @@ public class DonkeyBoatDupe extends Module {
         WAIT_INV_OPEN, TAKE_ITEMS,
         MOVE_BACKWARD, WAIT_BACKWARD_STOP,
         EXIT_BOAT, WAIT_BOAT_EXIT,
-        APPROACH_CHEST, WAIT_CHEST_OPEN, DUMP_ITEMS,
+        APPROACH_CHEST, OPEN_CHEST, WAIT_CHEST_OPEN, DUMP_ITEMS,
         CHECK_CHEST,
 
         HOME_TELEPORT_1, HOME_WAIT_TP1, HOME_WAIT_DONKEY_OPEN,
         HOME_TAKE_ITEMS, HOME_TELEPORT_2, HOME_WAIT_TP2,
-        HOME_APPROACH_CHEST, HOME_WAIT_CHEST_OPEN, HOME_DUMP_ITEMS,
+        HOME_APPROACH_CHEST, HOME_OPEN_CHEST, HOME_WAIT_CHEST_OPEN, HOME_DUMP_ITEMS,
         HOME_CHECK_CHEST
     }
 
@@ -144,7 +140,6 @@ public class DonkeyBoatDupe extends Module {
         }
     }
 
-
     private void updateBoatMode() {
         switch (state) {
             case FIND_DONKEY:
@@ -195,6 +190,9 @@ public class DonkeyBoatDupe extends Module {
             case APPROACH_CHEST:
                 approachChest();
                 break;
+            case OPEN_CHEST:
+                openChest();
+                break;
             case WAIT_CHEST_OPEN:
                 waitChestOpen();
                 break;
@@ -206,7 +204,6 @@ public class DonkeyBoatDupe extends Module {
                 break;
         }
     }
-
 
     private void updateHomeMode() {
         switch (state) {
@@ -240,6 +237,9 @@ public class DonkeyBoatDupe extends Module {
             case HOME_APPROACH_CHEST:
                 homeApproachChest();
                 break;
+            case HOME_OPEN_CHEST:
+                homeOpenChest();
+                break;
             case HOME_WAIT_CHEST_OPEN:
                 homeWaitChestOpen();
                 break;
@@ -251,7 +251,6 @@ public class DonkeyBoatDupe extends Module {
                 break;
         }
     }
-
 
     private void findDonkeyHome() {
         List<AbstractChestedHorse> horses = mc.level.getEntitiesOfClass(AbstractChestedHorse.class,
@@ -396,7 +395,23 @@ public class DonkeyBoatDupe extends Module {
 
         if (distToChest < 4.5) {
             releaseAllKeys();
-            lookAt(Vec3.atCenterOf(markedChest));
+            state = State.HOME_OPEN_CHEST;
+            ticks = 0;
+        } else {
+            lookAt(Vec3.atCenterOf(markedChest), false);
+            pressForward();
+        }
+    }
+
+    private void homeOpenChest() {
+        if (markedChest == null) {
+            this.toggle();
+            return;
+        }
+
+        lookAt(Vec3.atCenterOf(markedChest));
+
+        if (ticks > 5) {
             mc.gameMode.useItemOn(mc.player, mc.player.getUsedItemHand(),
                     new net.minecraft.world.phys.BlockHitResult(
                             Vec3.atCenterOf(markedChest),
@@ -404,9 +419,6 @@ public class DonkeyBoatDupe extends Module {
                             markedChest, false));
             state = State.HOME_WAIT_CHEST_OPEN;
             ticks = 0;
-        } else {
-            lookAt(Vec3.atCenterOf(markedChest), false);
-            pressForward();
         }
     }
 
@@ -483,7 +495,6 @@ public class DonkeyBoatDupe extends Module {
             this.toggle();
         }
     }
-
 
     private void findDonkey() {
         List<AbstractChestedHorse> horses = mc.level.getEntitiesOfClass(AbstractChestedHorse.class,
@@ -759,17 +770,30 @@ public class DonkeyBoatDupe extends Module {
 
         if (distToChest < 4.5) {
             releaseAllKeys();
-            lookAt(Vec3.atCenterOf(markedChest));
-            mc.gameMode.useItemOn(mc.player, mc.player.getUsedItemHand(),
-                    new net.minecraft.world.phys.BlockHitResult(
-                            Vec3.atCenterOf(markedChest),
-                            net.minecraft.core.Direction.UP,
-                            markedChest, false));
-            state = State.WAIT_CHEST_OPEN;
+            state = State.OPEN_CHEST;
             ticks = 0;
         } else {
             lookAt(Vec3.atCenterOf(markedChest), false);
             pressForward();
+        }
+    }
+
+    private void openChest() {
+        if (markedChest == null) {
+            this.toggle();
+            return;
+        }
+
+        lookAt(Vec3.atCenterOf(markedChest));
+
+        if (ticks == 5) {
+            mc.options.keyUse.setDown(true);
+        }
+
+        if (ticks > 7) {
+            mc.options.keyUse.setDown(false);
+            state = State.WAIT_CHEST_OPEN;
+            ticks = 0;
         }
     }
 
@@ -849,7 +873,6 @@ public class DonkeyBoatDupe extends Module {
             this.toggle();
         }
     }
-
 
     private void applyVelocity(Entity entity, boolean forward, float speed) {
         float yaw = entity.getYRot();
