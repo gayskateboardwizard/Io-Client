@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "io_client",
-  "version": "Indev V1.3",
+  "version": "Indev V1.4",
   "name": "Io Client",
   "description": "A fabric utility client mod made for anarchy servers.",
   "authors": [
