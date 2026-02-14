@@ -17,9 +17,12 @@ public class ThemeChanger extends Module {
         themeSelect.addOption("Ganymede");
         themeSelect.addOption("Callisto");
         themeSelect.addOption("Europa");
+        themeSelect.addOption("Amalthea");
+        themeSelect.addOption("Thebe");
+        themeSelect.addOption("Metis");
+        themeSelect.addOption("Adrastea");
 
         addSetting(themeSelect);
-
 
         Theme savedTheme = ModuleManager.INSTANCE.loadTheme();
         if (savedTheme != null) {
@@ -56,6 +59,10 @@ public class ThemeChanger extends Module {
             case "Ganymede" -> ClickGuiScreen.currentTheme = Theme.GANYMEDE;
             case "Callisto" -> ClickGuiScreen.currentTheme = Theme.CALLISTO;
             case "Europa" -> ClickGuiScreen.currentTheme = Theme.EUROPA;
+            case "Amalthea" -> ClickGuiScreen.currentTheme = Theme.AMALTHEA;
+            case "Thebe" -> ClickGuiScreen.currentTheme = Theme.THEBE;
+            case "Metis" -> ClickGuiScreen.currentTheme = Theme.METIS;
+            case "Adrastea" -> ClickGuiScreen.currentTheme = Theme.ADRASTEA;
         }
         ModuleManager.INSTANCE.saveTheme(ClickGuiScreen.currentTheme);
     }
