@@ -11,7 +11,7 @@ public class Macro extends Module {
     private final int[] keyCodes;
 
     public Macro(String name, String command, int[] keyCodes) {
-        super(name, "Macro: " + command, keyCodes[keyCodes.length - 1], Category.MISC);
+        super(name, "Macro: " + command, keyCodes[keyCodes.length - 1], Category.MACROS);
         this.command = command;
         this.keyCodes = keyCodes;
     }
