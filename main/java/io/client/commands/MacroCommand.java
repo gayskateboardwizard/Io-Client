@@ -37,7 +37,7 @@ public class MacroCommand implements Command {
                 }
 
                 MacroManager.INSTANCE.addMacro(name, command, keyCode);
-                CommandManager.INSTANCE.sendMessage("§aCreated macro §e" + name + " §7-> §d" + command + " §7[§e" + keyName + "§7]");
+                CommandManager.INSTANCE.sendMessage("§aCreated macro §e" + name + " §7> §d" + command + " §7[§e" + keyName + "§7]");
             }
 
             case "delete", "remove", "del" -> {
