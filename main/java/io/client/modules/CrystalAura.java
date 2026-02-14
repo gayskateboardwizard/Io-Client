@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
@@ -268,11 +269,11 @@ public class CrystalAura extends Module {
 
 	for (Entity e : mc.level.entitiesForRendering()) {
     		if (e == mc.player || e instanceof EndCrystal || e instanceof ItemEntity) continue;
-    		if (e instanceof LivingEntity living && living.getHealth() <= 0) continue;
+    		if (!(e instanceof LivingEntity living)) continue;
+    		if (living.getHealth() <= 0) continue;
    	 	if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
-	}
 
-	double distSq = mc.player.distanceToSqr(e);
+            double distSq = mc.player.distanceToSqr(e);
             if (distSq > maxRangeSq) continue;
 
             double value = targetLogic.getSelectedOption().equals("Distance") ? distSq : living.getHealth();
@@ -298,7 +299,7 @@ public class CrystalAura extends Module {
         long worldTick = mc.level.getGameTime();
 
         for (Entity e : mc.level.entitiesForRendering()) {
-            if (!(e instanceof EndCrystal crystal)  continue;
+            if (!(e instanceof EndCrystal crystal)) continue;
 
             if (crystalAge.getValue() > 0 && crystal.tickCount < crystalAge.getValue()) continue;
 
@@ -775,7 +776,7 @@ public class CrystalAura extends Module {
  	if (autoSwitch.getSelectedOption().equals("Silent")) {
                 mc.player.connection.send(new ServerboundSetCarriedItemPacket(previousSlot));
     	} else {
-             mc.player.getInventory().selected = previousSlot;
+             mc.player.getInventory().setSelectedSlot(previousSlot);
 	    }        
             previousSlot = -1;
             hasSwitched = false;
