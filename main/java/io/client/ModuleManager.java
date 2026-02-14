@@ -4,6 +4,7 @@ import io.client.clickgui.CategoryPanel;
 import io.client.clickgui.SavedPanelConfig;
 import io.client.clickgui.Theme;
 import io.client.commands.CommandManager;
+import io.client.MacroManager;
 import io.client.modules.*;
 import io.client.settings.*;
 import net.minecraft.client.Minecraft;
@@ -74,6 +75,11 @@ public class ModuleManager {
         modules.add(new DonkeyBoatDupe());
         modules.add(new ExtraItemInfo());
         modules.add(new ArmorHud());
+        modules.add(new WebAura());
+        modules.add(new Restock());
+        modules.add(new FastUse());
+        //modules.add(new );
+
 
         System.out.println("Loaded " + modules.size() + " modules");
 
@@ -81,6 +87,7 @@ public class ModuleManager {
         loadKeybinds();
         TargetManager.INSTANCE.loadTargets();
         TargetManager.INSTANCE.loadFriends();
+        MacroManager.INSTANCE.loadMacros();
         initTheme();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -88,6 +95,7 @@ public class ModuleManager {
             saveKeybinds();
             TargetManager.INSTANCE.saveFriends();
             TargetManager.INSTANCE.saveTargets();
+            MacroManager.INSTANCE.saveMacros();
         }));
     }
 
@@ -350,16 +358,33 @@ public class ModuleManager {
         return null;
     }
 
+    public void addModule(Module module) {
+        modules.add(module);
+    }
+
+    public void removeModule(Module module) {
+        modules.remove(module);
+    }
+
+    public File getConfigDir() {
+        Path gameDir = Minecraft.getInstance().gameDirectory.toPath();
+        File clientFolder = gameDir.resolve(CLIENT_FOLDER_NAME).toFile();
+        if (!clientFolder.exists()) clientFolder.mkdirs();
+        return clientFolder;
+    }
+
     public void onKeyPress(int key) {
         for (Module module : modules) {
             if (module.getKey() == key) {
                 module.toggle();
                 saveModules();
 
-                CommandManager.INSTANCE.sendMessage(
-                        "§a" + module.getName() + " is now " +
-                                (module.isEnabled() ? "enabled" : "§cdisabled")
-                );
+                if (!(module instanceof io.client.modules.Macro)) {
+                    CommandManager.INSTANCE.sendMessage(
+                            "§a" + module.getName() + " is now " +
+                                    (module.isEnabled() ? "enabled" : "§cdisabled")
+                    );
+                }
             }
         }
     }
