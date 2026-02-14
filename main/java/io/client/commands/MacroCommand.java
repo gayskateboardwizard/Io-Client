@@ -17,36 +17,59 @@ public class MacroCommand implements Command {
         switch (action) {
             case "new", "add", "create" -> {
                 if (args.length < 4) {
-                    CommandManager.INSTANCE.sendMessage("§cUsage: |macro new <name> <command> <keybind>");
+                    CommandManager.INSTANCE.sendMessage("§cUsage: |macro new <name|{name}> <command|{command}> <keybind>");
                     return;
                 }
 
-                String name = args[1];
-                String command = args[2];
-                String keyName = args[3].toUpperCase();
+                ParseResult nameResult = parseField(args, 1);
+                if (nameResult == null) {
+                    CommandManager.INSTANCE.sendMessage("§cInvalid name format");
+                    return;
+                }
+
+                ParseResult commandResult = parseField(args, nameResult.nextIndex);
+                if (commandResult == null) {
+                    CommandManager.INSTANCE.sendMessage("§cInvalid command format");
+                    return;
+                }
+
+                if (commandResult.nextIndex >= args.length) {
+                    CommandManager.INSTANCE.sendMessage("§cMissing keybind");
+                    return;
+                }
+
+                String name = nameResult.value;
+                String command = commandResult.value;
+                String keyBind = args[commandResult.nextIndex];
 
                 if (MacroManager.INSTANCE.getMacro(name) != null) {
                     CommandManager.INSTANCE.sendMessage("§e" + name + " §7already exists");
                     return;
                 }
 
-                int keyCode = getKeyCode(keyName);
-                if (keyCode == -1) {
-                    CommandManager.INSTANCE.sendMessage("§cInvalid key: §e" + keyName);
+                int[] keyCodes = parseKeybind(keyBind);
+                if (keyCodes == null) {
+                    CommandManager.INSTANCE.sendMessage("§cInvalid keybind: §e" + keyBind);
                     return;
                 }
 
-                MacroManager.INSTANCE.addMacro(name, command, keyCode);
-                CommandManager.INSTANCE.sendMessage("§aCreated macro §e" + name + " §7> §d" + command + " §7[§e" + keyName + "§7]");
+                MacroManager.INSTANCE.addMacro(name, command, keyCodes);
+                CommandManager.INSTANCE.sendMessage("§aCreated macro §e" + name + " §7> §d" + command + " §7[§e" + keyBind.toUpperCase() + "§7]");
             }
 
             case "delete", "remove", "del" -> {
                 if (args.length < 2) {
-                    CommandManager.INSTANCE.sendMessage("§cUsage: |macro delete <name>");
+                    CommandManager.INSTANCE.sendMessage("§cUsage: |macro delete <name|{name}>");
                     return;
                 }
 
-                String name = args[1];
+                ParseResult nameResult = parseField(args, 1);
+                if (nameResult == null) {
+                    CommandManager.INSTANCE.sendMessage("§cInvalid name format");
+                    return;
+                }
+
+                String name = nameResult.value;
                 Macro macro = MacroManager.INSTANCE.getMacro(name);
 
                 if (macro == null) {
@@ -67,13 +90,78 @@ public class MacroCommand implements Command {
 
                 CommandManager.INSTANCE.sendMessage("§9Macros §7(" + macros.size() + "):");
                 for (Macro macro : macros) {
-                    String keyName = getKeyName(macro.getKey());
+                    String keyName = formatKeybind(macro.getKeyCodes());
                     CommandManager.INSTANCE.sendMessage("§7- §e" + macro.getName() + " §7> §d" + macro.getCommand() + " §7[§e" + keyName + "§7]");
                 }
             }
 
             default -> CommandManager.INSTANCE.sendMessage("§cUnknown action: §e" + action);
         }
+    }
+
+    private static class ParseResult {
+        String value;
+        int nextIndex;
+
+        ParseResult(String value, int nextIndex) {
+            this.value = value;
+            this.nextIndex = nextIndex;
+        }
+    }
+
+    private ParseResult parseField(String[] args, int startIndex) {
+        if (startIndex >= args.length) return null;
+
+        String first = args[startIndex];
+
+        if (first.startsWith("{")) {
+            StringBuilder builder = new StringBuilder();
+            int endIndex = startIndex;
+
+            for (int i = startIndex; i < args.length; i++) {
+                if (i > startIndex) builder.append(" ");
+                builder.append(args[i]);
+
+                if (args[i].endsWith("}")) {
+                    endIndex = i + 1;
+                    break;
+                }
+            }
+
+            String result = builder.toString();
+            if (!result.endsWith("}")) return null;
+
+            result = result.substring(1, result.length() - 1);
+            return new ParseResult(result, endIndex);
+        } else {
+            return new ParseResult(first, startIndex + 1);
+        }
+    }
+
+    private int[] parseKeybind(String keyBind) {
+        String[] parts = keyBind.toUpperCase().split("\\+");
+        int[] keys = new int[parts.length];
+
+        for (int i = 0; i < parts.length; i++) {
+            int key = getKeyCode(parts[i].trim());
+            if (key == -1) return null;
+            keys[i] = key;
+        }
+
+        return keys;
+    }
+
+    private String formatKeybind(int[] keys) {
+        if (keys.length == 1) {
+            return getKeyName(keys[0]);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < keys.length; i++) {
+            if (i > 0) sb.append("+");
+            sb.append(getKeyName(keys[i]));
+        }
+        return sb.toString();
     }
 
     private String getKeyName(int keyCode) {
@@ -95,6 +183,9 @@ public class MacroCommand implements Command {
                 if (keyCode >= GLFW.GLFW_KEY_A && keyCode <= GLFW.GLFW_KEY_Z) {
                     yield String.valueOf((char) ('A' + (keyCode - GLFW.GLFW_KEY_A)));
                 }
+                if (keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
+                    yield String.valueOf((char) ('0' + (keyCode - GLFW.GLFW_KEY_0)));
+                }
                 yield "KEY_" + keyCode;
             }
         };
@@ -102,7 +193,13 @@ public class MacroCommand implements Command {
 
     private int getKeyCode(String name) {
         if (name.length() == 1) {
-            return GLFW.GLFW_KEY_A + (name.charAt(0) - 'A');
+            char c = name.charAt(0);
+            if (c >= 'A' && c <= 'Z') {
+                return GLFW.GLFW_KEY_A + (c - 'A');
+            }
+            if (c >= '0' && c <= '9') {
+                return GLFW.GLFW_KEY_0 + (c - '0');
+            }
         }
 
         return switch (name) {
