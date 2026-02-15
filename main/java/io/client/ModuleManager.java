@@ -7,6 +7,7 @@ import io.client.commands.CommandManager;
 import io.client.MacroManager;
 import io.client.modules.*;
 import io.client.settings.*;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 
 import java.io.*;
@@ -374,12 +375,30 @@ public class ModuleManager {
     }
 
     public void onKeyPress(int key) {
-        for (Module module : modules) {
-            if (module.getKey() == key) {
-                module.toggle();
-                saveModules();
+        long window = Minecraft.getInstance().getWindow().getWindow();
 
-                if (!(module instanceof io.client.modules.Macro)) {
+        for (Module module : modules) {
+            if (module instanceof io.client.modules.Macro macro) {
+                if (macro.getKeyCodes()[macro.getKeyCodes().length - 1] == key && macro.matchesKeys(window)) {
+                    if (isExactKeyMatch(window, macro.getKeyCodes())) {
+                        macro.toggle();
+                        saveModules();
+                        return;
+                    }
+                }
+            } else if (module.getKey() == key) {
+                boolean isPartOfMacro = false;
+                for (Module m : modules) {
+                    if (m instanceof io.client.modules.Macro macro2 && macro2.matchesKeys(window)) {
+                        isPartOfMacro = true;
+                        break;
+                    }
+                }
+
+                if (!isPartOfMacro) {
+                    module.toggle();
+                    saveModules();
+
                     CommandManager.INSTANCE.sendMessage(
                             "§a" + module.getName() + " is now " +
                                     (module.isEnabled() ? "enabled" : "§cdisabled")
@@ -387,5 +406,31 @@ public class ModuleManager {
                 }
             }
         }
+    }
+
+    private boolean isExactKeyMatch(long window, int[] requiredKeys) {
+        int[] allModifiers = {
+                GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT,
+                GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL,
+                GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT
+        };
+
+        for (int modifier : allModifiers) {
+            boolean isRequired = false;
+            for (int required : requiredKeys) {
+                if (required == modifier) {
+                    isRequired = true;
+                    break;
+                }
+            }
+
+            boolean isPressed = GLFW.glfwGetKey(window, modifier) == GLFW.GLFW_PRESS;
+
+            if (isPressed && !isRequired) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
