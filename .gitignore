@@ -1,6 +1,7 @@
 # Gradle build output
 build/
 .gradle/
+/.gradle/
 
 # IntelliJ IDEA files
 .idea/
@@ -26,3 +27,4 @@ build/
 
 # macOS specific files
 .DS_Store
+
