@@ -10,6 +10,5 @@ A lightweight minecraft utility mod for fabric 1.21.8.
 # Credits
 I took some code (mainly from the following clients:
 Meteor, Sn0w and thunderhack
-<img width="371" height="78" alt="image" src="https://github.com/user-attachments/assets/8b1b4ccb-22c5-4396-865b-4211c4d66e20" />
 
 <img alt="image" src="https://cdn.discordapp.com/attachments/1455235908419846177/1473064659165646848/image.png?ex=6994d9de&is=6993885e&hm=5c6c5de9b7cb439e4b30db840707f8434dbe95833fce2e415c54a803654643f0&" />
