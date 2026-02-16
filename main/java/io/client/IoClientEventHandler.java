@@ -1,6 +1,7 @@
 package io.client;
 
 import io.client.commands.CommandManager;
+import io.client.modules.ModuleHUD;
 import io.client.modules.ArmorHud;
 import io.client.modules.ESP;
 import io.client.modules.IoSwag;
@@ -66,6 +67,12 @@ public class IoClientEventHandler {
             if (hud != null && hud.isEnabled()) {
                 hud.render(drawContext);
             }
+
+            ModuleHUD ModuleHUD = ModuleManager.INSTANCE.getModule(ModuleHUD.class);
+            if (ModuleHUD != null && ModuleHUD.isEnabled()) {
+                ModuleHUD.render(drawContext);
+            }
+
             ESP esp = ModuleManager.INSTANCE.getModule(ESP.class);
             if (esp != null && esp.isEnabled()) {
                 esp.render(drawContext, tickDelta.getGameTimeDeltaTicks());

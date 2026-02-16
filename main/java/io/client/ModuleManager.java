@@ -79,7 +79,14 @@ public class ModuleManager {
         modules.add(new WebAura());
         modules.add(new Restock());
         modules.add(new FastUse());
+        modules.add(new ModuleHUD());
+        modules.add(new GUIScale());
         //modules.add(new );
+        //modules.add(new );
+        //modules.add(new );
+        //modules.add(new );
+        //modules.add(new );
+
 
 
         System.out.println("Loaded " + modules.size() + " modules");

@@ -1,5 +1,6 @@
 package io.client.mixin;
 
+import io.client.SplashTexts;
 import net.minecraft.client.gui.components.SplashRenderer;
 import net.minecraft.client.gui.screens.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +17,6 @@ public class ForceSplashMixin {
 
     @Inject(method = "init()V", at = @At("TAIL"))
     private void forceSplash(CallbackInfo ci) {
-        this.splash = new SplashRenderer("§d我们正在看着你");
+        this.splash = new SplashRenderer(SplashTexts.getRandomSplash());
     }
 }

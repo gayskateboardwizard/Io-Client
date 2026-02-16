@@ -13,16 +13,25 @@ import java.util.List;
 import java.util.Map;
 
 public class PanelRenderer {
-    private static final int PANEL_WIDTH = 90;
-    private static final int MODULE_HEIGHT = 10;
-    private static final int SETTING_HEIGHT = 12;
-    private static final int TITLE_BAR_HEIGHT = 13;
+    private static int PANEL_WIDTH = 90;
+    private static int MODULE_HEIGHT = 10;
+    private static int SETTING_HEIGHT = 12;
+    private static int TITLE_BAR_HEIGHT = 13;
+    private static float SCALE = 1.0f;
 
     private final Map<String, Float> textScrollOffsets = new HashMap<>();
     private Theme theme;
 
     public PanelRenderer(Theme theme) {
         this.theme = theme;
+    }
+
+    public static void setScale(float scale) {
+        SCALE = scale;
+        PANEL_WIDTH = (int) (90 * scale);
+        MODULE_HEIGHT = (int) (10 * scale);
+        SETTING_HEIGHT = (int) (12 * scale);
+        TITLE_BAR_HEIGHT = (int) (13 * scale);
     }
 
     public static int getPanelWidth() {
@@ -89,14 +98,26 @@ public class PanelRenderer {
         graphics.fill(panel.x, panel.y, panel.x + PANEL_WIDTH, panel.y + TITLE_BAR_HEIGHT, theme.titleBar);
         graphics.fill(panel.x, panel.y, panel.x + PANEL_WIDTH, panel.y + 1, 0x44FFFFFF);
 
-        graphics.drawString(font, panel.category.name(), panel.x + 3, panel.y + 2, 0xFFFFFFFF, false);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(panel.x + 3 * SCALE, panel.y + 2 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, panel.category.name(), 0, 0, 0xFFFFFFFF, false);
+        graphics.pose().popMatrix();
 
-        int collapseX = panel.x + PANEL_WIDTH - 12;
-        graphics.drawString(font, panel.collapsed ? "+" : "-", collapseX, panel.y + 2, 0xFFAAAAAA, false);
+        int collapseX = panel.x + PANEL_WIDTH - (int)(12 * SCALE);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(collapseX, panel.y + 2 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, panel.collapsed ? "+" : "-", 0, 0, 0xFFAAAAAA, false);
+        graphics.pose().popMatrix();
 
         if (panel.category == Category.COMBAT) {
-            int targetsX = panel.x + PANEL_WIDTH - 28;
-            graphics.drawString(font, "T", targetsX, panel.y + 2, theme.moduleEnabled, false);
+            int targetsX = panel.x + PANEL_WIDTH - (int)(28 * SCALE);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(targetsX, panel.y + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, "T", 0, 0, theme.moduleEnabled, false);
+            graphics.pose().popMatrix();
         }
     }
 
@@ -133,10 +154,18 @@ public class PanelRenderer {
 
         if (!module.getSettings().isEmpty()) {
             String indicator = module.isExtended() ? "^" : ">";
-            graphics.drawString(font, indicator, panel.x + PANEL_WIDTH - 8, yOffset + 1, 0xFF888888, false);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(panel.x + PANEL_WIDTH - 8 * SCALE, yOffset + 1 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, indicator, 0, 0, 0xFF888888, false);
+            graphics.pose().popMatrix();
         }
 
-        graphics.drawString(font, module.getName(), panel.x + 3, yOffset + 1, moduleColor, false);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(panel.x + 3 * SCALE, yOffset + 1 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, module.getName(), 0, 0, moduleColor, false);
+        graphics.pose().popMatrix();
 
         return isModuleHovered ? module.getDescription() : null;
     }
@@ -167,8 +196,18 @@ public class PanelRenderer {
         }
 
         String catIndicator = catSetting.isExpanded() ? "^" : ">";
-        graphics.drawString(font, catIndicator, panel.x + PANEL_WIDTH - 8, yOffset + 1, theme.moduleDisabled, false);
-        graphics.drawString(font, catSetting.getName(), panel.x + 3, yOffset + 1, theme.moduleEnabled, false);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(panel.x + PANEL_WIDTH - 8 * SCALE, yOffset + 1 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, catIndicator, 0, 0, theme.moduleDisabled, false);
+        graphics.pose().popMatrix();
+
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(panel.x + 3 * SCALE, yOffset + 1 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, catSetting.getName(), 0, 0, theme.moduleEnabled, false);
+        graphics.pose().popMatrix();
+
         yOffset += SETTING_HEIGHT;
 
         if (catSetting.isExpanded()) {
@@ -189,7 +228,11 @@ public class PanelRenderer {
                 } else if (catItem instanceof StringSetting strSetting) {
                     String displayValue = strSetting.getValue();
                     String label = strSetting.getName() + ": \"" + displayValue + "\"";
-                    graphics.drawString(font, label, panel.x + 8, yOffset + 2, 0xFFFFFFFF, false);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(panel.x + 8 * SCALE, yOffset + 2 * SCALE);
+                    graphics.pose().scale(SCALE, SCALE);
+                    graphics.drawString(font, label, 0, 0, 0xFFFFFFFF, false);
+                    graphics.pose().popMatrix();
                     yOffset += SETTING_HEIGHT;
                 } else if (catItem instanceof RadioSetting radioSetting) {
                     renderRadioSetting(graphics, font, panel, radioSetting, yOffset, mouseX, mouseY, 8);
@@ -211,12 +254,19 @@ public class PanelRenderer {
 
         int indicatorColor = boolSetting.isEnabled() ? theme.moduleEnabled : theme.moduleDisabled;
         String indicatorText = boolSetting.isEnabled() ? "[x]" : "[ ]";
-        int indicatorX = panel.x + indent;
-        graphics.drawString(font, indicatorText, indicatorX, yOffset + 2, indicatorColor, false);
-        int indicatorWidth = font.width(indicatorText);
+        float indicatorX = panel.x + indent * SCALE;
+
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(indicatorX, yOffset + 2 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, indicatorText, 0, 0, indicatorColor, false);
+        graphics.pose().popMatrix();
+
+        float indicatorWidth = font.width(indicatorText) * SCALE;
 
         String settingName = boolSetting.getName();
-        int maxWidth = PANEL_WIDTH - indicatorWidth - indent - 6;
+        int maxWidth = (int)((PANEL_WIDTH - indicatorWidth - indent * SCALE - 6 * SCALE) / SCALE);
+
         if (font.width(settingName) > maxWidth) {
             String key = "bool_" + indent + "_" + boolSetting.getName();
             if (isSettingHovered) {
@@ -231,11 +281,22 @@ public class PanelRenderer {
 
             float offset = textScrollOffsets.get(key);
             String scrollText = settingName + "  " + settingName + "  " + settingName;
-            graphics.enableScissor(indicatorX + indicatorWidth + 4, yOffset, panel.x + PANEL_WIDTH - 3, yOffset + SETTING_HEIGHT);
-            graphics.drawString(font, scrollText, (int) (indicatorX + indicatorWidth + 4 - offset), yOffset + 2, 0xFFFFFFFF, false);
+
+            int scissorX1 = (int)(indicatorX + indicatorWidth + 4 * SCALE);
+            int scissorX2 = (int)(panel.x + PANEL_WIDTH - 3 * SCALE);
+            graphics.enableScissor(scissorX1, yOffset, scissorX2, yOffset + SETTING_HEIGHT);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(indicatorX + indicatorWidth + 4 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
             graphics.disableScissor();
         } else {
-            graphics.drawString(font, settingName, indicatorX + indicatorWidth + 4, yOffset + 2, 0xFFFFFFFF, false);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(indicatorX + indicatorWidth + 4 * SCALE, yOffset + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, settingName, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
         }
 
         return yOffset + SETTING_HEIGHT;
@@ -250,13 +311,15 @@ public class PanelRenderer {
         }
 
         float range = numSetting.getMax() - numSetting.getMin();
-        int barWidth = (int) ((numSetting.getValue() - numSetting.getMin()) / range * (PANEL_WIDTH - indent - 7));
+        int barWidth = (int) ((numSetting.getValue() - numSetting.getMin()) / range * (PANEL_WIDTH - indent * SCALE - 7 * SCALE));
 
-        graphics.fill(panel.x + indent, yOffset + 10, panel.x + PANEL_WIDTH - 3, yOffset + 11, theme.sliderBackground);
-        graphics.fill(panel.x + indent, yOffset + 10, panel.x + indent + barWidth, yOffset + 11, theme.sliderForeground);
+        int sliderY = yOffset + (int)(10 * SCALE);
+        graphics.fill(panel.x + (int)(indent * SCALE), sliderY, panel.x + PANEL_WIDTH - (int)(3 * SCALE), sliderY + Math.max(1, (int)SCALE), theme.sliderBackground);
+        graphics.fill(panel.x + (int)(indent * SCALE), sliderY, panel.x + (int)(indent * SCALE) + barWidth, sliderY + Math.max(1, (int)SCALE), theme.sliderForeground);
 
         String label = numSetting.getName() + ": " + String.format("%.1f", numSetting.getValue());
-        int maxWidth = PANEL_WIDTH - indent - 7;
+        int maxWidth = (int)((PANEL_WIDTH - indent * SCALE - 7 * SCALE) / SCALE);
+
         if (font.width(label) > maxWidth) {
             String key = "num_" + indent + "_" + numSetting.getName();
             if (isSettingHovered) {
@@ -271,11 +334,22 @@ public class PanelRenderer {
 
             float offset = textScrollOffsets.get(key);
             String scrollText = label + "  " + label + "  " + label;
-            graphics.enableScissor(panel.x + indent, yOffset, panel.x + PANEL_WIDTH - 3, yOffset + SETTING_HEIGHT);
-            graphics.drawString(font, scrollText, (int) (panel.x + indent - offset), yOffset + 1, 0xFFFFFFFF, false);
+
+            int scissorX1 = panel.x + (int)(indent * SCALE);
+            int scissorX2 = panel.x + PANEL_WIDTH - (int)(3 * SCALE);
+            graphics.enableScissor(scissorX1, yOffset, scissorX2, yOffset + SETTING_HEIGHT);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(panel.x + indent * SCALE - offset * SCALE, yOffset + 1 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
             graphics.disableScissor();
         } else {
-            graphics.drawString(font, label, panel.x + indent, yOffset + 1, 0xFFFFFFFF, false);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(panel.x + indent * SCALE, yOffset + 1 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, label, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
         }
 
         return yOffset + SETTING_HEIGHT;
@@ -292,7 +366,8 @@ public class PanelRenderer {
         String displayValue = strSetting.getValue();
         String label = strSetting.getName() + ": \"" + displayValue + "\"";
 
-        if (font.width(label) > PANEL_WIDTH - 6) {
+        int maxWidth = (int)((PANEL_WIDTH - 6 * SCALE) / SCALE);
+        if (font.width(label) > maxWidth) {
             String key = "str_" + strSetting.getName();
             if (isSettingHovered) {
                 float offset = textScrollOffsets.getOrDefault(key, 0f);
@@ -306,11 +381,22 @@ public class PanelRenderer {
 
             float offset = textScrollOffsets.get(key);
             String scrollText = label + "  " + label + "  " + label;
-            graphics.enableScissor(panel.x + 3, yOffset, panel.x + PANEL_WIDTH - 3, yOffset + SETTING_HEIGHT);
-            graphics.drawString(font, scrollText, (int) (panel.x + 3 - offset), yOffset + 2, 0xFFFFFFFF, false);
+
+            int scissorX1 = panel.x + (int)(3 * SCALE);
+            int scissorX2 = panel.x + PANEL_WIDTH - (int)(3 * SCALE);
+            graphics.enableScissor(scissorX1, yOffset, scissorX2, yOffset + SETTING_HEIGHT);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(panel.x + 3 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
             graphics.disableScissor();
         } else {
-            graphics.drawString(font, label, panel.x + 3, yOffset + 2, 0xFFFFFFFF, false);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(panel.x + 3 * SCALE, yOffset + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, label, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
         }
 
         return yOffset + SETTING_HEIGHT;
@@ -327,11 +413,17 @@ public class PanelRenderer {
         String selected = radioSetting.getSelectedOption();
         int indicatorColor = theme.moduleEnabled;
         String indicatorText = ">";
-        int indicatorX = panel.x + indent;
-        graphics.drawString(font, indicatorText, indicatorX, yOffset + 2, indicatorColor, false);
+        float indicatorX = panel.x + indent * SCALE;
+
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(indicatorX, yOffset + 2 * SCALE);
+        graphics.pose().scale(SCALE, SCALE);
+        graphics.drawString(font, indicatorText, 0, 0, indicatorColor, false);
+        graphics.pose().popMatrix();
 
         String label = radioSetting.getName() + ": " + selected;
-        int maxWidth = PANEL_WIDTH - indent - 12;
+        int maxWidth = (int)((PANEL_WIDTH - indent * SCALE - 12 * SCALE) / SCALE);
+
         if (font.width(label) > maxWidth) {
             String key = "radio_" + indent + "_" + radioSetting.getName();
             if (isSettingHovered) {
@@ -346,11 +438,22 @@ public class PanelRenderer {
 
             float offset = textScrollOffsets.get(key);
             String scrollText = label + "  " + label + "  " + label;
-            graphics.enableScissor(indicatorX + 12, yOffset, panel.x + PANEL_WIDTH - 3, yOffset + SETTING_HEIGHT);
-            graphics.drawString(font, scrollText, (int) (indicatorX + 12 - offset), yOffset + 2, 0xFFFFFFFF, false);
+
+            int scissorX1 = (int)(indicatorX + 12 * SCALE);
+            int scissorX2 = panel.x + PANEL_WIDTH - (int)(3 * SCALE);
+            graphics.enableScissor(scissorX1, yOffset, scissorX2, yOffset + SETTING_HEIGHT);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(indicatorX + 12 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
             graphics.disableScissor();
         } else {
-            graphics.drawString(font, label, indicatorX + 12, yOffset + 2, 0xFFFFFFFF, false);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(indicatorX + 12 * SCALE, yOffset + 2 * SCALE);
+            graphics.pose().scale(SCALE, SCALE);
+            graphics.drawString(font, label, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popMatrix();
         }
 
         return yOffset + SETTING_HEIGHT;

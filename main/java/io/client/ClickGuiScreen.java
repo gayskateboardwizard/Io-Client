@@ -12,11 +12,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClickGuiScreen extends Screen {
-    private static final int PANEL_WIDTH = 90;
-    private static final int TITLE_BAR_HEIGHT = 13;
     private static final int PANEL_GAP = 10;
 
-    public static int clickGuiKey = GLFW.GLFW_KEY_BACKSLASH; 
+    public static int clickGuiKey = GLFW.GLFW_KEY_BACKSLASH;
 
     public static boolean opened = false;
     public static Theme currentTheme = Theme.IO;
@@ -47,7 +45,8 @@ public class ClickGuiScreen extends Screen {
             if (config != null) {
                 panels.put(category, new CategoryPanel(category, config.x, config.y, config.collapsed));
             } else {
-                int defaultX = 20 + (index.get() * (PANEL_WIDTH + PANEL_GAP));
+                int panelWidth = PanelRenderer.getPanelWidth();
+                int defaultX = 20 + (index.get() * (panelWidth + PANEL_GAP));
                 panels.put(category, new CategoryPanel(category, defaultX, initialY, false));
             }
             index.incrementAndGet();
@@ -75,20 +74,30 @@ public class ClickGuiScreen extends Screen {
 
     private void renderTooltip(GuiGraphics graphics, String description, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
+
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(mouseX + 10, mouseY - 5);
+
+        float scale = PanelRenderer.getPanelWidth() / 90.0f;
+        graphics.pose().scale(scale, scale);
+
         int tipWidth = mc.font.width(description) + 6;
         int tipHeight = mc.font.lineHeight + 6;
-        int tipX = mouseX + 10;
-        int tipY = mouseY - 5;
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-        if (tipX + tipWidth > screenWidth) tipX = mouseX - tipWidth - 5;
-        if (tipY + tipHeight > screenHeight) tipY = screenHeight - tipHeight - 5;
-        if (tipY < 0) tipY = 0;
+        int tipX = 0;
+        int tipY = 0;
+
+        if ((mouseX + 10 + tipWidth * scale) > screenWidth) tipX = (int)(-(tipWidth + 15) * scale);
+        if ((mouseY - 5 + tipHeight * scale) > screenHeight) tipY = (int)((screenHeight - mouseY - tipHeight - 5) / scale);
+        if ((mouseY - 5) < 0) tipY = (int)(-mouseY / scale);
 
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + tipHeight, 0xE0000000);
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + 1, 0x44FFFFFF);
         graphics.drawString(mc.font, description, tipX + 3, tipY + 3, 0xFFFFFFFF, false);
+
+        graphics.pose().popMatrix();
     }
 
     @Override
