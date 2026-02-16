@@ -1,11 +1,10 @@
 package io.client.commands;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 
 
 public class CommandManager {
@@ -13,7 +12,7 @@ public class CommandManager {
     private static final String PREFIX = "|";
 
     private final Map<String, Command> commands = new HashMap<>();
-    private final Minecraft mc = Minecraft.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
     private int suggestionIndex = 0;
 
     private CommandManager() {
@@ -87,7 +86,7 @@ public class CommandManager {
 
     public void sendMessage(String message) {
         if (mc.player != null) {
-            mc.player.displayClientMessage(Component.literal(message), false);
+            mc.player.sendMessage(Text.literal(message), false);
         }
     }
 }

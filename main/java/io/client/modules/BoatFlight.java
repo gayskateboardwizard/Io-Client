@@ -4,11 +4,11 @@ import io.client.Category;
 import io.client.Module;
 import io.client.ModuleManager;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
 public class BoatFlight extends Module {
@@ -23,15 +23,15 @@ public class BoatFlight extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
         Entity vehicle = mc.player.getVehicle();
-        if (!(vehicle instanceof Boat boat)) return;
+        if (!(vehicle instanceof BoatEntity boat)) return;
 
         boat.setNoGravity(true);
-        boat.setYRot(mc.player.getYRot());
-        boat.setXRot(mc.player.getXRot());
+        boat.setYaw(mc.player.getYaw());
+        boat.setPitch(mc.player.getPitch());
 
         boolean guiMoveActive = false;
         Module guiMoveModule = ModuleManager.INSTANCE.getModule(io.client.modules.GuiMove.class);
@@ -43,7 +43,7 @@ public class BoatFlight extends Module {
 
         boolean shiftPressed = isKeyDown(GLFW.GLFW_KEY_LEFT_SHIFT);
 
-        if (mc.screen == null || guiMoveActive) {
+        if (mc.currentScreen == null || guiMoveActive) {
             if (isKeyDown(GLFW.GLFW_KEY_W)) forwardMove += 1.0F;
             if (isKeyDown(GLFW.GLFW_KEY_S)) forwardMove -= 1.0F;
             if (isKeyDown(GLFW.GLFW_KEY_A)) strafe += 1.0F;
@@ -55,29 +55,29 @@ public class BoatFlight extends Module {
             }
         }
 
-        Vec3 moveVec = new Vec3(strafe, 0, forwardMove);
+        Vec3d moveVec = new Vec3d(strafe, 0, forwardMove);
         if (moveVec.length() > 0) {
-            moveVec = moveVec.normalize().yRot(-mc.player.getYRot() * Mth.DEG_TO_RAD);
+            moveVec = moveVec.normalize().rotateY(-mc.player.getYaw() * MathHelper.RADIANS_PER_DEGREE);
         }
 
         double motionX = moveVec.x * horizontalSpeed.getValue();
         double motionZ = moveVec.z * horizontalSpeed.getValue();
 
-        boat.setDeltaMovement(motionX, motionY, motionZ);
+        boat.setVelocity(motionX, motionY, motionZ);
     }
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
         Entity vehicle = mc.player.getVehicle();
-        if (!(vehicle instanceof Boat boat)) return;
+        if (!(vehicle instanceof BoatEntity boat)) return;
 
         boat.setNoGravity(false);
     }
 
     private boolean isKeyDown(int key) {
-        return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key) == GLFW.GLFW_PRESS;
+        return GLFW.glfwGetKey(MinecraftClient.getInstance().getWindow().getHandle(), key) == GLFW.GLFW_PRESS;
     }
 }

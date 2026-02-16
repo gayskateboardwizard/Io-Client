@@ -4,9 +4,9 @@ import io.client.Category;
 import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Vec3d;
 
 public class ElytraFlight extends Module {
     public final NumberSetting horizontalSpeed = new NumberSetting("Horizontal", 2.0F, 0.0F, 5.0F);
@@ -24,23 +24,23 @@ public class ElytraFlight extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
-        Player player = mc.player;
+        PlayerEntity player = mc.player;
 
-        if (player.isFallFlying()) {
-            Vec3 lookVec = player.getLookAngle();
-            Vec3 motion = player.getDeltaMovement();
+        if (player.isGliding()) {
+            Vec3d lookVec = player.getRotationVector();
+            Vec3d motion = player.getVelocity();
 
             double motionY = 0;
             double motionX = motion.x;
             double motionZ = motion.z;
 
-            if (mc.options.keyUp.isDown()) {
+            if (mc.options.forwardKey.isPressed()) {
                 motionX = lookVec.x * horizontalSpeed.getValue();
                 motionZ = lookVec.z * horizontalSpeed.getValue();
-            } else if (mc.options.keyDown.isDown()) {
+            } else if (mc.options.backKey.isPressed()) {
                 motionX = -lookVec.x * horizontalSpeed.getValue() * 0.5;
                 motionZ = -lookVec.z * horizontalSpeed.getValue() * 0.5;
             } else {
@@ -50,15 +50,15 @@ public class ElytraFlight extends Module {
                 }
             }
 
-            if (mc.options.keyJump.isDown()) {
+            if (mc.options.jumpKey.isPressed()) {
                 motionY = verticalSpeed.getValue();
-            } else if (mc.options.keyShift.isDown()) {
+            } else if (mc.options.sneakKey.isPressed()) {
                 motionY = -verticalSpeed.getValue();
             } else if (lockY.isEnabled()) {
                 motionY = 0.02;
             }
 
-            player.setDeltaMovement(motionX, motionY, motionZ);
+            player.setVelocity(motionX, motionY, motionZ);
         }
     }
 }

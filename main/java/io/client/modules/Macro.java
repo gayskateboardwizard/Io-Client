@@ -3,7 +3,7 @@ package io.client.modules;
 import io.client.Category;
 import io.client.Module;
 import io.client.commands.CommandManager;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class Macro extends Module {
@@ -28,7 +28,7 @@ public class Macro extends Module {
 
     @Override
     public void onEnable() {
-        if (Minecraft.getInstance().player == null) {
+        if (MinecraftClient.getInstance().player == null) {
             setEnabled(false);
             return;
         }
@@ -42,9 +42,9 @@ public class Macro extends Module {
             if (cmd.startsWith("|")) {
                 CommandManager.INSTANCE.handleMessage(cmd);
             } else if (cmd.startsWith("/")) {
-                Minecraft.getInstance().player.connection.sendCommand(cmd.substring(1));
+                MinecraftClient.getInstance().player.networkHandler.sendChatCommand(cmd.substring(1));
             } else {
-                Minecraft.getInstance().player.connection.sendChat(cmd);
+                MinecraftClient.getInstance().player.networkHandler.sendChatMessage(cmd);
             }
         }
 

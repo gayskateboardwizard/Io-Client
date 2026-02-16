@@ -6,12 +6,6 @@ import io.client.Module;
 import io.client.TargetManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -19,6 +13,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.Camera;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.Vec3d;
 
 public class ESP extends Module {
     private final BooleanSetting showHP;
@@ -44,7 +44,7 @@ public class ESP extends Module {
 
 
     private void loadColors() {
-        File themeFile = new File(Minecraft.getInstance().gameDirectory, "io/modules.cfg");
+        File themeFile = new File(MinecraftClient.getInstance().runDirectory, "io/modules.cfg");
         String activeTheme = "Io";
         if (themeFile.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(themeFile))) {
@@ -100,19 +100,19 @@ public class ESP extends Module {
         }
     }
 
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render(DrawContext graphics, float partialTicks) {
         if (!isEnabled()) return;
 
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
-        Camera cam = mc.gameRenderer.getMainCamera();
-        Vec3 camPos = cam.getPosition();
+        Camera cam = mc.gameRenderer.getCamera();
+        Vec3d camPos = cam.getPos();
 
-        int sw = mc.getWindow().getGuiScaledWidth();
-        int sh = mc.getWindow().getGuiScaledHeight();
+        int sw = mc.getWindow().getScaledWidth();
+        int sh = mc.getWindow().getScaledHeight();
 
-        double baseFov = mc.options.fov().get();
+        double baseFov = mc.options.getFov().getValue();
         float fovModifier = 1.0f;
 
         if (mc.player.isSprinting()) {
@@ -124,24 +124,24 @@ public class ESP extends Module {
         }
 
         float currentFov = (float) (baseFov * fovModifier);
-        Matrix4f projection = mc.gameRenderer.getProjectionMatrix(currentFov);
+        Matrix4f projection = mc.gameRenderer.getBasicProjectionMatrix(currentFov);
         Matrix4f modelView = new Matrix4f();
 
-        org.joml.Quaternionf rotation = new org.joml.Quaternionf(cam.rotation());
+        org.joml.Quaternionf rotation = new org.joml.Quaternionf(cam.getRotation());
         rotation.conjugate();
         modelView.rotation(rotation);
 
         Matrix4f mvp = new Matrix4f(projection);
         mvp.mul(modelView);
 
-        int renderDist = mc.options.renderDistance().get();
+        int renderDist = mc.options.getViewDistance().getValue();
         double maxRange = renderDist * 16;
 
-        for (Entity e : mc.level.entitiesForRendering()) {
+        for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof LivingEntity living)) continue;
             if (e == mc.player) continue;
             if (playersOnly.isEnabled()) {
-                if (!(e instanceof net.minecraft.world.entity.player.Player)) continue;
+                if (!(e instanceof net.minecraft.entity.player.PlayerEntity)) continue;
             } else {
                 if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
             }
@@ -149,9 +149,9 @@ public class ESP extends Module {
             double dist = mc.player.distanceTo(e);
             if (dist > maxRange) continue;
 
-            double x = e.xo + (e.getX() - e.xo) * partialTicks - camPos.x;
-            double y = e.yo + (e.getY() - e.yo) * partialTicks + e.getBbHeight() + 0.2 - camPos.y;
-            double z = e.zo + (e.getZ() - e.zo) * partialTicks - camPos.z;
+            double x = e.lastX + (e.getX() - e.lastX) * partialTicks - camPos.x;
+            double y = e.lastY + (e.getY() - e.lastY) * partialTicks + e.getHeight() + 0.2 - camPos.y;
+            double z = e.lastZ + (e.getZ() - e.lastZ) * partialTicks - camPos.z;
 
             Vector4f pos = new Vector4f((float) x, (float) y, (float) z, 1.0f);
             pos.mul(mvp);
@@ -172,11 +172,11 @@ public class ESP extends Module {
             String name = e.getName().getString();
             String hp = String.format("HP: %.1f", living.getHealth());
 
-            int nameW = mc.font.width(name);
-            int hpW = mc.font.width(hp);
+            int nameW = mc.textRenderer.getWidth(name);
+            int hpW = mc.textRenderer.getWidth(hp);
             int maxW = showHP.isEnabled() ? Math.max(nameW, hpW) : nameW;
 
-            var pose = graphics.pose();
+            var pose = graphics.getMatrices();
             pose.pushMatrix();
             pose.translate(sx, sy);
             pose.scale(scale, scale);
@@ -184,13 +184,13 @@ public class ESP extends Module {
             int bracketOffset = 6;
             int drawY = -10;
 
-            graphics.drawString(mc.font, "[", -(maxW / 2) - bracketOffset, drawY, enabledColor, true);
-            graphics.drawString(mc.font, "]", (maxW / 2) + 2, drawY, enabledColor, true);
+            graphics.drawText(mc.textRenderer, "[", -(maxW / 2) - bracketOffset, drawY, enabledColor, true);
+            graphics.drawText(mc.textRenderer, "]", (maxW / 2) + 2, drawY, enabledColor, true);
 
-            graphics.drawString(mc.font, name, -(nameW / 2), drawY, disabledColor, true);
+            graphics.drawText(mc.textRenderer, name, -(nameW / 2), drawY, disabledColor, true);
 
             if (showHP.isEnabled()) {
-                graphics.drawString(mc.font, hp, -(hpW / 2), drawY + 10,
+                graphics.drawText(mc.textRenderer, hp, -(hpW / 2), drawY + 10,
                         getHealthColor(living.getHealth(), living.getMaxHealth(), living), true);
             }
 
@@ -200,7 +200,7 @@ public class ESP extends Module {
 
     private int getHealthColor(float hp, float max, LivingEntity e) {
         float p = hp / max;
-        if (e == Minecraft.getInstance().player) {
+        if (e == MinecraftClient.getInstance().player) {
             if (hp > 20.0) return 0xFFFF0000;
             if (hp > 15.0) return 0xFF00FF00;
             if (hp > 9.0) return 0xFFFFAA00;

@@ -1,14 +1,14 @@
 package io.client.mixin;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Minecraft.class)
+@Mixin(MinecraftClient.class)
 public interface IMinecraftAccessor {
-    @Accessor("rightClickDelay")
+    @Accessor("itemUseCooldown")
     int getItemUseCooldown();
 
-    @Accessor("rightClickDelay")
+    @Accessor("itemUseCooldown")
     void setItemUseCooldown(int value);
 }

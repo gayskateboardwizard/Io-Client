@@ -5,14 +5,15 @@ import io.client.modules.ModuleHUD;
 import io.client.modules.ArmorHud;
 import io.client.modules.ESP;
 import io.client.modules.IoSwag;
+import io.client.modules.ThemeChanger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
@@ -75,29 +76,35 @@ public class IoClientEventHandler {
 
             ESP esp = ModuleManager.INSTANCE.getModule(ESP.class);
             if (esp != null && esp.isEnabled()) {
-                esp.render(drawContext, tickDelta.getGameTimeDeltaTicks());
+                esp.render(drawContext, tickDelta.getDynamicDeltaTicks());
             }
 
             ArmorHud armorHud = ModuleManager.INSTANCE.getModule(ArmorHud.class);
             if (armorHud != null && armorHud.isEnabled()) {
-                armorHud.render(drawContext, tickDelta.getGameTimeDeltaTicks());
+                armorHud.render(drawContext, tickDelta.getDynamicDeltaTicks());
             }
         });
     }
 
-    private void handleKeys(Minecraft mc) {
+    private void handleKeys(MinecraftClient mc) {
 
         if (mc.getWindow() == null) {
             return;
         }
 
-        long window = mc.getWindow().getWindow();
+        long window = mc.getWindow().getHandle();
 
 
-        if (mc.screen == null) {
+        if (mc.currentScreen == null) {
             if (isPressed(window, ClickGuiScreen.clickGuiKey)) {
                 if (!KeyManager.INSTANCE.isKeyPressed(ClickGuiScreen.clickGuiKey)) {
-                    mc.setScreen(new ClickGuiScreen());
+                    ThemeChanger themeChanger = ModuleManager.INSTANCE.getModule(ThemeChanger.class);
+                    String guiMode = themeChanger != null ? themeChanger.getSelectedClickGuiMode() : "IO";
+                    if ("Future".equalsIgnoreCase(guiMode)) {
+                        mc.setScreen(new FutureClickGuiScreen());
+                    } else {
+                        mc.setScreen(new ClickGuiScreen());
+                    }
                     KeyManager.INSTANCE.addKey(ClickGuiScreen.clickGuiKey);
                 }
             } else {
@@ -106,7 +113,7 @@ public class IoClientEventHandler {
         }
 
 
-        if (mc.screen == null) {
+        if (mc.currentScreen == null) {
             for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_LAST; key++) {
                 if (isPressed(window, key)) {
                     if (!KeyManager.INSTANCE.isKeyPressed(key)) {
@@ -121,15 +128,15 @@ public class IoClientEventHandler {
 
 
 
-        if (mc.screen instanceof ChatScreen chat) {
-            if (chat.getFocused() instanceof EditBox editBox) {
+        if (mc.currentScreen instanceof ChatScreen chat) {
+            if (chat.getFocused() instanceof TextFieldWidget editBox) {
                 if (isPressed(window, GLFW.GLFW_KEY_TAB)) {
                     if (!KeyManager.INSTANCE.isKeyPressed(GLFW.GLFW_KEY_TAB)) {
-                        String current = editBox.getValue();
+                        String current = editBox.getText();
                         if (current.startsWith("|")) {
                             String next = CommandManager.INSTANCE.getNextSuggestion(current);
                             if (next != null) {
-                                editBox.setValue(next);
+                                editBox.setText(next);
                             }
                         }
                         KeyManager.INSTANCE.addKey(GLFW.GLFW_KEY_TAB);

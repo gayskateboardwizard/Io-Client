@@ -1,26 +1,25 @@
 package io.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ambient.AmbientCreature;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
-import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
-
 import java.io.*;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPart;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.mob.AmbientEntity;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.MerchantEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.AbstractMinecartEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
 
 public class TargetManager {
     public static final TargetManager INSTANCE = new TargetManager();
@@ -70,21 +69,21 @@ public class TargetManager {
             return false;
         }
 
-        if (entity == Minecraft.getInstance().player) {
+        if (entity == MinecraftClient.getInstance().player) {
             return false;
         }
 
-        if (entity instanceof Player player) {
+        if (entity instanceof PlayerEntity player) {
             if (isFriend(player.getName().getString())) {
                 return false;
             }
         }
 
-        if (entity instanceof ArmorStand) {
+        if (entity instanceof ArmorStandEntity) {
             return isTargetEnabled(TargetType.ARMOR_STANDS);
         }
 
-        if (entity instanceof AbstractMinecart || entity instanceof Boat) {
+        if (entity instanceof AbstractMinecartEntity || entity instanceof BoatEntity) {
             return isTargetEnabled(TargetType.VEHICLES);
         }
 
@@ -92,35 +91,35 @@ public class TargetManager {
             return false;
         }
 
-        if (livingEntity.isDeadOrDying()) {
+        if (livingEntity.isDead()) {
             return false;
         }
 
-        if (entity instanceof Player) {
+        if (entity instanceof PlayerEntity) {
             return isTargetEnabled(TargetType.PLAYERS);
         }
 
-        if (entity instanceof EnderDragon || entity instanceof WitherBoss || entity instanceof EnderDragonPart) {
+        if (entity instanceof EnderDragonEntity || entity instanceof WitherEntity || entity instanceof EnderDragonPart) {
             return isTargetEnabled(TargetType.BOSSES);
         }
 
-        if (entity instanceof AbstractVillager) {
+        if (entity instanceof MerchantEntity) {
             return isTargetEnabled(TargetType.VILLAGERS);
         }
 
-        if (entity instanceof AmbientCreature) {
+        if (entity instanceof AmbientEntity) {
             return isTargetEnabled(TargetType.AMBIENT);
         }
 
-        if (entity instanceof WaterAnimal) {
+        if (entity instanceof WaterCreatureEntity) {
             return isTargetEnabled(TargetType.WATER_ANIMALS);
         }
 
-        if (entity instanceof Animal) {
+        if (entity instanceof AnimalEntity) {
             return isTargetEnabled(TargetType.ANIMALS);
         }
 
-        if (entity instanceof Monster) {
+        if (entity instanceof HostileEntity) {
             return isTargetEnabled(TargetType.MOBS);
         }
 

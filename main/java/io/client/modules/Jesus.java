@@ -2,11 +2,11 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class Jesus extends Module {
 
@@ -16,31 +16,31 @@ public class Jesus extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
-        BlockPos playerPos = mc.player.blockPosition();
-        BlockState blockBelowState = mc.level.getBlockState(playerPos.below());
+        BlockPos playerPos = mc.player.getBlockPos();
+        BlockState blockBelowState = mc.world.getBlockState(playerPos.down());
 
-        boolean isSinking = mc.player.getDeltaMovement().y < 0.0;
+        boolean isSinking = mc.player.getVelocity().y < 0.0;
 
-        if (mc.player.isInWater() && !mc.options.keyJump.isDown()) {
-            Vec3 motion = mc.player.getDeltaMovement();
-            mc.player.setDeltaMovement(motion.x, 0.1, motion.z);
+        if (mc.player.isTouchingWater() && !mc.options.jumpKey.isPressed()) {
+            Vec3d motion = mc.player.getVelocity();
+            mc.player.setVelocity(motion.x, 0.1, motion.z);
         }
 
         if (isSinking &&
-                !mc.player.isInWater() &&
-                blockBelowState.is(Blocks.WATER)) {
+                !mc.player.isTouchingWater() &&
+                blockBelowState.isOf(Blocks.WATER)) {
 
-            Vec3 motion = mc.player.getDeltaMovement();
-            mc.player.setDeltaMovement(motion.x, 0, motion.z);
+            Vec3d motion = mc.player.getVelocity();
+            mc.player.setVelocity(motion.x, 0, motion.z);
 
-            double targetY = playerPos.below().getY() + 0.95;
+            double targetY = playerPos.down().getY() + 0.95;
 
 
             if (mc.player.getY() < targetY) {
-                mc.player.setPos(mc.player.getX(), targetY, mc.player.getZ());
+                mc.player.setPosition(mc.player.getX(), targetY, mc.player.getZ());
             }
 
             mc.player.setOnGround(true);

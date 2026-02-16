@@ -7,17 +7,16 @@ import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-
 import java.util.Set;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.type.FoodComponent;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.util.Hand;
 
 public class AutoEat extends Module {
     private static final long SWAP_DELAY_MS = 100;
@@ -39,7 +38,7 @@ public class AutoEat extends Module {
     private int previousSlot = -1;
     private boolean hasSwitchedSlot = false;
     private boolean isEating = false;
-    private InteractionHand eatingHand = null;
+    private Hand eatingHand = null;
     private long lastSwapTime = 0;
 
     public AutoEat() {
@@ -58,10 +57,10 @@ public class AutoEat extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (!(mc.player instanceof LocalPlayer player) || mc.gameMode == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (!(mc.player instanceof ClientPlayerEntity player) || mc.interactionManager == null) return;
 
-        int hunger = player.getFoodData().getFoodLevel();
+        int hunger = player.getHungerManager().getFoodLevel();
         float health = player.getHealth();
         long now = System.currentTimeMillis();
 
@@ -73,10 +72,10 @@ public class AutoEat extends Module {
         if (player.isUsingItem()) {
             isEating = true;
             if (!eatWhileMoving.isEnabled()) {
-                mc.options.keyUp.setDown(false);
-                mc.options.keyDown.setDown(false);
-                mc.options.keyLeft.setDown(false);
-                mc.options.keyRight.setDown(false);
+                mc.options.forwardKey.setPressed(false);
+                mc.options.backKey.setPressed(false);
+                mc.options.leftKey.setPressed(false);
+                mc.options.rightKey.setPressed(false);
             }
             return;
         }
@@ -98,25 +97,25 @@ public class AutoEat extends Module {
         }
     }
 
-    private FoodSlot findBestFood(LocalPlayer player) {
+    private FoodSlot findBestFood(ClientPlayerEntity player) {
         String mode = handMode.getSelectedOption();
-        Inventory inv = player.getInventory();
+        PlayerInventory inv = player.getInventory();
 
         FoodSlot bestMainhand = null;
         FoodSlot bestOffhand = null;
 
-        ItemStack offhandStack = player.getOffhandItem();
+        ItemStack offhandStack = player.getOffHandStack();
         if (isValidFood(offhandStack)) {
             int priority = getFoodPriority(offhandStack);
-            bestOffhand = new FoodSlot(-1, InteractionHand.OFF_HAND, priority);
+            bestOffhand = new FoodSlot(-1, Hand.OFF_HAND, priority);
         }
 
         for (int slot = 0; slot < 9; slot++) {
-            ItemStack stack = inv.getItem(slot);
+            ItemStack stack = inv.getStack(slot);
             if (isValidFood(stack)) {
                 int priority = getFoodPriority(stack);
                 if (bestMainhand == null || priority > bestMainhand.priority) {
-                    bestMainhand = new FoodSlot(slot, InteractionHand.MAIN_HAND, priority);
+                    bestMainhand = new FoodSlot(slot, Hand.MAIN_HAND, priority);
                 }
             }
         }
@@ -139,22 +138,22 @@ public class AutoEat extends Module {
         if (stack.isEmpty()) return false;
         if (FOOD_BLACKLIST.contains(stack.getItem())) return false;
 
-        FoodProperties food = stack.getItem().components().get(net.minecraft.core.component.DataComponents.FOOD);
+        FoodComponent food = stack.getItem().getComponents().get(net.minecraft.component.DataComponentTypes.FOOD);
         return food != null;
     }
 
     private int getFoodPriority(ItemStack stack) {
         if (!prioritizeGapples.isEnabled()) return 1;
 
-        if (stack.is(Items.ENCHANTED_GOLDEN_APPLE)) return 3;
-        if (stack.is(Items.GOLDEN_APPLE)) return 2;
+        if (stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) return 3;
+        if (stack.isOf(Items.GOLDEN_APPLE)) return 2;
         return 1;
     }
 
-    private void startEating(Minecraft mc, LocalPlayer player, FoodSlot foodSlot, long now) {
-        Inventory inv = player.getInventory();
+    private void startEating(MinecraftClient mc, ClientPlayerEntity player, FoodSlot foodSlot, long now) {
+        PlayerInventory inv = player.getInventory();
 
-        if (foodSlot.hand == InteractionHand.MAIN_HAND) {
+        if (foodSlot.hand == Hand.MAIN_HAND) {
             int currSlot = getCurrentSlot(inv);
             if (currSlot != foodSlot.slot) {
                 previousSlot = currSlot;
@@ -165,13 +164,13 @@ public class AutoEat extends Module {
             }
         }
 
-        mc.options.keyUse.setDown(true);
+        mc.options.useKey.setPressed(true);
         eatingHand = foodSlot.hand;
         isEating = true;
     }
 
-    private void stopEating(Minecraft mc, LocalPlayer player) {
-        mc.options.keyUse.setDown(false);
+    private void stopEating(MinecraftClient mc, ClientPlayerEntity player) {
+        mc.options.useKey.setPressed(false);
 
         if (hasSwitchedSlot && previousSlot != -1) {
             setSelectedSlot(mc, player.getInventory(), previousSlot);
@@ -183,9 +182,9 @@ public class AutoEat extends Module {
         eatingHand = null;
     }
 
-    private int getCurrentSlot(Inventory inventory) {
+    private int getCurrentSlot(PlayerInventory inventory) {
         try {
-            var field = Inventory.class.getDeclaredField("selected");
+            var field = PlayerInventory.class.getDeclaredField("selected");
             field.setAccessible(true);
             return field.getInt(inventory);
         } catch (Exception e) {
@@ -193,23 +192,23 @@ public class AutoEat extends Module {
         }
     }
 
-    private void setSelectedSlot(Minecraft mc, Inventory inventory, int slot) {
+    private void setSelectedSlot(MinecraftClient mc, PlayerInventory inventory, int slot) {
         try {
-            var field = Inventory.class.getDeclaredField("selected");
+            var field = PlayerInventory.class.getDeclaredField("selected");
             field.setAccessible(true);
             field.setInt(inventory, slot);
         } catch (Exception ignored) {
         }
 
-        if (mc.player != null && mc.player.connection != null) {
-            mc.player.connection.send(new ServerboundSetCarriedItemPacket(slot));
+        if (mc.player != null && mc.player.networkHandler != null) {
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
         }
     }
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player instanceof LocalPlayer player) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player instanceof ClientPlayerEntity player) {
             stopEating(mc, player);
 
             previousSlot = -1;
@@ -219,10 +218,10 @@ public class AutoEat extends Module {
 
     private static class FoodSlot {
         final int slot;
-        final InteractionHand hand;
+        final Hand hand;
         final int priority;
 
-        FoodSlot(int slot, InteractionHand hand, int priority) {
+        FoodSlot(int slot, Hand hand, int priority) {
             this.slot = slot;
             this.hand = hand;
             this.priority = priority;

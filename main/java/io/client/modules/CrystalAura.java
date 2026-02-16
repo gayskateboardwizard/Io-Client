@@ -7,30 +7,29 @@ import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BowItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 
 public class CrystalAura extends Module {
 
@@ -100,7 +99,7 @@ public class CrystalAura extends Module {
 
     private LivingEntity target;
     private BlockPos bestPlacePos;
-    private EndCrystal bestCrystal;
+    private EndCrystalEntity bestCrystal;
     private int placeTimer = 0;
     private int breakTimer = 0;
     private BlockPos bestObbyPos;
@@ -193,14 +192,14 @@ public class CrystalAura extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         placeTimer = Math.max(0, placeTimer - 1);
         breakTimer = Math.max(0, breakTimer - 1);
         obbyTimer = Math.max(0, obbyTimer - 1);
 
-        long worldTick = mc.level.getGameTime();
+        long worldTick = mc.world.getTime();
 
         if (!blacklistedPos.isEmpty()) {
             blacklistedPos.entrySet().removeIf(e -> e.getValue() <= worldTick);
@@ -246,13 +245,13 @@ public class CrystalAura extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
-        switchBack(Minecraft.getInstance());
+        switchBack(MinecraftClient.getInstance());
         target = null;
         bestPlacePos = null;
         bestCrystal = null;
     }
 
-    private void doSequential(Minecraft mc) {
+    private void doSequential(MinecraftClient mc) {
 	if (bestCrystal != null && breakTimer <= 0) {
   	    breakCrystal(mc);
     	    if (sequential.getSelectedOption().equals("None")) return; 
@@ -262,18 +261,18 @@ public class CrystalAura extends Module {
         }
     }
 
-    private LivingEntity findTarget(Minecraft mc) {
+    private LivingEntity findTarget(MinecraftClient mc) {
         LivingEntity best = null;
         double bestValue = Double.MAX_VALUE;
         double maxRangeSq = sq(targetRange.getValue());
 
-	for (Entity e : mc.level.entitiesForRendering()) {
-    		if (e == mc.player || e instanceof EndCrystal || e instanceof ItemEntity) continue;
+	for (Entity e : mc.world.getEntities()) {
+    		if (e == mc.player || e instanceof EndCrystalEntity || e instanceof ItemEntity) continue;
     		if (!(e instanceof LivingEntity living)) continue;
     		if (living.getHealth() <= 0) continue;
    	 	if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
 
-            double distSq = mc.player.distanceToSqr(e);
+            double distSq = mc.player.squaredDistanceTo(e);
             if (distSq > maxRangeSq) continue;
 
             double value = targetLogic.getSelectedOption().equals("Distance") ? distSq : living.getHealth();
@@ -287,7 +286,7 @@ public class CrystalAura extends Module {
         return best;
     }
 
-    private void findBestCrystal(Minecraft mc) {
+    private void findBestCrystal(MinecraftClient mc) {
         bestCrystal = null;
         double bestDamage = 0;
 
@@ -296,26 +295,26 @@ public class CrystalAura extends Module {
 
         double maxBreakRange = breakRange.getValue();
         double maxWallRangeSq = sq(breakWallsRange.getValue());
-        long worldTick = mc.level.getGameTime();
+        long worldTick = mc.world.getTime();
 
-        for (Entity e : mc.level.entitiesForRendering()) {
-            if (!(e instanceof EndCrystal crystal)) continue;
+        for (Entity e : mc.world.getEntities()) {
+            if (!(e instanceof EndCrystalEntity crystal)) continue;
 
-            if (crystalAge.getValue() > 0 && crystal.tickCount < crystalAge.getValue()) continue;
+            if (crystalAge.getValue() > 0 && crystal.age < crystalAge.getValue()) continue;
 
             if (inhibit.isEnabled() && attackedCrystals.containsKey(crystal.getId())) {
                 long timeSinceAttackTicks = worldTick - attackedCrystals.get(crystal.getId());
                 if (timeSinceAttackTicks < 10L) continue;
             }
 
-            double dist = mc.player.getEyePosition().distanceTo(crystal.position());
+            double dist = mc.player.getEyePos().distanceTo(crystal.getPos());
             if (dist > maxBreakRange) continue;
 
             boolean canSee = canSeeCrystal(mc, crystal);
             if (!canSee && sq(dist) > maxWallRangeSq) continue;
 
-            double targetDmg = calculateDamage(crystal.position(), target);
-            double selfDmg = calculateDamage(crystal.position(), mc.player);
+            double targetDmg = calculateDamage(crystal.getPos(), target);
+            double selfDmg = calculateDamage(crystal.getPos(), mc.player);
 
             if (!isDamageSafe(targetDmg, selfDmg, mc.player)) continue;
 
@@ -326,13 +325,13 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void findBestObbyPos(Minecraft mc) {
+    private void findBestObbyPos(MinecraftClient mc) {
         bestObbyPos = null;
         double bestScore = 0;
 
         if (target == null) return;
 
-        BlockPos targetPos = target.blockPosition();
+        BlockPos targetPos = target.getBlockPos();
         int range = (int) Math.ceil(obbyRange.getValue());
         double maxRangeSq = sq(obbyRange.getValue());
         int verticalRange = 2;
@@ -340,15 +339,15 @@ public class CrystalAura extends Module {
         for (int x = -range; x <= range; x++) {
             for (int y = -verticalRange; y <= verticalRange; y++) {
                 for (int z = -range; z <= range; z++) {
-                    BlockPos pos = targetPos.offset(x, y, z);
+                    BlockPos pos = targetPos.add(x, y, z);
 
-                    double distSq = mc.player.blockPosition().distSqr(pos);
+                    double distSq = mc.player.getBlockPos().getSquaredDistance(pos);
                     if (distSq > maxRangeSq) continue;
 
                     if (!canPlaceObby(mc, pos)) continue;
 
                     if (obbyOnlyGround.isEnabled()) {
-                        if (!mc.level.getBlockState(pos.below()).isSolid()) continue;
+                        if (!mc.world.getBlockState(pos.down()).isSolid()) continue;
                     }
 
                     if (obbySmartPlace.isEnabled() && hasObbyNearby(mc, pos)) continue;
@@ -364,28 +363,28 @@ public class CrystalAura extends Module {
         }
     }
 
-   private boolean hasObbyNearby(Minecraft mc, BlockPos pos) {
+   private boolean hasObbyNearby(MinecraftClient mc, BlockPos pos) {
       for (Direction dir : Direction.values()) {
           if (dir == Direction.UP || dir == Direction.DOWN) continue;
-       	 	BlockState state = mc.level.getBlockState(pos.relative(dir));
-        	if (state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK)) {
+       	 	BlockState state = mc.world.getBlockState(pos.offset(dir));
+        	if (state.isOf(Blocks.OBSIDIAN) || state.isOf(Blocks.BEDROCK)) {
             		return true;
         	}
     	}
     	return false;
    }
 
-    private double scoreObbyPosition(Minecraft mc, BlockPos obbyPos) {
+    private double scoreObbyPosition(MinecraftClient mc, BlockPos obbyPos) {
         if (target == null) return 0;
 
-        BlockPos crystalPos = obbyPos.above();
-        Vec3 crystalVec = Vec3.atCenterOf(crystalPos).add(0, 1, 0);
+        BlockPos crystalPos = obbyPos.up();
+        Vec3d crystalVec = Vec3d.ofCenter(crystalPos).add(0, 1, 0);
 
-        double distToPlayer = mc.player.getEyePosition().distanceTo(crystalVec);
+        double distToPlayer = mc.player.getEyePos().distanceTo(crystalVec);
         if (distToPlayer > placeRange.getValue()) return 0;
 
-        if (!mc.level.getBlockState(crystalPos).isAir()) return 0;
-        if (!mc.level.getBlockState(crystalPos.above()).isAir() && !oldPlace.isEnabled()) return 0;
+        if (!mc.world.getBlockState(crystalPos).isAir()) return 0;
+        if (!mc.world.getBlockState(crystalPos.up()).isAir() && !oldPlace.isEnabled()) return 0;
 
         double targetDmg = calculateDamage(crystalVec, target);
         double selfDmg = calculateDamage(crystalVec, mc.player);
@@ -398,8 +397,8 @@ public class CrystalAura extends Module {
 
         double score = targetDmg;
 
-        double targetDist = Math.sqrt(target.blockPosition().distSqr(obbyPos));
-        double playerDist = Math.sqrt(mc.player.blockPosition().distSqr(obbyPos));
+        double targetDist = Math.sqrt(target.getBlockPos().getSquaredDistance(obbyPos));
+        double playerDist = Math.sqrt(mc.player.getBlockPos().getSquaredDistance(obbyPos));
 
         double ratio = obbyDistanceRatio.getValue();
         score -= (targetDist * 0.5);
@@ -408,30 +407,30 @@ public class CrystalAura extends Module {
         return score;
     }
 
-    private boolean canPlaceObby(Minecraft mc, BlockPos pos) {
-        if (!mc.level.getBlockState(pos).canBeReplaced()) return false;
+    private boolean canPlaceObby(MinecraftClient mc, BlockPos pos) {
+        if (!mc.world.getBlockState(pos).isReplaceable()) return false;
 
-        if (mc.level.getBlockState(pos.below()).is(Blocks.OBSIDIAN)) return false;
-        if (mc.level.getBlockState(pos.below()).is(Blocks.BEDROCK)) return false;
-        if (!mc.level.getBlockState(pos.below()).isSolid()) return false;
+        if (mc.world.getBlockState(pos.down()).isOf(Blocks.OBSIDIAN)) return false;
+        if (mc.world.getBlockState(pos.down()).isOf(Blocks.BEDROCK)) return false;
+        if (!mc.world.getBlockState(pos.down()).isSolid()) return false;
 
-        AABB box = new AABB(pos);
-        for (Entity e : mc.level.getEntities(null, box)) {
+        Box box = new Box(pos);
+        for (Entity e : mc.world.getOtherEntities(null, box)) {
             if (!(e instanceof ItemEntity)) return false;
         }
 
         return true;
     }
 
-    private void placeObsidian(Minecraft mc) {
+    private void placeObsidian(MinecraftClient mc) {
         if (bestObbyPos == null) return;
 
         int obbySlot = findObsidianSlot(mc);
         if (obbySlot == -1) return;
 
-        boolean offhand = mc.player.getOffhandItem().is(Items.OBSIDIAN);
+        boolean offhand = mc.player.getOffHandStack().isOf(Items.OBSIDIAN);
         int oldSlot = mc.player.getInventory().getSelectedSlot();
-        boolean needSwitch = !offhand && !mc.player.getMainHandItem().is(Items.OBSIDIAN);
+        boolean needSwitch = !offhand && !mc.player.getMainHandStack().isOf(Items.OBSIDIAN);
 
         if (needSwitch) {
             if (autoSwitch.getSelectedOption().equals("None")) return;
@@ -445,16 +444,16 @@ public class CrystalAura extends Module {
         }
 
         if (rotate.isEnabled()) {
-            Vec3 vec = Vec3.atCenterOf(bestObbyPos);
+            Vec3d vec = Vec3d.ofCenter(bestObbyPos);
             applyRotation(mc, vec);
         }
 
-        InteractionHand hand = offhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-        Vec3 hitVec = Vec3.atCenterOf(bestObbyPos.below()).add(0, 1, 0);
-        BlockHitResult result = new BlockHitResult(hitVec, Direction.UP, bestObbyPos.below(), false);
+        Hand hand = offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        Vec3d hitVec = Vec3d.ofCenter(bestObbyPos.down()).add(0, 1, 0);
+        BlockHitResult result = new BlockHitResult(hitVec, Direction.UP, bestObbyPos.down(), false);
 
-        mc.gameMode.useItemOn(mc.player, hand, result);
-        mc.player.swing(hand);
+        mc.interactionManager.interactBlock(mc.player, hand, result);
+        mc.player.swingHand(hand);
 
         obbyTimer = (int) obbyDelay.getValue();
 
@@ -463,23 +462,23 @@ public class CrystalAura extends Module {
         }
     }
 
-    private int findObsidianSlot(Minecraft mc) {
+    private int findObsidianSlot(MinecraftClient mc) {
         for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getItem(i).is(Items.OBSIDIAN)) {
+            if (mc.player.getInventory().getStack(i).isOf(Items.OBSIDIAN)) {
                 return i;
             }
         }
         return -1;
     }
 
-    private void findBestPlacePos(Minecraft mc) {
+    private void findBestPlacePos(MinecraftClient mc) {
         bestPlacePos = null;
         double bestDamage = 0;
 
         if (!doPlace.isEnabled()) return;
         if (target == null) return;
 
-        BlockPos playerPos = mc.player.blockPosition();
+        BlockPos playerPos = mc.player.getBlockPos();
         int horizontalRange = (int) Math.ceil(placeRange.getValue());
         int verticalRange = 2;
 
@@ -489,18 +488,18 @@ public class CrystalAura extends Module {
         for (int x = -horizontalRange; x <= horizontalRange; x++) {
             for (int y = -verticalRange; y <= verticalRange; y++) {
                 for (int z = -horizontalRange; z <= horizontalRange; z++) {
-                    BlockPos pos = playerPos.offset(x, y, z);
+                    BlockPos pos = playerPos.add(x, y, z);
 
                     if (blacklist.isEnabled() && blacklistedPos.containsKey(pos)) continue;
 
                     if (!canPlaceCrystal(mc, pos)) continue;
 
-                    Vec3 crystalVec = Vec3.atCenterOf(pos).add(0, 1, 0);
-                    double dist = mc.player.getEyePosition().distanceTo(crystalVec);
+                    Vec3d crystalVec = Vec3d.ofCenter(pos).add(0, 1, 0);
+                    double dist = mc.player.getEyePos().distanceTo(crystalVec);
 
                     if (dist > placeRangeVal) continue;
 
-                    boolean canSee = !isLineBlocked(mc, mc.player.getEyePosition(), crystalVec);
+                    boolean canSee = !isLineBlocked(mc, mc.player.getEyePos(), crystalVec);
                     if (!canSee && dist > placeWallsRangeVal) continue;
 
                     if (raycast.isEnabled() && !canSee) continue;
@@ -519,7 +518,7 @@ public class CrystalAura extends Module {
         }
     }
 
-    private boolean isDamageSafe(double targetDmg, double selfDmg, Player player) {
+    private boolean isDamageSafe(double targetDmg, double selfDmg, PlayerEntity player) {
         if (target == null) return false;
 
         if (shouldFacePlace(target)) {
@@ -548,21 +547,21 @@ public class CrystalAura extends Module {
         return target.getHealth() + target.getAbsorptionAmount() <= facePlaceHP.getValue();
     }
 
-    private void breakCrystal(Minecraft mc) {
+    private void breakCrystal(MinecraftClient mc) {
         if (bestCrystal == null) return;
 
         int oldSlot = mc.player.getInventory().getSelectedSlot();
         boolean switched = switchForWeakness(mc);
 
         if (rotate.isEnabled()) {
-            Vec3 vec = bestCrystal.position().add(0, bestCrystal.getBbHeight() / 2, 0);
+            Vec3d vec = bestCrystal.getPos().add(0, bestCrystal.getHeight() / 2, 0);
             applyRotation(mc, vec);
         }
 
-        mc.gameMode.attack(mc.player, bestCrystal);
-        mc.player.swing(InteractionHand.MAIN_HAND);
+        mc.interactionManager.attackEntity(mc.player, bestCrystal);
+        mc.player.swingHand(Hand.MAIN_HAND);
 
-        attackedCrystals.put(bestCrystal.getId(), mc.level.getGameTime());
+        attackedCrystals.put(bestCrystal.getId(), mc.world.getTime());
         breakTimer = (int) breakDelay.getValue();
 
         if (switched) {
@@ -570,12 +569,12 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void placeCrystal(Minecraft mc) {
+    private void placeCrystal(MinecraftClient mc) {
         if (bestPlacePos == null) return;
 
-        boolean offhand = mc.player.getOffhandItem().is(Items.END_CRYSTAL);
+        boolean offhand = mc.player.getOffHandStack().isOf(Items.END_CRYSTAL);
 
-        if (!offhand && !mc.player.getMainHandItem().is(Items.END_CRYSTAL)) {
+        if (!offhand && !mc.player.getMainHandStack().isOf(Items.END_CRYSTAL)) {
             if (autoSwitch.getSelectedOption().equals("None")) {
                 return;
             }
@@ -598,35 +597,35 @@ public class CrystalAura extends Module {
         }
 
         if (rotate.isEnabled()) {
-            Vec3 vec = getPlaceVec(bestPlacePos);
+            Vec3d vec = getPlaceVec(bestPlacePos);
             applyRotation(mc, vec);
         }
 
-        InteractionHand hand = offhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-        Vec3 hitVec = Vec3.atCenterOf(bestPlacePos).add(0, 1, 0);
+        Hand hand = offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        Vec3d hitVec = Vec3d.ofCenter(bestPlacePos).add(0, 1, 0);
         BlockHitResult result = new BlockHitResult(hitVec, Direction.UP, bestPlacePos, false);
 
-        mc.gameMode.useItemOn(mc.player, hand, result);
-        mc.player.swing(hand);
+        mc.interactionManager.interactBlock(mc.player, hand, result);
+        mc.player.swingHand(hand);
 
         placeTimer = (int) placeDelay.getValue();
 
         if (blacklist.isEnabled()) {
-            long expiration = mc.level.getGameTime() + 4L;
+            long expiration = mc.world.getTime() + 4L;
             blacklistedPos.put(bestPlacePos, expiration);
         }
     }
 
-    private Vec3 getPlaceVec(BlockPos pos) {
+    private Vec3d getPlaceVec(BlockPos pos) {
         if (rotateType.getSelectedOption().equals("Center")) {
-            return Vec3.atCenterOf(pos).add(0, 1, 0);
+            return Vec3d.ofCenter(pos).add(0, 1, 0);
         }
-        return Vec3.atCenterOf(pos).add(0, 0.5, 0);
+        return Vec3d.ofCenter(pos).add(0, 0.5, 0);
     }
 
-    private boolean switchForWeakness(Minecraft mc) {
+    private boolean switchForWeakness(MinecraftClient mc) {
         if (antiWeakness.getSelectedOption().equals("None")) return false;
-        if (!mc.player.hasEffect(MobEffects.WEAKNESS)) return false;
+        if (!mc.player.hasStatusEffect(StatusEffects.WEAKNESS)) return false;
 
         int weaponSlot = findWeaponSlot(mc);
         if (weaponSlot == -1) return false;
@@ -636,8 +635,8 @@ public class CrystalAura extends Module {
         return antiWeakness.getSelectedOption().equals("Silent");
     }
 
-    private boolean shouldPause(Minecraft mc) {
-        if (pauseMining.isEnabled() && mc.gameMode.isDestroying()) {
+    private boolean shouldPause(MinecraftClient mc) {
+        if (pauseMining.isEnabled() && mc.interactionManager.isBreakingBlock()) {
             return true;
         }
 
@@ -652,16 +651,16 @@ public class CrystalAura extends Module {
         return false;
     }
 
-    private boolean shouldPauseForItem(Minecraft mc) {
+    private boolean shouldPauseForItem(MinecraftClient mc) {
         if (noGapSwitch.isEnabled() && mc.player.isUsingItem()) {
-            Item item = mc.player.getUseItem().getItem();
+            Item item = mc.player.getActiveItem().getItem();
             if (item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE) {
                 return true;
             }
         }
 
         if (noBowSwitch.isEnabled() && mc.player.isUsingItem()) {
-            if (mc.player.getUseItem().getItem() instanceof BowItem) {
+            if (mc.player.getActiveItem().getItem() instanceof BowItem) {
                 return true;
             }
         }
@@ -669,24 +668,24 @@ public class CrystalAura extends Module {
         return false;
     }
 
-    private boolean canPlaceCrystal(Minecraft mc, BlockPos pos) {
-        if (!mc.level.getBlockState(pos).is(Blocks.OBSIDIAN) && !mc.level.getBlockState(pos).is(Blocks.BEDROCK)) {
+    private boolean canPlaceCrystal(MinecraftClient mc, BlockPos pos) {
+        if (!mc.world.getBlockState(pos).isOf(Blocks.OBSIDIAN) && !mc.world.getBlockState(pos).isOf(Blocks.BEDROCK)) {
             return false;
         }
 
-        BlockPos above = pos.above();
-        if (!mc.level.getBlockState(above).isAir()) return false;
+        BlockPos above = pos.up();
+        if (!mc.world.getBlockState(above).isAir()) return false;
 
-        if (oldPlace.isEnabled() && !mc.level.getBlockState(above.above()).isAir()) {
+        if (oldPlace.isEnabled() && !mc.world.getBlockState(above.up()).isAir()) {
             return false;
         }
 
-        AABB box = new AABB(above);
+        Box box = new Box(above);
         if (oldPlace.isEnabled()) {
-            box = box.expandTowards(0, 1, 0);
+            box = box.stretch(0, 1, 0);
         }
 
-        for (Entity e : mc.level.getEntities(null, box)) {
+        for (Entity e : mc.world.getOtherEntities(null, box)) {
             if (e instanceof ItemEntity) continue;
             return false;
         }
@@ -694,43 +693,43 @@ public class CrystalAura extends Module {
         return true;
     }
 
-    private boolean canSeeCrystal(Minecraft mc, EndCrystal crystal) {
-        Vec3 start = mc.player.getEyePosition();
-        Vec3 end = crystal.position().add(0, crystal.getBbHeight() / 2, 0);
+    private boolean canSeeCrystal(MinecraftClient mc, EndCrystalEntity crystal) {
+        Vec3d start = mc.player.getEyePos();
+        Vec3d end = crystal.getPos().add(0, crystal.getHeight() / 2, 0);
         return !isLineBlocked(mc, start, end);
     }
 
-    private boolean isLineBlocked(Minecraft mc, Vec3 start, Vec3 end) {
-        ClipContext context = new ClipContext(start, end, ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE, mc.player);
-        BlockHitResult result = mc.level.clip(context);
+    private boolean isLineBlocked(MinecraftClient mc, Vec3d start, Vec3d end) {
+        RaycastContext context = new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE, mc.player);
+        BlockHitResult result = mc.world.raycast(context);
         return result.getType() == HitResult.Type.BLOCK;
     }
 
-    private double calculateDamage(Vec3 crystalPos, LivingEntity target) {
+    private double calculateDamage(Vec3d crystalPos, LivingEntity target) {
         if (target == null) return 0.0;
 
-        double distance = target.position().distanceTo(crystalPos);
+        double distance = target.getPos().distanceTo(crystalPos);
         if (distance > MAX_CRYSTAL_DAMAGE_DISTANCE) return 0.0;
 
         double exposure = 1.0 - (distance / MAX_CRYSTAL_DAMAGE_DISTANCE);
         double impact = exposure * 2.0;
         double rawDamage = Math.floor(impact * 49.0 + 1.0);
 
-        float armor = Math.min(20.0f, target.getArmorValue() * 0.04f);
+        float armor = Math.min(20.0f, target.getArmor() * 0.04f);
         float finalDamage = (float) (rawDamage * (1.0f - armor));
 
         return Math.max(0.5, finalDamage);
     }
 
-    private void applyRotation(Minecraft mc, Vec3 to) {
-        Vec3 from = mc.player.getEyePosition();
+    private void applyRotation(MinecraftClient mc, Vec3d to) {
+        Vec3d from = mc.player.getEyePos();
         float[] rots = calculateRotation(from, to);
-        mc.player.setYRot(rots[0]);
-        mc.player.setXRot(rots[1]);
+        mc.player.setYaw(rots[0]);
+        mc.player.setPitch(rots[1]);
     }
 
-    private float[] calculateRotation(Vec3 from, Vec3 to) {
+    private float[] calculateRotation(Vec3d from, Vec3d to) {
         double diffX = to.x - from.x;
         double diffY = to.y - from.y;
         double diffZ = to.z - from.z;
@@ -742,18 +741,18 @@ public class CrystalAura extends Module {
         return new float[]{yaw, pitch};
     }
 
-    private int findCrystalSlot(Minecraft mc) {
+    private int findCrystalSlot(MinecraftClient mc) {
         for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getItem(i).is(Items.END_CRYSTAL)) {
+            if (mc.player.getInventory().getStack(i).isOf(Items.END_CRYSTAL)) {
                 return i;
             }
         }
         return -1;
     }
 
-    private int findWeaponSlot(Minecraft mc) {
+    private int findWeaponSlot(MinecraftClient mc) {
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.getInventory().getItem(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
             String itemName = item.toString().toLowerCase();
             if (itemName.contains("sword") || itemName.contains("axe")) {
                 return i;
@@ -762,19 +761,19 @@ public class CrystalAura extends Module {
         return -1;
     }
 
-    private void switchToSlot(Minecraft mc, int slot) {
+    private void switchToSlot(MinecraftClient mc, int slot) {
         if (slot == -1) return;
         if (autoSwitch.getSelectedOption().equals("Silent")) {
-            mc.player.connection.send(new ServerboundSetCarriedItemPacket(slot));
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
         } else {
             mc.player.getInventory().setSelectedSlot(slot);
         }
     }
 
-    private void switchBack(Minecraft mc) {
+    private void switchBack(MinecraftClient mc) {
         if (!hasSwitched || previousSlot == -1) return; 
  	if (autoSwitch.getSelectedOption().equals("Silent")) {
-                mc.player.connection.send(new ServerboundSetCarriedItemPacket(previousSlot));
+                mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(previousSlot));
     	} else {
              mc.player.getInventory().setSelectedSlot(previousSlot);
 	    }        

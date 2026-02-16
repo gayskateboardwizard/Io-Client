@@ -1,9 +1,9 @@
 package io.client;
 
 import io.client.clickgui.Theme;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
 
 public class TargetsScreen extends Screen {
     private static final int PANEL_WIDTH = 150;
@@ -17,7 +17,7 @@ public class TargetsScreen extends Screen {
     private int dragOffsetY;
 
     public TargetsScreen(Screen parentScreen) {
-        super(Component.literal("Target Selection"));
+        super(Text.literal("Target Selection"));
         this.parentScreen = parentScreen;
     }
 
@@ -30,7 +30,7 @@ public class TargetsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void render(DrawContext graphics, int mouseX, int mouseY, float partialTicks) {
 
         if (this.parentScreen != null) {
             this.parentScreen.render(graphics, 0, 0, partialTicks);
@@ -45,9 +45,9 @@ public class TargetsScreen extends Screen {
 
         int titleBarColor = (theme.titleBar & 0x00FFFFFF) | 0xFF000000;
         graphics.fill(panelX, panelY, panelX + PANEL_WIDTH, panelY + TITLE_BAR_HEIGHT, titleBarColor);
-        graphics.drawString(this.font, "Target Selection", panelX + 5, panelY + 8, 0xFFFFFFFF, false);
+        graphics.drawText(this.textRenderer, "Target Selection", panelX + 5, panelY + 8, 0xFFFFFFFF, false);
 
-        graphics.drawString(this.font, "X", panelX + PANEL_WIDTH - 15, panelY + 8, theme.moduleEnabled, false);
+        graphics.drawText(this.textRenderer, "X", panelX + PANEL_WIDTH - 15, panelY + 8, theme.moduleEnabled, false);
 
         int panelBackgroundColor = (theme.panelBackground & 0x00FFFFFF) | 0xFF000000;
         graphics.fill(panelX, panelY + TITLE_BAR_HEIGHT, panelX + PANEL_WIDTH, panelY + panelHeight, panelBackgroundColor);
@@ -64,8 +64,8 @@ public class TargetsScreen extends Screen {
             }
 
             String checkbox = enabled ? "[X]" : "[ ]";
-            graphics.drawString(this.font, checkbox, panelX + 5, yOffset + 6, color, false);
-            graphics.drawString(this.font, type.getName(), panelX + 30, yOffset + 6, 0xFFFFFFFF, false);
+            graphics.drawText(this.textRenderer, checkbox, panelX + 5, yOffset + 6, color, false);
+            graphics.drawText(this.textRenderer, type.getName(), panelX + 30, yOffset + 6, 0xFFFFFFFF, false);
 
             yOffset += ITEM_HEIGHT;
         }
@@ -77,7 +77,7 @@ public class TargetsScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseX >= panelX + PANEL_WIDTH - 20 && mouseX <= panelX + PANEL_WIDTH &&
                 mouseY >= panelY && mouseY <= panelY + TITLE_BAR_HEIGHT) {
-            this.onClose();
+            this.close();
             return true;
         }
 
@@ -125,14 +125,14 @@ public class TargetsScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 
     @Override
-    public void onClose() {
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(this.parentScreen);
+    public void close() {
+        if (this.client != null) {
+            this.client.setScreen(this.parentScreen);
         }
     }
 }

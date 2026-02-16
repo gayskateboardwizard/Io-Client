@@ -3,21 +3,20 @@ package io.client.modules;
 import io.client.Category;
 import io.client.Module;
 import io.client.settings.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.AbstractDonkeyEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 public class DonkeyBoatDupe extends Module {
-    private final Minecraft mc = Minecraft.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
     private final Random random = new Random();
 
     private final RadioSetting modeSetting = new RadioSetting("Mode", "Boat");
@@ -54,14 +53,14 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private State state = State.FIND_DONKEY;
-    private AbstractChestedHorse targetDonkey;
-    private Boat targetBoat;
+    private AbstractDonkeyEntity targetDonkey;
+    private BoatEntity targetBoat;
     private BlockPos markedChest;
     private int ticks = 0;
     private int stopTicks = 0;
     private int invTickCounter = 0;
     private int currentRandomDelay = 0;
-    private Vec3 boatEntryPos = null;
+    private Vec3d boatEntryPos = null;
     private double maxDistReached = 0;
 
     public DonkeyBoatDupe() {
@@ -118,19 +117,19 @@ public class DonkeyBoatDupe extends Module {
     private void cleanup() {
         releaseAllKeys();
         if (mc.player != null) {
-            mc.player.setDeltaMovement(0, 0, 0);
+            mc.player.setVelocity(0, 0, 0);
             if (mc.player.getVehicle() != null) {
-                mc.player.getVehicle().setDeltaMovement(0, 0, 0);
+                mc.player.getVehicle().setVelocity(0, 0, 0);
             }
-            if (mc.screen != null) {
-                mc.player.closeContainer();
+            if (mc.currentScreen != null) {
+                mc.player.closeHandledScreen();
             }
         }
     }
 
     @Override
     public void onUpdate() {
-        if (mc.player == null || mc.level == null) return;
+        if (mc.player == null || mc.world == null) return;
         ticks++;
 
         if (modeSetting.isSelected("Boat")) {
@@ -253,14 +252,14 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void findDonkeyHome() {
-        List<AbstractChestedHorse> horses = mc.level.getEntitiesOfClass(AbstractChestedHorse.class,
-                new AABB(mc.player.blockPosition()).inflate(32), h -> h.hasChest() && h.isAlive());
+        List<AbstractDonkeyEntity> horses = mc.world.getEntitiesByClass(AbstractDonkeyEntity.class,
+                new Box(mc.player.getBlockPos()).expand(32), h -> h.hasChest() && h.isAlive());
         if (horses.isEmpty()) {
             this.toggle();
             return;
         }
         targetDonkey = horses.stream()
-                .min(Comparator.comparingDouble(h -> h.distanceToSqr(mc.player)))
+                .min(Comparator.comparingDouble(h -> h.squaredDistanceTo(mc.player)))
                 .orElse(null);
         if (targetDonkey != null) {
             state = State.APPROACH_DONKEY;
@@ -280,7 +279,7 @@ public class DonkeyBoatDupe extends Module {
             state = State.OPEN_DONKEY;
             ticks = 0;
         } else {
-            lookAt(targetDonkey.position());
+            lookAt(targetDonkey.getPos());
             pressForward();
         }
     }
@@ -291,19 +290,19 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        lookAt(targetDonkey.position());
-        mc.options.keyShift.setDown(true);
+        lookAt(targetDonkey.getPos());
+        mc.options.sneakKey.setPressed(true);
 
         if (ticks > 5) {
-            mc.gameMode.interact(mc.player, targetDonkey, mc.player.getUsedItemHand());
-            mc.options.keyShift.setDown(false);
+            mc.interactionManager.interactEntity(mc.player, targetDonkey, mc.player.getActiveHand());
+            mc.options.sneakKey.setPressed(false);
             state = State.HOME_WAIT_DONKEY_OPEN;
             ticks = 0;
         }
     }
 
     private void homeWaitDonkeyOpen() {
-        if (mc.screen != null) {
+        if (mc.currentScreen != null) {
             state = State.HOME_TELEPORT_1;
             ticks = 0;
         } else if (ticks > 20) {
@@ -314,7 +313,7 @@ public class DonkeyBoatDupe extends Module {
 
     private void homeTeleport1() {
         if (ticks == 60) {
-            mc.player.connection.sendCommand("home " + home1Setting.getValue());
+            mc.player.networkHandler.sendChatCommand("home " + home1Setting.getValue());
         }
         if (ticks > 80) {
             state = State.HOME_WAIT_TP1;
@@ -332,7 +331,7 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void homeTakeItems() {
-        if (mc.screen == null) {
+        if (mc.currentScreen == null) {
             state = State.HOME_TELEPORT_2;
             ticks = 0;
             return;
@@ -344,21 +343,21 @@ public class DonkeyBoatDupe extends Module {
         invTickCounter = 0;
         updateRandomDelay();
 
-        int playerInvStart = mc.player.containerMenu.slots.size() - 36;
+        int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
         boolean movedAny = false;
 
         for (int i = 0; i < playerInvStart; i++) {
-            if (!mc.player.containerMenu.getSlot(i).getItem().isEmpty()) {
-                mc.gameMode.handleInventoryMouseClick(
-                        mc.player.containerMenu.containerId, i, 0,
-                        net.minecraft.world.inventory.ClickType.QUICK_MOVE, mc.player);
+            if (!mc.player.currentScreenHandler.getSlot(i).getStack().isEmpty()) {
+                mc.interactionManager.clickSlot(
+                        mc.player.currentScreenHandler.syncId, i, 0,
+                        net.minecraft.screen.slot.SlotActionType.QUICK_MOVE, mc.player);
                 movedAny = true;
                 break;
             }
         }
 
         if (!movedAny) {
-            mc.player.closeContainer();
+            mc.player.closeHandledScreen();
             state = State.HOME_TELEPORT_2;
             ticks = 0;
         }
@@ -366,7 +365,7 @@ public class DonkeyBoatDupe extends Module {
 
     private void homeTeleport2() {
         if (ticks == 60) {
-            mc.player.connection.sendCommand("home " + home2Setting.getValue());
+            mc.player.networkHandler.sendChatCommand("home " + home2Setting.getValue());
         }
         if (ticks > 80) {
             state = State.HOME_WAIT_TP2;
@@ -391,14 +390,14 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        double distToChest = mc.player.position().distanceTo(Vec3.atCenterOf(markedChest));
+        double distToChest = mc.player.getPos().distanceTo(Vec3d.ofCenter(markedChest));
 
         if (distToChest < 4.5) {
             releaseAllKeys();
             state = State.HOME_OPEN_CHEST;
             ticks = 0;
         } else {
-            lookAt(Vec3.atCenterOf(markedChest), false);
+            lookAt(Vec3d.ofCenter(markedChest), false);
             pressForward();
         }
     }
@@ -409,13 +408,13 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        lookAt(Vec3.atCenterOf(markedChest));
+        lookAt(Vec3d.ofCenter(markedChest));
 
         if (ticks > 5) {
-            mc.gameMode.useItemOn(mc.player, mc.player.getUsedItemHand(),
-                    new net.minecraft.world.phys.BlockHitResult(
-                            Vec3.atCenterOf(markedChest),
-                            net.minecraft.core.Direction.UP,
+            mc.interactionManager.interactBlock(mc.player, mc.player.getActiveHand(),
+                    new net.minecraft.util.hit.BlockHitResult(
+                            Vec3d.ofCenter(markedChest),
+                            net.minecraft.util.math.Direction.UP,
                             markedChest, false));
             state = State.HOME_WAIT_CHEST_OPEN;
             ticks = 0;
@@ -423,7 +422,7 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void homeWaitChestOpen() {
-        if (mc.screen != null) {
+        if (mc.currentScreen != null) {
             state = State.HOME_DUMP_ITEMS;
             ticks = 0;
             invTickCounter = 0;
@@ -435,7 +434,7 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void homeDumpItems() {
-        if (mc.screen == null) {
+        if (mc.currentScreen == null) {
             state = State.HOME_CHECK_CHEST;
             ticks = 0;
             return;
@@ -447,21 +446,21 @@ public class DonkeyBoatDupe extends Module {
         invTickCounter = 0;
         updateRandomDelay();
 
-        int playerInvStart = mc.player.containerMenu.slots.size() - 36;
+        int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
         boolean movedAny = false;
 
-        for (int i = playerInvStart; i < mc.player.containerMenu.slots.size(); i++) {
-            if (!mc.player.containerMenu.getSlot(i).getItem().isEmpty()) {
-                mc.gameMode.handleInventoryMouseClick(
-                        mc.player.containerMenu.containerId, i, 0,
-                        net.minecraft.world.inventory.ClickType.QUICK_MOVE, mc.player);
+        for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
+            if (!mc.player.currentScreenHandler.getSlot(i).getStack().isEmpty()) {
+                mc.interactionManager.clickSlot(
+                        mc.player.currentScreenHandler.syncId, i, 0,
+                        net.minecraft.screen.slot.SlotActionType.QUICK_MOVE, mc.player);
                 movedAny = true;
                 break;
             }
         }
 
         if (!movedAny) {
-            mc.player.closeContainer();
+            mc.player.closeHandledScreen();
             state = State.HOME_CHECK_CHEST;
             ticks = 0;
         }
@@ -473,10 +472,10 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        if (mc.level.getBlockEntity(markedChest) instanceof ChestBlockEntity chest) {
+        if (mc.world.getBlockEntity(markedChest) instanceof ChestBlockEntity chest) {
             boolean hasEmptySlot = false;
-            for (int i = 0; i < chest.getContainerSize(); i++) {
-                if (chest.getItem(i).isEmpty()) {
+            for (int i = 0; i < chest.size(); i++) {
+                if (chest.getStack(i).isEmpty()) {
                     hasEmptySlot = true;
                     break;
                 }
@@ -497,14 +496,14 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void findDonkey() {
-        List<AbstractChestedHorse> horses = mc.level.getEntitiesOfClass(AbstractChestedHorse.class,
-                new AABB(mc.player.blockPosition()).inflate(32), h -> h.hasChest() && h.isAlive());
+        List<AbstractDonkeyEntity> horses = mc.world.getEntitiesByClass(AbstractDonkeyEntity.class,
+                new Box(mc.player.getBlockPos()).expand(32), h -> h.hasChest() && h.isAlive());
         if (horses.isEmpty()) {
             this.toggle();
             return;
         }
         targetDonkey = horses.stream()
-                .min(Comparator.comparingDouble(h -> h.distanceToSqr(mc.player)))
+                .min(Comparator.comparingDouble(h -> h.squaredDistanceTo(mc.player)))
                 .orElse(null);
         if (targetDonkey != null) {
             state = State.APPROACH_DONKEY;
@@ -524,7 +523,7 @@ public class DonkeyBoatDupe extends Module {
             state = State.OPEN_DONKEY;
             ticks = 0;
         } else {
-            lookAt(targetDonkey.position());
+            lookAt(targetDonkey.getPos());
             pressForward();
         }
     }
@@ -535,21 +534,21 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        lookAt(targetDonkey.position());
-        mc.options.keyShift.setDown(true);
+        lookAt(targetDonkey.getPos());
+        mc.options.sneakKey.setPressed(true);
 
         if (ticks > 5) {
-            mc.gameMode.interact(mc.player, targetDonkey, mc.player.getUsedItemHand());
-            mc.options.keyShift.setDown(false);
+            mc.interactionManager.interactEntity(mc.player, targetDonkey, mc.player.getActiveHand());
+            mc.options.sneakKey.setPressed(false);
             state = State.WAIT_DONKEY_OPEN;
             ticks = 0;
         }
     }
 
     private void waitDonkeyOpen() {
-        if (mc.screen != null || ticks > 20) {
-            if (mc.screen != null) {
-                mc.player.closeContainer();
+        if (mc.currentScreen != null || ticks > 20) {
+            if (mc.currentScreen != null) {
+                mc.player.closeHandledScreen();
             }
             state = State.FIND_BOAT;
             ticks = 0;
@@ -557,14 +556,14 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void findBoat() {
-        List<Boat> boats = mc.level.getEntitiesOfClass(Boat.class,
-                new AABB(mc.player.blockPosition()).inflate(32), Entity::isAlive);
+        List<BoatEntity> boats = mc.world.getEntitiesByClass(BoatEntity.class,
+                new Box(mc.player.getBlockPos()).expand(32), Entity::isAlive);
         if (boats.isEmpty()) {
             this.toggle();
             return;
         }
         targetBoat = boats.stream()
-                .min(Comparator.comparingDouble(b -> b.distanceToSqr(mc.player)))
+                .min(Comparator.comparingDouble(b -> b.squaredDistanceTo(mc.player)))
                 .orElse(null);
         if (targetBoat != null) {
             state = State.APPROACH_BOAT;
@@ -581,20 +580,20 @@ public class DonkeyBoatDupe extends Module {
         double distance = mc.player.distanceTo(targetBoat);
         if (distance < 3.5) {
             releaseAllKeys();
-            lookAt(targetBoat.position());
-            mc.gameMode.interact(mc.player, targetBoat, mc.player.getUsedItemHand());
+            lookAt(targetBoat.getPos());
+            mc.interactionManager.interactEntity(mc.player, targetBoat, mc.player.getActiveHand());
             state = State.WAIT_BOAT_MOUNT;
             ticks = 0;
         } else {
-            lookAt(targetBoat.position());
+            lookAt(targetBoat.getPos());
             pressForward();
         }
     }
 
     private void waitBoatMount() {
-        if (mc.player.getVehicle() instanceof Boat) {
+        if (mc.player.getVehicle() instanceof BoatEntity) {
             if (boatEntryPos == null) {
-                boatEntryPos = mc.player.getVehicle().position();
+                boatEntryPos = mc.player.getVehicle().getPos();
             }
             state = State.MOVE_FORWARD;
             ticks = 0;
@@ -607,7 +606,7 @@ public class DonkeyBoatDupe extends Module {
 
     private void moveForward() {
         Entity boat = mc.player.getVehicle();
-        if (!(boat instanceof Boat)) {
+        if (!(boat instanceof BoatEntity)) {
             state = State.FIND_BOAT;
             return;
         }
@@ -620,13 +619,13 @@ public class DonkeyBoatDupe extends Module {
 
     private void waitForwardStop() {
         Entity boat = mc.player.getVehicle();
-        if (!(boat instanceof Boat) || boatEntryPos == null) {
+        if (!(boat instanceof BoatEntity) || boatEntryPos == null) {
             state = State.FIND_BOAT;
             return;
         }
 
-        double distFromHome = boat.position().distanceTo(boatEntryPos);
-        double speed = boat.getDeltaMovement().horizontalDistance();
+        double distFromHome = boat.getPos().distanceTo(boatEntryPos);
+        double speed = boat.getVelocity().horizontalLength();
         double targetDist = distanceSetting.getValue();
 
         if (distFromHome > maxDistReached) {
@@ -637,7 +636,7 @@ public class DonkeyBoatDupe extends Module {
         boolean stoppedEarly = (speed < 0.05) && (distFromHome >= targetDist * 0.9);
 
         if (reachedTarget || stoppedEarly) {
-            boat.setDeltaMovement(0, 0, 0);
+            boat.setVelocity(0, 0, 0);
             stopTicks++;
             if (stopTicks > 10) {
                 state = State.WAIT_INV_OPEN;
@@ -651,7 +650,7 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void waitInventoryOpen() {
-        if (mc.screen != null) {
+        if (mc.currentScreen != null) {
             state = State.TAKE_ITEMS;
             ticks = 0;
             invTickCounter = 0;
@@ -663,7 +662,7 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void takeItems() {
-        if (mc.screen == null) {
+        if (mc.currentScreen == null) {
             state = State.MOVE_BACKWARD;
             ticks = 0;
             return;
@@ -675,21 +674,21 @@ public class DonkeyBoatDupe extends Module {
         invTickCounter = 0;
         updateRandomDelay();
 
-        int playerInvStart = mc.player.containerMenu.slots.size() - 36;
+        int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
         boolean movedAny = false;
 
         for (int i = 0; i < playerInvStart; i++) {
-            if (!mc.player.containerMenu.getSlot(i).getItem().isEmpty()) {
-                mc.gameMode.handleInventoryMouseClick(
-                        mc.player.containerMenu.containerId, i, 0,
-                        net.minecraft.world.inventory.ClickType.QUICK_MOVE, mc.player);
+            if (!mc.player.currentScreenHandler.getSlot(i).getStack().isEmpty()) {
+                mc.interactionManager.clickSlot(
+                        mc.player.currentScreenHandler.syncId, i, 0,
+                        net.minecraft.screen.slot.SlotActionType.QUICK_MOVE, mc.player);
                 movedAny = true;
                 break;
             }
         }
 
         if (!movedAny) {
-            mc.player.closeContainer();
+            mc.player.closeHandledScreen();
             state = State.MOVE_BACKWARD;
             ticks = 0;
         }
@@ -697,7 +696,7 @@ public class DonkeyBoatDupe extends Module {
 
     private void moveBackward() {
         Entity boat = mc.player.getVehicle();
-        if (!(boat instanceof Boat)) {
+        if (!(boat instanceof BoatEntity)) {
             state = State.EXIT_BOAT;
             return;
         }
@@ -710,19 +709,19 @@ public class DonkeyBoatDupe extends Module {
 
     private void waitBackwardStop() {
         Entity boat = mc.player.getVehicle();
-        if (!(boat instanceof Boat) || boatEntryPos == null) {
+        if (!(boat instanceof BoatEntity) || boatEntryPos == null) {
             state = State.EXIT_BOAT;
             return;
         }
 
-        double distFromHome = boat.position().distanceTo(boatEntryPos);
-        double speed = boat.getDeltaMovement().horizontalDistance();
+        double distFromHome = boat.getPos().distanceTo(boatEntryPos);
+        double speed = boat.getVelocity().horizontalLength();
 
         boolean nearHome = distFromHome <= 3.0;
         boolean stopped = speed < 0.05;
 
         if (nearHome && stopped) {
-            boat.setDeltaMovement(0, 0, 0);
+            boat.setVelocity(0, 0, 0);
             stopTicks++;
             if (stopTicks > exitGracePeriod.getValue()) {
                 state = State.EXIT_BOAT;
@@ -732,15 +731,15 @@ public class DonkeyBoatDupe extends Module {
             applyVelocity(boat, false, boatSpeed.getValue());
             stopTicks = 0;
         } else {
-            boat.setDeltaMovement(boat.getDeltaMovement().scale(0.5));
+            boat.setVelocity(boat.getVelocity().multiply(0.5));
             stopTicks = 0;
         }
     }
 
     private void exitBoat() {
-        mc.options.keyShift.setDown(true);
+        mc.options.sneakKey.setPressed(true);
         if (ticks > 5) {
-            mc.options.keyShift.setDown(false);
+            mc.options.sneakKey.setPressed(false);
             state = State.WAIT_BOAT_EXIT;
             ticks = 0;
         }
@@ -766,14 +765,14 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        double distToChest = mc.player.position().distanceTo(Vec3.atCenterOf(markedChest));
+        double distToChest = mc.player.getPos().distanceTo(Vec3d.ofCenter(markedChest));
 
         if (distToChest < 4.5) {
             releaseAllKeys();
             state = State.OPEN_CHEST;
             ticks = 0;
         } else {
-            lookAt(Vec3.atCenterOf(markedChest), false);
+            lookAt(Vec3d.ofCenter(markedChest), false);
             pressForward();
         }
     }
@@ -784,21 +783,21 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        lookAt(Vec3.atCenterOf(markedChest));
+        lookAt(Vec3d.ofCenter(markedChest));
 
         if (ticks == 5) {
-            mc.options.keyUse.setDown(true);
+            mc.options.useKey.setPressed(true);
         }
 
         if (ticks > 7) {
-            mc.options.keyUse.setDown(false);
+            mc.options.useKey.setPressed(false);
             state = State.WAIT_CHEST_OPEN;
             ticks = 0;
         }
     }
 
     private void waitChestOpen() {
-        if (mc.screen != null) {
+        if (mc.currentScreen != null) {
             state = State.DUMP_ITEMS;
             ticks = 0;
             invTickCounter = 0;
@@ -810,7 +809,7 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void dumpItems() {
-        if (mc.screen == null) {
+        if (mc.currentScreen == null) {
             state = State.CHECK_CHEST;
             ticks = 0;
             return;
@@ -822,21 +821,21 @@ public class DonkeyBoatDupe extends Module {
         invTickCounter = 0;
         updateRandomDelay();
 
-        int playerInvStart = mc.player.containerMenu.slots.size() - 36;
+        int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
         boolean movedAny = false;
 
-        for (int i = playerInvStart; i < mc.player.containerMenu.slots.size(); i++) {
-            if (!mc.player.containerMenu.getSlot(i).getItem().isEmpty()) {
-                mc.gameMode.handleInventoryMouseClick(
-                        mc.player.containerMenu.containerId, i, 0,
-                        net.minecraft.world.inventory.ClickType.QUICK_MOVE, mc.player);
+        for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
+            if (!mc.player.currentScreenHandler.getSlot(i).getStack().isEmpty()) {
+                mc.interactionManager.clickSlot(
+                        mc.player.currentScreenHandler.syncId, i, 0,
+                        net.minecraft.screen.slot.SlotActionType.QUICK_MOVE, mc.player);
                 movedAny = true;
                 break;
             }
         }
 
         if (!movedAny) {
-            mc.player.closeContainer();
+            mc.player.closeHandledScreen();
             state = State.CHECK_CHEST;
             ticks = 0;
         }
@@ -848,10 +847,10 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        if (mc.level.getBlockEntity(markedChest) instanceof ChestBlockEntity chest) {
+        if (mc.world.getBlockEntity(markedChest) instanceof ChestBlockEntity chest) {
             boolean hasEmptySlot = false;
-            for (int i = 0; i < chest.getContainerSize(); i++) {
-                if (chest.getItem(i).isEmpty()) {
+            for (int i = 0; i < chest.size(); i++) {
+                if (chest.getStack(i).isEmpty()) {
                     hasEmptySlot = true;
                     break;
                 }
@@ -875,25 +874,25 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void applyVelocity(Entity entity, boolean forward, float speed) {
-        float yaw = entity.getYRot();
+        float yaw = entity.getYaw();
         float targetYaw = forward ? yaw : yaw + 180;
         double rad = Math.toRadians(targetYaw);
-        Vec3 moveVec = new Vec3(-Math.sin(rad), 0, Math.cos(rad)).scale(speed);
-        entity.setDeltaMovement(moveVec.x, entity.getDeltaMovement().y, moveVec.z);
-        if (entity instanceof net.minecraft.client.player.LocalPlayer) {
-            ((net.minecraft.client.player.LocalPlayer) entity).hurtMarked = true;
+        Vec3d moveVec = new Vec3d(-Math.sin(rad), 0, Math.cos(rad)).multiply(speed);
+        entity.setVelocity(moveVec.x, entity.getVelocity().y, moveVec.z);
+        if (entity instanceof net.minecraft.client.network.ClientPlayerEntity) {
+            ((net.minecraft.client.network.ClientPlayerEntity) entity).velocityModified = true;
         }
     }
 
-    private void lookAt(Vec3 target) {
+    private void lookAt(Vec3d target) {
         lookAt(target, true);
     }
 
-    private void lookAt(Vec3 target, boolean includePitch) {
-        Vec3 dir = target.subtract(mc.player.getEyePosition()).normalize();
-        mc.player.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+    private void lookAt(Vec3d target, boolean includePitch) {
+        Vec3d dir = target.subtract(mc.player.getEyePos()).normalize();
+        mc.player.setYaw((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
         if (includePitch) {
-            mc.player.setXRot((float) Math.toDegrees(Math.asin(-dir.y)));
+            mc.player.setPitch((float) Math.toDegrees(Math.asin(-dir.y)));
         }
     }
 
@@ -903,15 +902,15 @@ public class DonkeyBoatDupe extends Module {
     }
 
     private void pressForward() {
-        mc.options.keyUp.setDown(true);
+        mc.options.forwardKey.setPressed(true);
     }
 
     private void releaseAllKeys() {
-        mc.options.keyUp.setDown(false);
-        mc.options.keyDown.setDown(false);
-        mc.options.keyLeft.setDown(false);
-        mc.options.keyRight.setDown(false);
-        mc.options.keyShift.setDown(false);
+        mc.options.forwardKey.setPressed(false);
+        mc.options.backKey.setPressed(false);
+        mc.options.leftKey.setPressed(false);
+        mc.options.rightKey.setPressed(false);
+        mc.options.sneakKey.setPressed(false);
     }
 
     public void setMarkedChest(BlockPos pos) {

@@ -3,7 +3,7 @@ package io.client.event;
 import com.mojang.brigadier.ParseResults;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.command.ServerCommandSource;
 
 public class MiscEvents {
     public static final Event<CommandExecute> COMMAND_EXECUTE = EventFactory.createArrayBacked(CommandExecute.class, (callbacks) -> (results) -> {
@@ -18,6 +18,6 @@ public class MiscEvents {
 
     @FunctionalInterface
     public interface CommandExecute {
-        boolean onCommandExecuted(ParseResults<CommandSourceStack> results);
+        boolean onCommandExecuted(ParseResults<ServerCommandSource> results);
     }
 }

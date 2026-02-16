@@ -6,21 +6,20 @@ import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.List;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public class Burrow extends Module {
 
@@ -87,18 +86,18 @@ public class Burrow extends Module {
         if (entity.getY() - Math.floor(entity.getY()) > 0.5) {
             y = Math.ceil(entity.getY());
         }
-        return BlockPos.containing(entity.getX(), y, entity.getZ());
+        return BlockPos.ofFloored(entity.getX(), y, entity.getZ());
     }
 
-    private static BlockPos getPlayerPos(Minecraft mc) {
-        return Math.abs(mc.player.getDeltaMovement().y) > 0.1
-                ? mc.player.blockPosition()
+    private static BlockPos getPlayerPos(MinecraftClient mc) {
+        return Math.abs(mc.player.getVelocity().y) > 0.1
+                ? mc.player.getBlockPos()
                 : getPosition(mc.player);
     }
 
     @Override
     public void onEnable() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
         startPos = getPlayerPos(mc);
         lastPlaceTime = System.currentTimeMillis();
@@ -106,8 +105,8 @@ public class Burrow extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
 
 
         if (wait.isEnabled()) {
@@ -119,9 +118,9 @@ public class Burrow extends Module {
         }
 
         BlockPos pos = getPosition(mc.player);
-        BlockState state = mc.level.getBlockState(pos);
+        BlockState state = mc.world.getBlockState(pos);
 
-        if (!state.isAir() && !state.canBeReplaced()) {
+        if (!state.isAir() && !state.isReplaceable()) {
             if (!wait.isEnabled()) {
                 toggle();
             }
@@ -129,14 +128,14 @@ public class Burrow extends Module {
         }
 
 
-        AABB box = new AABB(pos);
-        List<Entity> entities = mc.level.getEntities(mc.player, box);
+        Box box = new Box(pos);
+        List<Entity> entities = mc.world.getOtherEntities(mc.player, box);
 
         for (Entity entity : entities) {
-            if (entity instanceof EndCrystal && attack.isEnabled()) {
+            if (entity instanceof EndCrystalEntity && attack.isEnabled()) {
 
-                mc.gameMode.attack(mc.player, entity);
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                mc.interactionManager.attackEntity(mc.player, entity);
+                mc.player.swingHand(Hand.MAIN_HAND);
                 continue;
             }
             if (!wait.isEnabled()) {
@@ -153,7 +152,7 @@ public class Burrow extends Module {
         }
     }
 
-    private void handleWeb(Minecraft mc, BlockPos pos) {
+    private void handleWeb(MinecraftClient mc, BlockPos pos) {
 
         int webSlot = findBlockInHotbar(mc, Blocks.COBWEB);
         if (webSlot == -1) {
@@ -165,8 +164,8 @@ public class Burrow extends Module {
 
 
         if (rotate.isEnabled()) {
-            mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(
-                    mc.player.getYRot(), 90.0F, onGround.isEnabled(), false
+            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
+                    mc.player.getYaw(), 90.0F, onGround.isEnabled(), false
             ));
         }
 
@@ -184,7 +183,7 @@ public class Burrow extends Module {
         }
     }
 
-    private void handleDefault(Minecraft mc, BlockPos pos) {
+    private void handleDefault(MinecraftClient mc, BlockPos pos) {
 
         if (!mc.player.verticalCollision) {
             return;
@@ -192,9 +191,9 @@ public class Burrow extends Module {
 
 
         if (!allowUp.isEnabled()) {
-            BlockPos headPos = pos.above(2);
-            BlockState headState = mc.level.getBlockState(headPos);
-            if (!headState.isAir() && !headState.canBeReplaced()) {
+            BlockPos headPos = pos.up(2);
+            BlockState headState = mc.world.getBlockState(headPos);
+            if (!headState.isAir() && !headState.isReplaceable()) {
                 if (!wait.isEnabled()) {
                     toggle();
                 }
@@ -223,23 +222,23 @@ public class Burrow extends Module {
 
 
         if (rotate.isEnabled()) {
-            float[] angles = calculateAngles(mc.player.getEyePosition(), Vec3.atCenterOf(pos));
-            mc.getConnection().send(new ServerboundMovePlayerPacket.Rot(
+            float[] angles = calculateAngles(mc.player.getEyePos(), Vec3d.ofCenter(pos));
+            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                     angles[0], angles[1], onGround.isEnabled(), false
             ));
         }
 
 
-        mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                 mc.player.getX(), mc.player.getY() + 0.42, mc.player.getZ(), onGround.isEnabled(), false
         ));
-        mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                 mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), onGround.isEnabled(), false
         ));
-        mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                 mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), onGround.isEnabled(), false
         ));
-        mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                 mc.player.getX(), mc.player.getY() + 1.16, mc.player.getZ(), onGround.isEnabled(), false
         ));
 
@@ -252,7 +251,7 @@ public class Burrow extends Module {
         mc.player.getInventory().setSelectedSlot(prevSlot);
 
 
-        mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(
+        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                 mc.player.getX(), y, mc.player.getZ(), false, false
         ));
 
@@ -285,7 +284,7 @@ public class Burrow extends Module {
     }
 
     private double getYOffset(Entity entity, double min, double max, boolean add) {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (min > max && add || max > min && !add) {
             return Double.NaN;
         }
@@ -299,7 +298,7 @@ public class Burrow extends Module {
         BlockPos last = null;
 
         for (double off = min; add ? off < max : off > max; off = (add ? ++off : --off)) {
-            BlockPos pos = BlockPos.containing(x, y - off, z);
+            BlockPos pos = BlockPos.ofFloored(x, y - off, z);
 
             if (noVoid.isEnabled() && pos.getY() < 0) {
                 continue;
@@ -312,8 +311,8 @@ public class Burrow extends Module {
                 continue;
             }
 
-            BlockState state = mc.level.getBlockState(pos);
-            boolean isAir = state.isAir() || (!this.air.isEnabled() && !state.blocksMotion());
+            BlockState state = mc.world.getBlockState(pos);
+            boolean isAir = state.isAir() || (!this.air.isEnabled() && !state.blocksMovement());
 
             if (isAir) {
                 if (airFound) {
@@ -332,26 +331,26 @@ public class Burrow extends Module {
         return Double.NaN;
     }
 
-    private void placeBlock(Minecraft mc, BlockPos pos) {
+    private void placeBlock(MinecraftClient mc, BlockPos pos) {
 
         for (Direction dir : Direction.values()) {
-            BlockPos neighbor = pos.relative(dir);
-            BlockState neighborState = mc.level.getBlockState(neighbor);
+            BlockPos neighbor = pos.offset(dir);
+            BlockState neighborState = mc.world.getBlockState(neighbor);
 
-            if (!neighborState.isAir() && !neighborState.canBeReplaced()) {
-                Vec3 hitVec = Vec3.atCenterOf(neighbor).add(Vec3.atLowerCornerOf(dir.getOpposite().getUnitVec3i()).scale(0.5));
+            if (!neighborState.isAir() && !neighborState.isReplaceable()) {
+                Vec3d hitVec = Vec3d.ofCenter(neighbor).add(Vec3d.of(dir.getOpposite().getVector()).multiply(0.5));
                 BlockHitResult hitResult = new BlockHitResult(hitVec, dir.getOpposite(), neighbor, false);
 
-                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hitResult);
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hitResult);
+                mc.player.swingHand(Hand.MAIN_HAND);
                 return;
             }
         }
     }
 
-    private int findBlockInHotbar(Minecraft mc, net.minecraft.world.level.block.Block block) {
+    private int findBlockInHotbar(MinecraftClient mc, net.minecraft.block.Block block) {
         for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getItem(i).getItem() instanceof BlockItem blockItem) {
+            if (mc.player.getInventory().getStack(i).getItem() instanceof BlockItem blockItem) {
                 if (blockItem.getBlock() == block) {
                     return i;
                 }
@@ -360,7 +359,7 @@ public class Burrow extends Module {
         return -1;
     }
 
-    private float[] calculateAngles(Vec3 from, Vec3 to) {
+    private float[] calculateAngles(Vec3d from, Vec3d to) {
         double diffX = to.x - from.x;
         double diffY = to.y - from.y;
         double diffZ = to.z - from.z;

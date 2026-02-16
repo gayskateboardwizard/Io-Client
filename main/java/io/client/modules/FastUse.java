@@ -4,14 +4,18 @@ import io.client.Category;
 import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import io.client.mixin.IMinecraftAccessor;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.*;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
 
 public class FastUse extends Module {
@@ -51,46 +55,46 @@ public class FastUse extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
         handleBow(mc);
         handleItems(mc);
     }
 
-    private void handleBow(Minecraft mc) {
-        ItemStack mainhand = mc.player.getMainHandItem();
+    private void handleBow(MinecraftClient mc) {
+        ItemStack mainhand = mc.player.getMainHandStack();
 
         if (mainhand.getItem() == Items.BOW && bows.isEnabled()) {
-            if (mc.player.getTicksUsingItem() >= (int) bowDelay.getValue()) {
-                mc.getConnection().send(new ServerboundPlayerActionPacket(
-                        ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM,
-                        BlockPos.ZERO,
+            if (mc.player.getItemUseTime() >= (int) bowDelay.getValue()) {
+                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
+                        BlockPos.ORIGIN,
                         Direction.DOWN
                 ));
-                mc.player.stopUsingItem();
+                mc.player.clearActiveItem();
             }
         } else if (crossbow.isEnabled() && mainhand.getItem() == Items.CROSSBOW) {
-            if (mc.player.getTicksUsingItem() / (float) CrossbowItem.getChargeDuration(mainhand, mc.player) > 1.0f) {
-                mc.getConnection().send(new ServerboundPlayerActionPacket(
-                        ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM,
-                        BlockPos.ZERO,
+            if (mc.player.getItemUseTime() / (float) CrossbowItem.getPullTime(mainhand, mc.player) > 1.0f) {
+                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
+                        BlockPos.ORIGIN,
                         Direction.DOWN
                 ));
-                mc.player.stopUsingItem();
-                mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+                mc.player.clearActiveItem();
+                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
             }
         }
     }
 
-    private void handleItems(Minecraft mc) {
-        if (getItemUseCooldown(mc) > delay.getValue() && check(mc.player.getMainHandItem().getItem())) {
+    private void handleItems(MinecraftClient mc) {
+        if (getItemUseCooldown(mc) > delay.getValue() && check(mc.player.getMainHandStack().getItem())) {
             if (ghostFix.isEnabled()) {
-                mc.getConnection().send(new ServerboundUseItemPacket(
-                        mc.player.getUsedItemHand(),
+                mc.getNetworkHandler().sendPacket(new PlayerInteractItemC2SPacket(
+                        mc.player.getActiveHand(),
                         0,
-                        mc.player.getYRot(),
-                        mc.player.getXRot()
+                        mc.player.getYaw(),
+                        mc.player.getPitch()
                 ));
             }
             setItemUseCooldown(mc, (int) delay.getValue());
@@ -104,11 +108,11 @@ public class FastUse extends Module {
                 || all.isEnabled();
     }
 
-    private int getItemUseCooldown(Minecraft mc) {
+    private int getItemUseCooldown(MinecraftClient mc) {
         return ((IMinecraftAccessor) mc).getItemUseCooldown();
     }
 
-    private void setItemUseCooldown(Minecraft mc, int value) {
+    private void setItemUseCooldown(MinecraftClient mc, int value) {
         ((IMinecraftAccessor) mc).setItemUseCooldown(value);
     }
 }

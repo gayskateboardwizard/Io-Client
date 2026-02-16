@@ -5,8 +5,8 @@ import io.client.Module;
 import io.client.ModuleManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Items;
 
 public class Safety extends Module {
     public final NumberSetting healthThreshold = new NumberSetting("Min HP", 8.0F, 1.0F, 20.0F);
@@ -22,11 +22,11 @@ public class Safety extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
         float currentHealth = mc.player.getHealth();
-        boolean hasTotem = mc.player.getOffhandItem().is(Items.TOTEM_OF_UNDYING);
+        boolean hasTotem = mc.player.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING);
 
         CrystalAura ca = ModuleManager.INSTANCE.getModule(CrystalAura.class);
         if (ca == null) return;

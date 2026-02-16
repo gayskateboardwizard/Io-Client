@@ -1,15 +1,15 @@
 package io.client;
 
 import io.client.clickgui.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
 
 public class ClickGuiScreen extends Screen {
     private static final int PANEL_GAP = 10;
@@ -24,7 +24,7 @@ public class ClickGuiScreen extends Screen {
     private final InputHandler inputHandler;
 
     public ClickGuiScreen() {
-        super(Component.literal("IO Client"));
+        super(Text.literal("IO Client"));
 
         Theme savedTheme = ModuleManager.INSTANCE.loadTheme();
         if (savedTheme != null) currentTheme = savedTheme;
@@ -54,14 +54,14 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void render(DrawContext graphics, int mouseX, int mouseY, float partialTicks) {
         opened = true;
         renderer.setTheme(currentTheme);
 
         String hoveredDescription = null;
 
         for (CategoryPanel panel : panels.values()) {
-            String desc = renderer.renderPanel(graphics, font, panel, mouseX, mouseY);
+            String desc = renderer.renderPanel(graphics, textRenderer, panel, mouseX, mouseY);
             if (desc != null) hoveredDescription = desc;
         }
 
@@ -72,19 +72,19 @@ public class ClickGuiScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTicks);
     }
 
-    private void renderTooltip(GuiGraphics graphics, String description, int mouseX, int mouseY) {
-        Minecraft mc = Minecraft.getInstance();
+    private void renderTooltip(DrawContext graphics, String description, int mouseX, int mouseY) {
+        MinecraftClient mc = MinecraftClient.getInstance();
 
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(mouseX + 10, mouseY - 5);
+        graphics.getMatrices().pushMatrix();
+        graphics.getMatrices().translate(mouseX + 10, mouseY - 5);
 
         float scale = PanelRenderer.getPanelWidth() / 90.0f;
-        graphics.pose().scale(scale, scale);
+        graphics.getMatrices().scale(scale, scale);
 
-        int tipWidth = mc.font.width(description) + 6;
-        int tipHeight = mc.font.lineHeight + 6;
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int tipWidth = mc.textRenderer.getWidth(description) + 6;
+        int tipHeight = mc.textRenderer.fontHeight + 6;
+        int screenWidth = mc.getWindow().getScaledWidth();
+        int screenHeight = mc.getWindow().getScaledHeight();
 
         int tipX = 0;
         int tipY = 0;
@@ -95,9 +95,9 @@ public class ClickGuiScreen extends Screen {
 
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + tipHeight, 0xE0000000);
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + 1, 0x44FFFFFF);
-        graphics.drawString(mc.font, description, tipX + 3, tipY + 3, 0xFFFFFFFF, false);
+        graphics.drawText(mc.textRenderer, description, tipX + 3, tipY + 3, 0xFFFFFFFF, false);
 
-        graphics.pose().popMatrix();
+        graphics.getMatrices().popMatrix();
     }
 
     @Override
@@ -125,17 +125,17 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 
     @Override
-    public void onClose() {
+    public void close() {
         ModuleManager.INSTANCE.saveUiConfig(panels);
         ModuleManager.INSTANCE.saveModules();
         ModuleManager.INSTANCE.saveTheme(currentTheme);
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(null);
+        if (this.client != null) {
+            this.client.setScreen(null);
         }
     }
 }

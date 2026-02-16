@@ -6,14 +6,13 @@ import io.client.Module;
 import io.client.ModuleManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.entity.player.Player;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 public class HUD extends Module {
     private final BooleanSetting showFPS;
@@ -107,11 +106,11 @@ public class HUD extends Module {
         return "↖";
     }
 
-    public void render(GuiGraphics graphics) {
+    public void render(DrawContext graphics) {
         if (!isEnabled()) return;
 
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         float scale = 1.0f;
         GUIScale guiScale = ModuleManager.INSTANCE.getModule(GUIScale.class);
@@ -126,61 +125,61 @@ public class HUD extends Module {
         }
 
         if (showFPS.isEnabled()) {
-            int fps = mc.getFps();
+            int fps = mc.getCurrentFps();
             if (fps > 0) lastFPS = fps;
             lines.add("FPS: " + lastFPS);
         }
 
         if (showCoords.isEnabled()) {
-            Player player = mc.player;
+            PlayerEntity player = mc.player;
             lines.add(String.format("XYZ: %.1f %.1f %.1f", player.getX(), player.getY(), player.getZ()));
         }
 
         if (showBiome.isEnabled()) {
-            BlockPos pos = mc.player.blockPosition();
-            String biome = mc.level.getBiome(pos).unwrapKey()
-                    .map(key -> key.location().getPath())
+            BlockPos pos = mc.player.getBlockPos();
+            String biome = mc.world.getBiome(pos).getKey()
+                    .map(key -> key.getValue().getPath())
                     .orElse("unknown");
             lines.add("Biome: " + biome);
         }
 
         if (showDirection.isEnabled()) {
-            Direction direction = mc.player.getDirection();
-            float yaw = mc.player.getYRot() % 360;
+            Direction direction = mc.player.getHorizontalFacing();
+            float yaw = mc.player.getYaw() % 360;
             if (yaw < 0) yaw += 360;
-            lines.add("Dir: " + String.format("%s [%.1f°]", direction.getName(), yaw));
+            lines.add("Dir: " + String.format("%s [%.1f°]", direction.getId(), yaw));
         }
 
         if (showSpeed.isEnabled()) {
-            double dx = mc.player.getX() - mc.player.xOld;
-            double dz = mc.player.getZ() - mc.player.zOld;
+            double dx = mc.player.getX() - mc.player.lastRenderX;
+            double dz = mc.player.getZ() - mc.player.lastRenderZ;
             double speed = Math.sqrt(dx * dx + dz * dz) * 20.0;
             lines.add(String.format("Speed: %.2f m/s", speed));
         }
 
-        if (showPing.isEnabled() && mc.getConnection() != null) {
+        if (showPing.isEnabled() && mc.getNetworkHandler() != null) {
             int ping = 0;
-            var playerInfo = mc.getConnection().getPlayerInfo(mc.player.getUUID());
+            var playerInfo = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
             if (playerInfo != null) ping = playerInfo.getLatency();
             lines.add("Ping: " + ping + "ms");
         }
 
         if (showTime.isEnabled()) {
-            long time = mc.level.getDayTime() % 24000;
+            long time = mc.world.getTimeOfDay() % 24000;
             int hours = (int) ((time / 1000 + 6) % 24);
             int minutes = (int) ((time % 1000) * 60 / 1000);
             lines.add(String.format("Time: %02d:%02d", hours, minutes));
         }
 
         if (showChordTarget.isEnabled() && hasChordTarget) {
-            Player player = mc.player;
+            PlayerEntity player = mc.player;
             double dx = chordTargetX - player.getX();
             double dy = chordTargetY - player.getY();
             double dz = chordTargetZ - player.getZ();
             double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
             double angle = Math.toDegrees(Math.atan2(dz, dx)) - 90;
-            double relative = angle - player.getYRot();
+            double relative = angle - player.getYaw();
             while (relative > 180) relative -= 360;
             while (relative < -180) relative += 360;
 
@@ -192,18 +191,18 @@ public class HUD extends Module {
         boolean isTop = vertical.isSelected("Top");
         boolean isLeft = horizontal.isSelected("Left");
 
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int screenWidth = mc.getWindow().getScaledWidth();
+        int screenHeight = mc.getWindow().getScaledHeight();
 
         int lineHeight = (int)(10 * scale);
         int startY = isTop ? 2 : screenHeight - (lines.size() * lineHeight + 2);
 
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(scale, scale);
+        graphics.getMatrices().pushMatrix();
+        graphics.getMatrices().scale(scale, scale);
 
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
-            int textWidth = mc.font.width(line);
+            int textWidth = mc.textRenderer.getWidth(line);
 
             int y = isTop ? (startY + i * lineHeight) : (startY + i * lineHeight);
             int x;
@@ -217,9 +216,9 @@ public class HUD extends Module {
             int scaledX = (int) (x / scale);
             int scaledY = (int) (y / scale);
 
-            graphics.drawString(mc.font, line, scaledX, scaledY, ClickGuiScreen.currentTheme.moduleEnabled, true);
+            graphics.drawText(mc.textRenderer, line, scaledX, scaledY, ClickGuiScreen.currentTheme.moduleEnabled, true);
         }
 
-        graphics.pose().popMatrix();
+        graphics.getMatrices().popMatrix();
     }
 }

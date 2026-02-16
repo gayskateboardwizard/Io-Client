@@ -2,11 +2,11 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 public class Nuker extends Module {
     private static final int RANGE = 4;
@@ -20,22 +20,22 @@ public class Nuker extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
 
-        BlockPos playerPos = mc.player.blockPosition();
+        BlockPos playerPos = mc.player.getBlockPos();
         BlockPos newTarget = null;
         double shortestDistanceSq = Double.MAX_VALUE;
 
         for (int x = -RANGE; x <= RANGE; x++) {
             for (int y = -RANGE; y <= RANGE; y++) {
                 for (int z = -RANGE; z <= RANGE; z++) {
-                    BlockPos pos = playerPos.offset(x, y, z);
-                    BlockState state = mc.level.getBlockState(pos);
+                    BlockPos pos = playerPos.add(x, y, z);
+                    BlockState state = mc.world.getBlockState(pos);
 
-                    if (!state.isAir() && !state.is(Blocks.BEDROCK) && !pos.equals(playerPos)) {
+                    if (!state.isAir() && !state.isOf(Blocks.BEDROCK) && !pos.equals(playerPos)) {
 
-                        double distanceSq = playerPos.distSqr(pos);
+                        double distanceSq = playerPos.getSquaredDistance(pos);
 
                         if (distanceSq < shortestDistanceSq) {
                             shortestDistanceSq = distanceSq;
@@ -50,25 +50,25 @@ public class Nuker extends Module {
         if (newTarget != null) {
 
             if (!newTarget.equals(currentTarget)) {
-                mc.gameMode.stopDestroyBlock();
+                mc.interactionManager.cancelBlockBreaking();
 
-                mc.gameMode.startDestroyBlock(newTarget, Direction.UP);
+                mc.interactionManager.attackBlock(newTarget, Direction.UP);
 
                 currentTarget = newTarget;
             } else {
-                mc.gameMode.continueDestroyBlock(newTarget, Direction.UP);
+                mc.interactionManager.updateBlockBreakingProgress(newTarget, Direction.UP);
             }
         } else if (currentTarget != null) {
-            mc.gameMode.stopDestroyBlock();
+            mc.interactionManager.cancelBlockBreaking();
             currentTarget = null;
         }
     }
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && mc.gameMode != null && currentTarget != null) {
-            mc.gameMode.stopDestroyBlock();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player != null && mc.interactionManager != null && currentTarget != null) {
+            mc.interactionManager.cancelBlockBreaking();
         }
         currentTarget = null;
     }

@@ -1,8 +1,8 @@
 package io.client.mixin;
 
 import io.client.SplashTexts;
-import net.minecraft.client.gui.components.SplashRenderer;
-import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screen.SplashTextRenderer;
+import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ForceSplashMixin {
 
     @Shadow
-    private SplashRenderer splash;
+    private SplashTextRenderer splashText;
 
     @Inject(method = "init()V", at = @At("TAIL"))
     private void forceSplash(CallbackInfo ci) {
-        this.splash = new SplashRenderer(SplashTexts.getRandomSplash());
+        this.splashText = new SplashTextRenderer(SplashTexts.getRandomSplash());
     }
 }

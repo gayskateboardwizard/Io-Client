@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="output" path="bin/default"/>
+	<classpathentry output="bin/main" kind="src" path="main/java">
+		<attributes>
+			<attribute name="gradle_scope" value="main"/>
+			<attribute name="gradle_used_by_scope" value="main,test,client"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry output="bin/main" kind="src" path="main/resources">
+		<attributes>
+			<attribute name="gradle_scope" value="main"/>
+			<attribute name="gradle_used_by_scope" value="main,test,client"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry output="bin/client" kind="src" path="main/java">
+		<attributes>
+			<attribute name="gradle_scope" value="client"/>
+			<attribute name="gradle_used_by_scope" value="client"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry output="bin/client" kind="src" path="main/resources">
+		<attributes>
+			<attribute name="gradle_scope" value="client"/>
+			<attribute name="gradle_used_by_scope" value="client"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21/"/>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/bfa27b5e683363963c8d5e2fec39d755295cbb82/annotations-26.0.2-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/26.0.2/c7ce3cdeda3d18909368dfe5977332dfad326c6d/annotations-26.0.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm/9.9/5aa89c77317a704e2e34d117b72756ff1c1530bb/asm-9.9-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm/9.9/c29635c8a7afa03d74b33c1884df8abb2b3f3dcc/asm-9.9.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-analysis/9.9/3ce67cca2a5bf3d1d271fb13e0011714df6c68e6/asm-analysis-9.9-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-analysis/9.9/bf4fa6e66638851c1cd22c2caea0c3ee5d5f437/asm-analysis-9.9.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-commons/9.9/a51d8b4b55baa109a6c4ac1e897820ad638f63d2/asm-commons-9.9-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-commons/9.9/db9165a3bf908ded6b08612d583a15d1d0c7bda0/asm-commons-9.9.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-tree/9.9/60b736062debb8f627d06fa42b962744b1e1a43a/asm-tree-9.9-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-tree/9.9/f8de6eead6d24dd0f45bd065bbe112b2cda6ea21/asm-tree-9.9.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-util/9.9/4e8aceea08c648727bb173f03e6fd31fbdb86289/asm-util-9.9-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-util/9.9/42fdfc0508b43807c8078d6e82ecff2ce2112ae8/asm-util-9.9.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.17.0+mixin.0.8.7/d3ea80c8aa7974ecfcde80e7be1b3eb796fb2022/sponge-mixin-0.17.0+mixin.0.8.7-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.17.0+mixin.0.8.7/cf31463202f72d03b0ef1e1e38e8ee71b7faaab6/sponge-mixin-0.17.0+mixin.0.8.7.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.github.llamalad7/mixinextras-fabric/0.5.0/763194e452da1311d6e93091d431854f4a4b4c5d/mixinextras-fabric-0.5.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.github.llamalad7/mixinextras-fabric/0.5.0/91a83dfb7abd320f6236bd1fcf5c0ff143d59a13/mixinextras-fabric-0.5.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/yarn/1.21.8+build.1/9561c4bfb54e28e490a06daa99329d2c805ea8f0/yarn-1.21.8+build.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/yarn/1.21.8+build.1/2ad14aed781c4a73ed4dbb421966d408a0a06686/yarn-1.21.8+build.1-constants.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.13.4/f6b8a8daa9bcf7ece61c673e53f5d00b9e92e70e/jackson-annotations-2.13.4-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.13.4/858c6cc78e1f08a885b1613e1d817c829df70a6e/jackson-annotations-2.13.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.13.4/dd8da2766363ea64383d1344349acce91d5a5469/jackson-core-2.13.4-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.13.4/cf934c681294b97ef6d80082faeefbe1edadf56/jackson-core-2.13.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.13.4.2/99771ed18f5059ca6b4fb51142d7aa4a2eba9002/jackson-databind-2.13.4.2-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.13.4.2/325c06bdfeb628cfb80ebaaf1a26cc1eb558a585/jackson-databind-2.13.4.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.github.oshi/oshi-core/6.6.5/8be7bb74b13ca86e9f3cdc3a809d77771f7d0062/oshi-core-6.6.5-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.github.oshi/oshi-core/6.6.5/e1099981fd15dc4236c4499d82aba1276fb43a9a/oshi-core-6.6.5.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.github.stephenc.jcip/jcip-annotations/1.0-1/2064ac5ff426f3c02656aedc317952b82463782f/jcip-annotations-1.0-1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.github.stephenc.jcip/jcip-annotations/1.0-1/ef31541dd28ae2cefdd17c7ebf352d93e9058c63/jcip-annotations-1.0-1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.11.0/bbd772a8634d3d6fea7ffea693535a4bd1c773c0/gson-2.11.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.11.0/527175ca6d81050b53bdd4c457a6d6e017626b0e/gson-2.11.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.2/6acdafcf2dfc3b548e59dd3a4b454552aeb6ff65/failureaccess-1.0.2-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.2/c4a06a64e650562f30b7bf9aaec1bfed43aca12b/failureaccess-1.0.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/33.3.1-jre/e788c9bc41ef2bcbb89794f793da9b576b5dde38/guava-33.3.1-jre-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/33.3.1-jre/852f8b363da0111e819460021ca693cacca3e8db/guava-33.3.1-jre.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.ibm.icu/icu4j/76.1/da9098d9fdb0db117bd80a46ec872574cca71844/icu4j-76.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.ibm.icu/icu4j/76.1/215f3a8e936d4069344bd75f2b1368fd58112894/icu4j-76.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.microsoft.azure/msal4j/1.17.2/dfc737bc41b4570e2da52be203b3d4a4b35bea33/msal4j-1.17.2-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.microsoft.azure/msal4j/1.17.2/a6211e3d71d0388929babaa0ff0951b30d001852/msal4j-1.17.2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/authlib/6.0.58/c29fd63b7dd4c20ed0a7c0f83405dd6c484a6ff9/authlib-6.0.58-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/authlib/6.0.58/9261a6d53e629469fab20136b968bf5202d9c0f7/authlib-6.0.58.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/blocklist/1.0.10/ef44852fa1707a833bfa8e8518659ab18f368d25/blocklist-1.0.10-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/blocklist/1.0.10/5c685c5ffa94c4cd39496c7184c1d122e515ecef/blocklist-1.0.10.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/brigadier/1.3.10/d4b579a2b795ff6bfe5eb02760a2748d29addd2e/brigadier-1.3.10-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/brigadier/1.3.10/d15b53a14cf20fdcaa98f731af5dda654452c010/brigadier-1.3.10.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/datafixerupper/8.0.16/1482506562a012761c60594c23f6bcbeb0d354a3/datafixerupper-8.0.16-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/datafixerupper/8.0.16/67d4de6d7f95d89bcf5862995fb854ebaec02a34/datafixerupper-8.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/jtracy/1.0.29/335f3d8b2db1fd977b541c7e7a25133e5e10f1d1/jtracy-1.0.29-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/jtracy/1.0.29/6f07dcb6a2e595c7ee2ca43b67e5d1c018ca0770/jtracy-1.0.29.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/logging/1.5.10/cf41b5ead0d671bc70afd981fc4be9ede5dacb14/logging-1.5.10-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/logging/1.5.10/9ab1202793717af9df9c1704d0a02892067001eb/logging-1.5.10.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/patchy/2.2.10/da05971b07cbb379d002cf7eaec6a2048211fefc/patchy-2.2.10.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/text2speech/1.18.11/7d5fb57405ae67117b5471c243067c0efe0f6b58/text2speech-1.18.11-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/text2speech/1.18.11/e853a12cdd6ba4f4836e8f4bf3b37844a13482b6/text2speech-1.18.11.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/content-type/2.3/353fffcaafbd9624e6e13af3f74aa772ccfe30ef/content-type-2.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/content-type/2.3/e3aa0be212d7a42839a8f3f506f5b990bcce0222/content-type-2.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/lang-tag/1.7/8ebac7ea14da04f2c11ab3e56583abe246346477/lang-tag-1.7-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/lang-tag/1.7/97c73ecd70bc7e8eefb26c5eea84f251a63f1031/lang-tag-1.7.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/nimbus-jose-jwt/9.40/1454a59e5d91f70fdafeab83d4d395379947ca3c/nimbus-jose-jwt-9.40-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/nimbus-jose-jwt/9.40/42b1dfa0360e4062951b070bac52dd8d96fd7b38/nimbus-jose-jwt-9.40.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/oauth2-oidc-sdk/11.18/d96bef00c004c72a622163cbc7ece51ed4b27cc9/oauth2-oidc-sdk-11.18-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.nimbusds/oauth2-oidc-sdk/11.18/7c7ec4f4066625ff07a711ad856fa04da1ff9de/oauth2-oidc-sdk-11.18.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.17.1/335f6edc3ea89bb9ed0febd6685aff864dc8f4d4/commons-codec-1.17.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.17.1/973638b7149d333563584137ebf13a691bb60579/commons-codec-1.17.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.17.0/28415dc64e3a2e8a90751fd59a21bad0fe5681dc/commons-io-2.17.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.17.0/ddcc8433eb019fb48fe25207c0278143f3e1d7e2/commons-io-2.17.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.3.4/48ab26b05c0754956d581057288286b2bd9a6e9c/commons-logging-1.3.4-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.3.4/b9fc14968d63a8b8a8a2c1885fe3e90564239708/commons-logging-1.3.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffer/4.1.118.Final/2d4785c62bb7b405eb1be23c236c562afb9bb5da/netty-buffer-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffer/4.1.118.Final/7022990af1e0d449f9d5322035899745e19735c5/netty-buffer-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec/4.1.118.Final/b856e2e8135c144489767b92b458751a64a8373c/netty-codec-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec/4.1.118.Final/307f665c08ce57333121de4f460479fc0c3c94d4/netty-codec-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.1.118.Final/443f79dfdd99384c8d1cee3864fedd16b2944818/netty-common-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.1.118.Final/4bb0f9899146484fa89f7b9bc27389d5b8e2ecde/netty-common-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler/4.1.118.Final/e10de5aaaa4adb0c89d1dc315e573831f3c44c63/netty-handler-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler/4.1.118.Final/30ebb05b6b0fb071dbfcf713017c4a767a97bb9b/netty-handler-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver/4.1.118.Final/a6fa4618f0894177546187c60d6997e1fcbf7edf/netty-resolver-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver/4.1.118.Final/28c378c19c1779eca1104b400452627f3ebc4aea/netty-resolver-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-classes-epoll/4.1.118.Final/4a4e7f5dc7e365918541029240b761c0816327c9/netty-transport-classes-epoll-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-classes-epoll/4.1.118.Final/376ce95507066f0e755d97c1c8bcd6c33f657617/netty-transport-classes-epoll-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-unix-common/4.1.118.Final/2897b8d1f24499c88089ec23421753dd7fc1739b/netty-transport-native-unix-common-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-unix-common/4.1.118.Final/9da25a94e6a0edac90da0bc7894e5a54efcb866b/netty-transport-native-unix-common-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport/4.1.118.Final/b500a89c84eff977737d53c7fabbf5a9e69bf60f/netty-transport-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport/4.1.118.Final/5a27232e5d08218722d94ca14f0b1b4576e7711c/netty-transport-4.1.118.Final.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/it.unimi.dsi/fastutil/8.5.15/823800c6463db95d464e8a4ab3ce5898028b45f8/fastutil-8.5.15-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/it.unimi.dsi/fastutil/8.5.15/1e885b40c9563ab0d3899b871fd0b30e958705dc/fastutil-8.5.15.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna-platform/5.15.0/712d5f4d00130b3727a653dc3aca63921fab671f/jna-platform-5.15.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna-platform/5.15.0/86b502cad57d45da172b5e3231c537b042e296ef/jna-platform-5.15.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.15.0/f84631ed8ab3610424139df0baf36a0756336e8d/jna-5.15.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.15.0/1ee1d80ff44f08280188f7c0e740d57207841ac/jna-5.15.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.minidev/accessors-smart/2.5.1/1301d502f3d849f1966e56acdc446436dab8b504/accessors-smart-2.5.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.minidev/accessors-smart/2.5.1/19b820261eb2e7de7d5bde11d1c06e4501dd7e5f/accessors-smart-2.5.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.minidev/json-smart/2.5.1/45abd4dda57f72e56d16aefc4d895a311afd751b/json-smart-2.5.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.minidev/json-smart/2.5.1/4c11d2808d009132dfbbf947ebf37de6bf266c8e/json-smart-2.5.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.sf.jopt-simple/jopt-simple/5.0.4/950831646d014c9162999019a3cb17d5fc01ac0d/jopt-simple-5.0.4-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.sf.jopt-simple/jopt-simple/5.0.4/4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c/jopt-simple-5.0.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.27.1/c90678c885e13d0c2ea971f05f8fc15004906d0f/commons-compress-1.27.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.27.1/a19151084758e2fbb6b41eddaa88e7b8ff4e6599/commons-compress-1.27.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.17.0/f409092a9f723034a839327029255900a19742b4/commons-lang3-3.17.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.17.0/b17d2136f0460dcc0d2016ceefca8723bdf4ee70/commons-lang3-3.17.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.14/14321a360aa0e037c56d4c820747a84954d9196e/httpclient-4.5.14-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.14/1194890e6f56ec29177673f2f12d0b8e627dec98/httpclient-4.5.14.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.16/229e4c0eae80465381ae02adf61bca5558360777/httpcore-4.4.16-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.16/51cf043c87253c9f58b539c9f7e44c8894223850/httpcore-4.4.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.24.1/63358d6542d9a55f2ff3e78aa19b7f8729101220/log4j-api-2.24.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.24.1/7ebeb12c20606373005af4232cd0ecca72613dda/log4j-api-2.24.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.24.1/f5a5261c171329e63f3f0888202f0ed23ab0390a/log4j-core-2.24.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.24.1/c85285146f28d8c8962384f786e2dff04172fb43/log4j-core-2.24.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-slf4j2-impl/2.24.1/c43f57c4a1d1a6ddc15e3d7d00dbd548cbbc6f14/log4j-slf4j2-impl-2.24.1-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-slf4j2-impl/2.24.1/8e3ddc96464ef7f768823e7e001a52b23de8cd0a/log4j-slf4j2-impl-2.24.1.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jcraft/jorbis/0.0.17/5446be5d62e4c6b347c8e6cd28dc00a936417ba2/jorbis-0.0.17-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jcraft/jorbis/0.0.17/8872d22b293e8f5d7d56ff92be966e6dc28ebdc6/jorbis-0.0.17.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.8/3fa7a5a8a5119d23dbe3402f6ffa3df1b3d9598e/joml-1.10.8-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.8/fc0a71dad90a2cf41d82a76156a0e700af8e4f8d/joml-1.10.8.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/d9fba96328a80677edbab28a843f33b847cf1e57/lwjgl-freetype-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/a0db6c84a8becc8ca05f9dbfa985edc348a824c7/lwjgl-freetype-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/fa2c760452674d3eaf336123539b0dd9a83041a4/lwjgl-glfw-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/efa1eb78c5ccd840e9f329717109b5e892d72f8e/lwjgl-glfw-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/6a4ea7a9095e1684a9c6adb2c49d28daae2b6e45/lwjgl-jemalloc-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/b543467b7ff3c6920539a88ee602d34098628be5/lwjgl-jemalloc-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/60a4ce24d71b3376ce53b50cfe3eaaf3277dd727/lwjgl-openal-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/daada81ceb5fc0c291fbfdd4433cb8d9423577f2/lwjgl-openal-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/3353d0b2cac91b84088b01711d33cc403893450b/lwjgl-opengl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/2f6b0147078396a58979125a4c947664e98293a/lwjgl-opengl-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/37c2b604ec4a5ee356dd734dc8167a193e8874ed/lwjgl-stb-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/25dd6161988d7e65f71d5065c99902402ee32746/lwjgl-stb-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/dcda55223f2f940654d222bf4371baa969c60bb9/lwjgl-tinyfd-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/82d755ca94b102e9ca77283b9e2dc46d1b15fbe5/lwjgl-tinyfd-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/e5949c7bbf4f839afe6d1a631e9b75f63c559e0/lwjgl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/29589b5f87ed335a6c7e7ee6a5775f81f97ecb84/lwjgl-3.3.3.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lz4/lz4-java/1.8.0/7609c362f37f0c0bd3743bc1976df2daa28ad19e/lz4-java-1.8.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lz4/lz4-java/1.8.0/4b986a99445e49ea5fbf5d149c4b63f6ed6c6780/lz4-java-1.8.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.16/68223612de5e53b90b752bbbe520390ae1f104db/slf4j-api-2.0.16-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.16/172931663a09a1fa515567af5fbef00897d3c04/slf4j-api-2.0.16.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-merged-6790506c70/1.21.8-net.fabricmc.yarn.1_21_8.1.21.8+build.1-v2/minecraft-merged-6790506c70-1.21.8-net.fabricmc.yarn.1_21_8.1.21.8+build.1-v2.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.118.Final/5ee728dc59bcd335b42ef10cd7c8b19fba698244/netty-transport-native-epoll-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.118.Final/7e6b89e3746acb7cf6f0aad993bbd058fc6d912e/netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.118.Final/5ee728dc59bcd335b42ef10cd7c8b19fba698244/netty-transport-native-epoll-4.1.118.Final-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.118.Final/82f94d0a9d837f6b6a580379373310ff7288c0f8/netty-transport-native-epoll-4.1.118.Final-linux-aarch_64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/fabric-loader/0.18.4/c346b05fad0e97adcf357f519cf8e61b153e5ee2/fabric-loader-0.18.4-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/fabric-loader/0.18.4/dc4682125d5db647d6ce80a98b98945835adcd4b/fabric-loader-0.18.4.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-api-a5b452c0/0.136.1+1.21.8/fabric-api-a5b452c0-0.136.1+1.21.8-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-api-a5b452c0/0.136.1+1.21.8/fabric-api-a5b452c0-0.136.1+1.21.8.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-transfer-api-v1-a5b452c0/6.0.6+946bf4c32c/fabric-transfer-api-v1-a5b452c0-6.0.6+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-transfer-api-v1-a5b452c0/6.0.6+946bf4c32c/fabric-transfer-api-v1-a5b452c0-6.0.6+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-api-lookup-api-v1-a5b452c0/1.6.101+946bf4c32c/fabric-api-lookup-api-v1-a5b452c0-1.6.101+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-api-lookup-api-v1-a5b452c0/1.6.101+946bf4c32c/fabric-api-lookup-api-v1-a5b452c0-1.6.101+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-command-api-v2-a5b452c0/2.3.1+52fff9ec2c/fabric-command-api-v2-a5b452c0-2.3.1+52fff9ec2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-command-api-v2-a5b452c0/2.3.1+52fff9ec2c/fabric-command-api-v2-a5b452c0-2.3.1+52fff9ec2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-content-registries-v0-a5b452c0/10.1.0+c75de69d2c/fabric-content-registries-v0-a5b452c0-10.1.0+c75de69d2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-content-registries-v0-a5b452c0/10.1.0+c75de69d2c/fabric-content-registries-v0-a5b452c0-10.1.0+c75de69d2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-data-generation-api-v1-a5b452c0/23.2.8+2e1c6d322c/fabric-data-generation-api-v1-a5b452c0-23.2.8+2e1c6d322c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-data-generation-api-v1-a5b452c0/23.2.8+2e1c6d322c/fabric-data-generation-api-v1-a5b452c0-23.2.8+2e1c6d322c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-convention-tags-v1-a5b452c0/2.1.41+7f945d5b2c/fabric-convention-tags-v1-a5b452c0-2.1.41+7f945d5b2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-convention-tags-v1-a5b452c0/2.1.41+7f945d5b2c/fabric-convention-tags-v1-a5b452c0-2.1.41+7f945d5b2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-convention-tags-v2-a5b452c0/2.15.6+eb5df52f2c/fabric-convention-tags-v2-a5b452c0-2.15.6+eb5df52f2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-convention-tags-v2-a5b452c0/2.15.6+eb5df52f2c/fabric-convention-tags-v2-a5b452c0-2.15.6+eb5df52f2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-data-attachment-api-v1-a5b452c0/1.8.14+97214db32c/fabric-data-attachment-api-v1-a5b452c0-1.8.14+97214db32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-data-attachment-api-v1-a5b452c0/1.8.14+97214db32c/fabric-data-attachment-api-v1-a5b452c0-1.8.14+97214db32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-entity-events-v1-a5b452c0/2.1.2+c9e472732c/fabric-entity-events-v1-a5b452c0-2.1.2+c9e472732c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-entity-events-v1-a5b452c0/2.1.2+c9e472732c/fabric-entity-events-v1-a5b452c0-2.1.2+c9e472732c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-events-interaction-v0-a5b452c0/4.0.26+946bf4c32c/fabric-events-interaction-v0-a5b452c0-4.0.26+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-events-interaction-v0-a5b452c0/4.0.26+946bf4c32c/fabric-events-interaction-v0-a5b452c0-4.0.26+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-gametest-api-v1-a5b452c0/3.1.10+39ce47f52c/fabric-gametest-api-v1-a5b452c0-3.1.10+39ce47f52c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-gametest-api-v1-a5b452c0/3.1.10+39ce47f52c/fabric-gametest-api-v1-a5b452c0-3.1.10+39ce47f52c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-item-api-v1-a5b452c0/11.5.0+02ce13f42c/fabric-item-api-v1-a5b452c0-11.5.0+02ce13f42c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-item-api-v1-a5b452c0/11.5.0+02ce13f42c/fabric-item-api-v1-a5b452c0-11.5.0+02ce13f42c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-item-group-api-v1-a5b452c0/4.2.14+c5f9bbc12c/fabric-item-group-api-v1-a5b452c0-4.2.14+c5f9bbc12c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-item-group-api-v1-a5b452c0/4.2.14+c5f9bbc12c/fabric-item-group-api-v1-a5b452c0-4.2.14+c5f9bbc12c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-model-loading-api-v1-a5b452c0/5.2.8+946bf4c32c/fabric-model-loading-api-v1-a5b452c0-5.2.8+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-model-loading-api-v1-a5b452c0/5.2.8+946bf4c32c/fabric-model-loading-api-v1-a5b452c0-5.2.8+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-renderer-indigo-a5b452c0/4.0.5+946bf4c32c/fabric-renderer-indigo-a5b452c0-4.0.5+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-renderer-indigo-a5b452c0/4.0.5+946bf4c32c/fabric-renderer-indigo-a5b452c0-4.0.5+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-renderer-api-v1-a5b452c0/7.0.5+208eed172c/fabric-renderer-api-v1-a5b452c0-7.0.5+208eed172c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-renderer-api-v1-a5b452c0/7.0.5+208eed172c/fabric-renderer-api-v1-a5b452c0-7.0.5+208eed172c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-v1-a5b452c0/12.6.0+486b7ff72c/fabric-rendering-v1-a5b452c0-12.6.0+486b7ff72c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-v1-a5b452c0/12.6.0+486b7ff72c/fabric-rendering-v1-a5b452c0-12.6.0+486b7ff72c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-lifecycle-events-v1-a5b452c0/2.6.4+db4dfd852c/fabric-lifecycle-events-v1-a5b452c0-2.6.4+db4dfd852c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-lifecycle-events-v1-a5b452c0/2.6.4+db4dfd852c/fabric-lifecycle-events-v1-a5b452c0-2.6.4+db4dfd852c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-loot-api-v2-a5b452c0/3.0.56+3f89f5a52c/fabric-loot-api-v2-a5b452c0-3.0.56+3f89f5a52c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-loot-api-v2-a5b452c0/3.0.56+3f89f5a52c/fabric-loot-api-v2-a5b452c0-3.0.56+3f89f5a52c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-loot-api-v3-a5b452c0/2.0.3+946bf4c32c/fabric-loot-api-v3-a5b452c0-2.0.3+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-loot-api-v3-a5b452c0/2.0.3+946bf4c32c/fabric-loot-api-v3-a5b452c0-2.0.3+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-message-api-v1-a5b452c0/6.1.2+946bf4c32c/fabric-message-api-v1-a5b452c0-6.1.2+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-message-api-v1-a5b452c0/6.1.2+946bf4c32c/fabric-message-api-v1-a5b452c0-6.1.2+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-particles-v1-a5b452c0/4.1.10+946bf4c32c/fabric-particles-v1-a5b452c0-4.1.10+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-particles-v1-a5b452c0/4.1.10+946bf4c32c/fabric-particles-v1-a5b452c0-4.1.10+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-recipe-api-v1-a5b452c0/8.1.17+946bf4c32c/fabric-recipe-api-v1-a5b452c0-8.1.17+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-recipe-api-v1-a5b452c0/8.1.17+946bf4c32c/fabric-recipe-api-v1-a5b452c0-8.1.17+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-object-builder-api-v1-a5b452c0/21.1.10+946bf4c32c/fabric-object-builder-api-v1-a5b452c0-21.1.10+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-object-builder-api-v1-a5b452c0/21.1.10+946bf4c32c/fabric-object-builder-api-v1-a5b452c0-21.1.10+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-screen-handler-api-v1-a5b452c0/1.3.139+946bf4c32c/fabric-screen-handler-api-v1-a5b452c0-1.3.139+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-screen-handler-api-v1-a5b452c0/1.3.139+946bf4c32c/fabric-screen-handler-api-v1-a5b452c0-1.3.139+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-registry-sync-v0-a5b452c0/6.1.30+946bf4c32c/fabric-registry-sync-v0-a5b452c0-6.1.30+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-registry-sync-v0-a5b452c0/6.1.30+946bf4c32c/fabric-registry-sync-v0-a5b452c0-6.1.30+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-networking-api-v1-a5b452c0/5.1.0+57cb96dd2c/fabric-networking-api-v1-a5b452c0-5.1.0+57cb96dd2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-networking-api-v1-a5b452c0/5.1.0+57cb96dd2c/fabric-networking-api-v1-a5b452c0-5.1.0+57cb96dd2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-fluids-v1-a5b452c0/3.1.31+fa6cb72b2c/fabric-rendering-fluids-v1-a5b452c0-3.1.31+fa6cb72b2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-fluids-v1-a5b452c0/3.1.31+fa6cb72b2c/fabric-rendering-fluids-v1-a5b452c0-3.1.31+fa6cb72b2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-tag-api-v1-a5b452c0/1.2.2+946bf4c32c/fabric-tag-api-v1-a5b452c0-1.2.2+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-tag-api-v1-a5b452c0/1.2.2+946bf4c32c/fabric-tag-api-v1-a5b452c0-1.2.2+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-resource-loader-v0-a5b452c0/3.1.12+020423442c/fabric-resource-loader-v0-a5b452c0-3.1.12+020423442c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-resource-loader-v0-a5b452c0/3.1.12+020423442c/fabric-resource-loader-v0-a5b452c0-3.1.12+020423442c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-screen-api-v1-a5b452c0/2.2.0+e0cb65d02c/fabric-screen-api-v1-a5b452c0-2.2.0+e0cb65d02c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-screen-api-v1-a5b452c0/2.2.0+e0cb65d02c/fabric-screen-api-v1-a5b452c0-2.2.0+e0cb65d02c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-api-base-a5b452c0/0.5.0+cd8c0daa2c/fabric-api-base-a5b452c0-0.5.0+cd8c0daa2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-api-base-a5b452c0/0.5.0+cd8c0daa2c/fabric-api-base-a5b452c0-0.5.0+cd8c0daa2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-biome-api-v1-a5b452c0/16.1.0+c21d71cc2c/fabric-biome-api-v1-a5b452c0-16.1.0+c21d71cc2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-biome-api-v1-a5b452c0/16.1.0+c21d71cc2c/fabric-biome-api-v1-a5b452c0-16.1.0+c21d71cc2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-block-api-v1-a5b452c0/1.1.3+946bf4c32c/fabric-block-api-v1-a5b452c0-1.1.3+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-block-api-v1-a5b452c0/1.1.3+946bf4c32c/fabric-block-api-v1-a5b452c0-1.1.3+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-block-view-api-v2-a5b452c0/1.0.31+946bf4c32c/fabric-block-view-api-v2-a5b452c0-1.0.31+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-block-view-api-v2-a5b452c0/1.0.31+946bf4c32c/fabric-block-view-api-v2-a5b452c0-1.0.31+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-client-gametest-api-v1-a5b452c0/4.2.5+8a98c3fc2c/fabric-client-gametest-api-v1-a5b452c0-4.2.5+8a98c3fc2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-client-gametest-api-v1-a5b452c0/4.2.5+8a98c3fc2c/fabric-client-gametest-api-v1-a5b452c0-4.2.5+8a98c3fc2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-crash-report-info-v1-a5b452c0/0.3.15+946bf4c32c/fabric-crash-report-info-v1-a5b452c0-0.3.15+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-crash-report-info-v1-a5b452c0/0.3.15+946bf4c32c/fabric-crash-report-info-v1-a5b452c0-0.3.15+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-dimensions-v1-a5b452c0/4.0.20+948fc79a2c/fabric-dimensions-v1-a5b452c0-4.0.20+948fc79a2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-dimensions-v1-a5b452c0/4.0.20+948fc79a2c/fabric-dimensions-v1-a5b452c0-4.0.20+948fc79a2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-game-rule-api-v1-a5b452c0/1.0.73+c64c9c5b2c/fabric-game-rule-api-v1-a5b452c0-1.0.73+c64c9c5b2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-game-rule-api-v1-a5b452c0/1.0.73+c64c9c5b2c/fabric-game-rule-api-v1-a5b452c0-1.0.73+c64c9c5b2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-key-binding-api-v1-a5b452c0/1.0.65+946bf4c32c/fabric-key-binding-api-v1-a5b452c0-1.0.65+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-key-binding-api-v1-a5b452c0/1.0.65+946bf4c32c/fabric-key-binding-api-v1-a5b452c0-1.0.65+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-resource-conditions-api-v1-a5b452c0/5.0.25+98e6d6db2c/fabric-resource-conditions-api-v1-a5b452c0-5.0.25+98e6d6db2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-resource-conditions-api-v1-a5b452c0/5.0.25+98e6d6db2c/fabric-resource-conditions-api-v1-a5b452c0-5.0.25+98e6d6db2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-serialization-api-v1-a5b452c0/1.0.0+fc0e5aba2c/fabric-serialization-api-v1-a5b452c0-1.0.0+fc0e5aba2c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-serialization-api-v1-a5b452c0/1.0.0+fc0e5aba2c/fabric-serialization-api-v1-a5b452c0-1.0.0+fc0e5aba2c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-sound-api-v1-a5b452c0/1.0.42+946bf4c32c/fabric-sound-api-v1-a5b452c0-1.0.42+946bf4c32c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-sound-api-v1-a5b452c0/1.0.42+946bf4c32c/fabric-sound-api-v1-a5b452c0-1.0.42+946bf4c32c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-transitive-access-wideners-v1-a5b452c0/6.5.0+c847ce762c/fabric-transitive-access-wideners-v1-a5b452c0-6.5.0+c847ce762c-sources.jar" kind="lib" path="C:/Users/Newport/Io-Client-1/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-transitive-access-wideners-v1-a5b452c0/6.5.0+c847ce762c/fabric-transitive-access-wideners-v1-a5b452c0-6.5.0+c847ce762c.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.fabricmc/dev-launch-injector/0.2.1+build.8/da8bef7e6e2f952da707f282bdb46882a0fce5e3/dev-launch-injector-0.2.1+build.8.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.minecrell/terminalconsoleappender/1.3.0/2fd4d796402a408af0d26c848e02ec8f91dceae7/terminalconsoleappender-1.3.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/net.minecrell/terminalconsoleappender/1.3.0/b562e9bb61235c9520e26282cdee71f8f802d1fc/terminalconsoleappender-1.3.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/jtracy/1.0.29/335f3d8b2db1fd977b541c7e7a25133e5e10f1d1/jtracy-1.0.29-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/com.mojang/jtracy/1.0.29/e05332cb31c7ae582dc8d8bd1bffd47c2ff7636f/jtracy-1.0.29-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/d9fba96328a80677edbab28a843f33b847cf1e57/lwjgl-freetype-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/81091b006dbb43fab04c8c638e9ac87c51b4096d/lwjgl-freetype-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/d9fba96328a80677edbab28a843f33b847cf1e57/lwjgl-freetype-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/82028265a0a2ff33523ca75137ada7dc176e5210/lwjgl-freetype-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/d9fba96328a80677edbab28a843f33b847cf1e57/lwjgl-freetype-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-freetype/3.3.3/15a8c1de7f51d07a92eae7ce1222557073a0c0c3/lwjgl-freetype-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/fa2c760452674d3eaf336123539b0dd9a83041a4/lwjgl-glfw-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/e449e28b4891fc423c54c85fbc5bb0b9efece67a/lwjgl-glfw-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/fa2c760452674d3eaf336123539b0dd9a83041a4/lwjgl-glfw-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/f27018dc74f6289574502b46cce55d52817554e2/lwjgl-glfw-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/fa2c760452674d3eaf336123539b0dd9a83041a4/lwjgl-glfw-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.3/32334f3fd5270a59bad9939a93115acb6de36dcf/lwjgl-glfw-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/6a4ea7a9095e1684a9c6adb2c49d28daae2b6e45/lwjgl-jemalloc-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/426222fc027602a5f21b9c0fe79cde6a4c7a011f/lwjgl-jemalloc-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/6a4ea7a9095e1684a9c6adb2c49d28daae2b6e45/lwjgl-jemalloc-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/ba1f3fed0ee4be0217eaa41c5bbfb4b9b1383c33/lwjgl-jemalloc-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/6a4ea7a9095e1684a9c6adb2c49d28daae2b6e45/lwjgl-jemalloc-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.3/f6063b6e0f23be483c5c88d84ce51b39dc69126c/lwjgl-jemalloc-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/60a4ce24d71b3376ce53b50cfe3eaaf3277dd727/lwjgl-openal-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/cf83862ae95d98496b26915024c7e666d8ab1c8f/lwjgl-openal-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/60a4ce24d71b3376ce53b50cfe3eaaf3277dd727/lwjgl-openal-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/8e0615235116b9e4160dfe87bec90f5f6378bf72/lwjgl-openal-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/60a4ce24d71b3376ce53b50cfe3eaaf3277dd727/lwjgl-openal-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.3/87b8d5050e3adb46bb58fe1cb2669a4a48fce10d/lwjgl-openal-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/3353d0b2cac91b84088b01711d33cc403893450b/lwjgl-opengl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/e6c1eec8be8a71951b830a4d69efc01c6531900c/lwjgl-opengl-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/3353d0b2cac91b84088b01711d33cc403893450b/lwjgl-opengl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/65e956d3735a1abdc82eff4baec1b61174697d4b/lwjgl-opengl-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/3353d0b2cac91b84088b01711d33cc403893450b/lwjgl-opengl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.3/d32d833dcaa2f355a886eaf21f0408b5f03241d/lwjgl-opengl-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/37c2b604ec4a5ee356dd734dc8167a193e8874ed/lwjgl-stb-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/1d9facdf6541de114b0f963be33505b7679c78cb/lwjgl-stb-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/37c2b604ec4a5ee356dd734dc8167a193e8874ed/lwjgl-stb-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/a584ab44de569708871f0a79561f4d8c37487f2c/lwjgl-stb-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/37c2b604ec4a5ee356dd734dc8167a193e8874ed/lwjgl-stb-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.3/b5c874687b9aac1a936501d4ed2c49567fd1b575/lwjgl-stb-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/dcda55223f2f940654d222bf4371baa969c60bb9/lwjgl-tinyfd-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/a6697981b0449a5087c1d546fc08b4f73e8f98c9/lwjgl-tinyfd-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/dcda55223f2f940654d222bf4371baa969c60bb9/lwjgl-tinyfd-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/a88c494f3006eb91a7433b12a3a55a9a6c20788b/lwjgl-tinyfd-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/dcda55223f2f940654d222bf4371baa969c60bb9/lwjgl-tinyfd-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.3/c336c84ee88cccb495c6ffa112395509e7378e8a/lwjgl-tinyfd-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/e5949c7bbf4f839afe6d1a631e9b75f63c559e0/lwjgl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/a5ed18a2b82fc91b81f40d717cb1f64c9dcb0540/lwjgl-3.3.3-natives-windows.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/e5949c7bbf4f839afe6d1a631e9b75f63c559e0/lwjgl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/e9aca8c5479b520a2a7f0d542a118140e812c5e8/lwjgl-3.3.3-natives-windows-arm64.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/e5949c7bbf4f839afe6d1a631e9b75f63c559e0/lwjgl-3.3.3-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.3/9e670718e050aeaeea0c2d5b907cffb142f2e58f/lwjgl-3.3.3-natives-windows-x86.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jline/jline-reader/3.20.0/94a832964241f634f3b4a872e55241678227f28b/jline-reader-3.20.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jline/jline-reader/3.20.0/8f15415b022a25b473e8e16c28ae913186ffb9c4/jline-reader-3.20.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jline/jline-terminal/3.20.0/2ca86e8c3a4ba5d6a3cb629afd9180c58076609/jline-terminal-3.20.0-sources.jar" kind="lib" path="C:/Users/Newport/.gradle/caches/modules-2/files-2.1/org.jline/jline-terminal/3.20.0/d0ddcc708ddf527a3454c941b7b9225cc83a15ff/jline-terminal-3.20.0.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Newport/.gradle/caches/fabric-loom/1.21.8/net.fabricmc.yarn.1_21_8.1.21.8+build.1-v2/mappings.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="client,main,test"/>
+		</attributes>
+	</classpathentry>
+</classpath>

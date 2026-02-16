@@ -7,25 +7,24 @@ import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 
 public class WebAura extends Module {
     private final CategorySetting general;
@@ -117,8 +116,8 @@ public class WebAura extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         int webSlot = getWebSlot();
         if (webSlot == -1) return;
@@ -135,8 +134,8 @@ public class WebAura extends Module {
     }
 
     private void handleSelfMode(int webSlot) {
-        Minecraft mc = Minecraft.getInstance();
-        BlockPos playerPos = mc.player.blockPosition();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        BlockPos playerPos = mc.player.getBlockPos();
 
         int oldSlot = mc.player.getInventory().getSelectedSlot();
         mc.player.getInventory().setSelectedSlot(webSlot);
@@ -144,16 +143,16 @@ public class WebAura extends Module {
         if (feet.isEnabled()) {
             placeWeb(playerPos);
             if (doubles.isEnabled()) {
-                placeWeb(playerPos.above());
+                placeWeb(playerPos.up());
             }
         }
 
         if (surround.isEnabled()) {
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
-                BlockPos surroundPos = playerPos.relative(dir);
+            for (Direction dir : Direction.Type.HORIZONTAL) {
+                BlockPos surroundPos = playerPos.offset(dir);
                 placeWeb(surroundPos);
                 if (doubles.isEnabled()) {
-                    placeWeb(surroundPos.above());
+                    placeWeb(surroundPos.up());
                 }
             }
         }
@@ -165,10 +164,10 @@ public class WebAura extends Module {
         updateTarget();
         if (target == null) return;
 
-        Vec3 targetPos = target.position();
+        Vec3d targetPos = target.getPos();
 
         if (predictMovement.isEnabled()) {
-            Vec3 vel = target.getDeltaMovement();
+            Vec3d vel = target.getVelocity();
             double tickMultiplier = predictTicks.getValue();
             targetPos = targetPos.add(
                     vel.x * tickMultiplier,
@@ -177,36 +176,36 @@ public class WebAura extends Module {
             );
         }
 
-        BlockPos basePos = BlockPos.containing(targetPos);
+        BlockPos basePos = BlockPos.ofFloored(targetPos);
 
-        int oldSlot = Minecraft.getInstance().player.getInventory().getSelectedSlot();
-        Minecraft.getInstance().player.getInventory().setSelectedSlot(webSlot);
+        int oldSlot = MinecraftClient.getInstance().player.getInventory().getSelectedSlot();
+        MinecraftClient.getInstance().player.getInventory().setSelectedSlot(webSlot);
 
         if (feet.isEnabled()) {
             placeWeb(basePos);
             if (doubles.isEnabled()) {
-                placeWeb(basePos.above());
+                placeWeb(basePos.up());
             }
         }
 
         if (surround.isEnabled()) {
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
-                BlockPos surroundPos = basePos.relative(dir);
+            for (Direction dir : Direction.Type.HORIZONTAL) {
+                BlockPos surroundPos = basePos.offset(dir);
                 placeWeb(surroundPos);
                 if (doubles.isEnabled()) {
-                    placeWeb(surroundPos.above());
+                    placeWeb(surroundPos.up());
                 }
             }
         }
 
-        Minecraft.getInstance().player.getInventory().setSelectedSlot(oldSlot);
+        MinecraftClient.getInstance().player.getInventory().setSelectedSlot(oldSlot);
     }
 
     private void updateTarget() {
-        Minecraft mc = Minecraft.getInstance();
-        Vec3 playerPos = mc.player.getEyePosition();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        Vec3d playerPos = mc.player.getEyePos();
 
-        AABB searchBox = new AABB(
+        Box searchBox = new Box(
                 playerPos.x - range.getValue(),
                 playerPos.y - range.getValue(),
                 playerPos.z - range.getValue(),
@@ -215,21 +214,21 @@ public class WebAura extends Module {
                 playerPos.z + range.getValue()
         );
 
-        List<Entity> entities = mc.level.getEntities(mc.player, searchBox);
+        List<Entity> entities = mc.world.getOtherEntities(mc.player, searchBox);
 
         Stream<Entity> entityStream = entities.stream()
                 .filter(e -> e instanceof LivingEntity)
                 .filter(e -> e != mc.player)
                 .filter(e -> ((LivingEntity) e).isAlive())
-                .filter(e -> !((LivingEntity) e).isDeadOrDying())
+                .filter(e -> !((LivingEntity) e).isDead())
                 .filter(e -> {
                     if (onlyPlayers.isEnabled()) {
-                        return e instanceof Player;
+                        return e instanceof PlayerEntity;
                     }
                     return true;
                 })
                 .filter(e -> {
-                    if (e instanceof Player player) {
+                    if (e instanceof PlayerEntity player) {
                         return !TargetManager.INSTANCE.isFriend(player.getName().getString());
                     }
                     return TargetManager.INSTANCE.isValidTarget(e);
@@ -243,36 +242,36 @@ public class WebAura extends Module {
         } else {
             target = (LivingEntity) entityStream
                     .min(Comparator.comparingDouble(e -> {
-                        Vec3 targetVec = e.getEyePosition();
+                        Vec3d targetVec = e.getEyePos();
                         float[] rot = calculateRotation(playerPos, targetVec);
-                        float yawDiff = Math.abs(rot[0] - mc.player.getYRot());
-                        float pitchDiff = Math.abs(rot[1] - mc.player.getXRot());
+                        float yawDiff = Math.abs(rot[0] - mc.player.getYaw());
+                        float pitchDiff = Math.abs(rot[1] - mc.player.getPitch());
                         return yawDiff + pitchDiff;
                     }))
                     .orElse(null);
         }
     }
 
-    private boolean isInRange(Vec3 pos, Entity entity, Minecraft mc) {
-        Vec3 targetVec = entity.getEyePosition();
+    private boolean isInRange(Vec3d pos, Entity entity, MinecraftClient mc) {
+        Vec3d targetVec = entity.getEyePos();
         double dist = pos.distanceTo(targetVec);
 
         if (dist > range.getValue()) {
             return false;
         }
 
-        BlockHitResult result = mc.level.clip(new ClipContext(
+        BlockHitResult result = mc.world.raycast(new RaycastContext(
                 pos,
                 targetVec,
-                ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE,
+                RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE,
                 mc.player
         ));
 
         return result.getType() == HitResult.Type.MISS || dist <= wallsRange.getValue();
     }
 
-    private float[] calculateRotation(Vec3 from, Vec3 to) {
+    private float[] calculateRotation(Vec3d from, Vec3d to) {
         double diffX = to.x - from.x;
         double diffY = to.y - from.y;
         double diffZ = to.z - from.z;
@@ -286,42 +285,42 @@ public class WebAura extends Module {
     }
 
     private void placeWeb(BlockPos pos) {
-        Minecraft mc = Minecraft.getInstance();
-        BlockState state = mc.level.getBlockState(pos);
+        MinecraftClient mc = MinecraftClient.getInstance();
+        BlockState state = mc.world.getBlockState(pos);
 
         if (state.getBlock() == Blocks.COBWEB) return;
-        if (!state.canBeReplaced()) return;
+        if (!state.isReplaceable()) return;
 
-        double dist = mc.player.distanceToSqr(Vec3.atCenterOf(pos));
+        double dist = mc.player.squaredDistanceTo(Vec3d.ofCenter(pos));
         if (dist > range.getValue() * range.getValue()) return;
 
         if (rotate.isEnabled()) {
             lookAt(pos);
         }
 
-        BlockPos belowPos = pos.below();
-        Vec3 hitVec = new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        BlockPos belowPos = pos.down();
+        Vec3d hitVec = new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, belowPos, false);
 
-        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hitResult);
-        mc.player.swing(InteractionHand.MAIN_HAND);
+        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hitResult);
+        mc.player.swingHand(Hand.MAIN_HAND);
     }
 
     private void lookAt(BlockPos pos) {
-        Minecraft mc = Minecraft.getInstance();
-        Vec3 eyePos = mc.player.getEyePosition();
-        Vec3 target = Vec3.atCenterOf(pos);
+        MinecraftClient mc = MinecraftClient.getInstance();
+        Vec3d eyePos = mc.player.getEyePos();
+        Vec3d target = Vec3d.ofCenter(pos);
 
         float[] rotation = calculateRotation(eyePos, target);
-        mc.player.setYRot(rotation[0]);
-        mc.player.setXRot(rotation[1]);
+        mc.player.setYaw(rotation[0]);
+        mc.player.setPitch(rotation[1]);
     }
 
     private int getWebSlot() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
 
         for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getItem(i).getItem() == Items.COBWEB) {
+            if (mc.player.getInventory().getStack(i).getItem() == Items.COBWEB) {
                 return i;
             }
         }

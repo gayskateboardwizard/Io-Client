@@ -4,7 +4,7 @@ import io.client.Category;
 import io.client.Module;
 import io.client.settings.NumberSetting;
 import io.client.settings.StringSetting;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 public class MessageSpammer extends Module {
     private final NumberSetting delaySetting = new NumberSetting("Tick delay", 200, 1, 1200);
@@ -19,14 +19,14 @@ public class MessageSpammer extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
-        int currentTick = (int) mc.level.getGameTime();
+        int currentTick = (int) mc.world.getTime();
         int currentDelay = (int) delaySetting.getValue();
 
         if (currentTick - lastTick >= currentDelay) {
-            mc.player.connection.sendChat(message.getValue());
+            mc.player.networkHandler.sendChatMessage(message.getValue());
             lastTick = currentTick;
         }
     }

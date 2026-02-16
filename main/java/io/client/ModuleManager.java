@@ -8,8 +8,6 @@ import io.client.MacroManager;
 import io.client.modules.*;
 import io.client.settings.*;
 import org.lwjgl.glfw.GLFW;
-import net.minecraft.client.Minecraft;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import net.minecraft.client.MinecraftClient;
 
 public class ModuleManager {
     public static final ModuleManager INSTANCE = new ModuleManager();
@@ -70,6 +69,7 @@ public class ModuleManager {
         modules.add(new ThemeChanger());
         modules.add(new HUD());
         modules.add(new ESP());
+        modules.add(new Chams());
         modules.add(new ArsonAura());
         modules.add(new Surround());
         modules.add(new Burrow());
@@ -108,7 +108,7 @@ public class ModuleManager {
     }
 
     private File getFile(String fileName) {
-        Path gameDir = Minecraft.getInstance().gameDirectory.toPath();
+        Path gameDir = MinecraftClient.getInstance().runDirectory.toPath();
         File clientFolder = gameDir.resolve(CLIENT_FOLDER_NAME).toFile();
         if (!clientFolder.exists()) clientFolder.mkdirs();
         return clientFolder.toPath().resolve(fileName).toFile();
@@ -375,14 +375,14 @@ public class ModuleManager {
     }
 
     public File getConfigDir() {
-        Path gameDir = Minecraft.getInstance().gameDirectory.toPath();
+        Path gameDir = MinecraftClient.getInstance().runDirectory.toPath();
         File clientFolder = gameDir.resolve(CLIENT_FOLDER_NAME).toFile();
         if (!clientFolder.exists()) clientFolder.mkdirs();
         return clientFolder;
     }
 
     public void onKeyPress(int key) {
-        long window = Minecraft.getInstance().getWindow().getWindow();
+        long window = MinecraftClient.getInstance().getWindow().getHandle();
 
         for (Module module : modules) {
             if (module instanceof io.client.modules.Macro macro) {

@@ -4,11 +4,10 @@ import io.client.Category;
 import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class Restock extends Module {
     private final NumberSetting threshold;
@@ -40,15 +39,15 @@ public class Restock extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         tickCounter++;
         if (tickCounter < delay.getValue()) return;
         tickCounter = 0;
 
         for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-            ItemStack hotbarStack = mc.player.getInventory().getItem(hotbarSlot);
+            ItemStack hotbarStack = mc.player.getInventory().getStack(hotbarSlot);
 
             if (hotbarStack.isEmpty()) continue;
 
@@ -67,15 +66,15 @@ public class Restock extends Module {
         if (stack.isEmpty()) return false;
 
         if (stackables.isEnabled() && stack.isStackable()) {
-            int maxStackSize = stack.getMaxStackSize();
+            int maxStackSize = stack.getMaxCount();
             int currentCount = stack.getCount();
             float percentage = (currentCount / (float) maxStackSize) * 100.0F;
             return percentage <= threshold.getValue();
         }
 
-        if (weapons.isEnabled() && stack.isDamageableItem()) {
+        if (weapons.isEnabled() && stack.isDamageable()) {
             int maxDamage = stack.getMaxDamage();
-            int currentDamage = stack.getDamageValue();
+            int currentDamage = stack.getDamage();
             int durabilityLeft = maxDamage - currentDamage;
             float percentage = (durabilityLeft / (float) maxDamage) * 100.0F;
             return percentage <= threshold.getValue();
@@ -84,36 +83,36 @@ public class Restock extends Module {
         return false;
     }
 
-    private void restockItem(Minecraft mc, int hotbarSlot, ItemStack hotbarStack) {
+    private void restockItem(MinecraftClient mc, int hotbarSlot, ItemStack hotbarStack) {
         for (int invSlot = 9; invSlot < 36; invSlot++) {
-            ItemStack invStack = mc.player.getInventory().getItem(invSlot);
+            ItemStack invStack = mc.player.getInventory().getStack(invSlot);
 
             if (invStack.isEmpty()) continue;
 
             if (stackables.isEnabled() && hotbarStack.isStackable()) {
-                if (ItemStack.isSameItemSameComponents(hotbarStack, invStack)) {
-                    mc.gameMode.handleInventoryMouseClick(
-                            mc.player.inventoryMenu.containerId,
+                if (ItemStack.areItemsAndComponentsEqual(hotbarStack, invStack)) {
+                    mc.interactionManager.clickSlot(
+                            mc.player.playerScreenHandler.syncId,
                             invSlot,
                             0,
-                            ClickType.QUICK_MOVE,
+                            SlotActionType.QUICK_MOVE,
                             mc.player
                     );
                     return;
                 }
             }
 
-            if (weapons.isEnabled() && hotbarStack.isDamageableItem()) {
-                if (ItemStack.isSameItemSameComponents(invStack, hotbarStack)) {
-                    int hotbarDurability = hotbarStack.getMaxDamage() - hotbarStack.getDamageValue();
-                    int invDurability = invStack.getMaxDamage() - invStack.getDamageValue();
+            if (weapons.isEnabled() && hotbarStack.isDamageable()) {
+                if (ItemStack.areItemsAndComponentsEqual(invStack, hotbarStack)) {
+                    int hotbarDurability = hotbarStack.getMaxDamage() - hotbarStack.getDamage();
+                    int invDurability = invStack.getMaxDamage() - invStack.getDamage();
 
                     if (invDurability > hotbarDurability) {
-                        mc.gameMode.handleInventoryMouseClick(
-                                mc.player.inventoryMenu.containerId,
+                        mc.interactionManager.clickSlot(
+                                mc.player.playerScreenHandler.syncId,
                                 invSlot,
                                 hotbarSlot,
-                                ClickType.SWAP,
+                                SlotActionType.SWAP,
                                 mc.player
                         );
                         return;
@@ -123,7 +122,7 @@ public class Restock extends Module {
         }
     }
 
-    private void checkAndRestockArmor(Minecraft mc) {
+    private void checkAndRestockArmor(MinecraftClient mc) {
         EquipmentSlot[] armorSlots = {
                 EquipmentSlot.FEET,
                 EquipmentSlot.LEGS,
@@ -132,34 +131,34 @@ public class Restock extends Module {
         };
 
         for (EquipmentSlot slot : armorSlots) {
-            ItemStack currentArmor = mc.player.getItemBySlot(slot);
+            ItemStack currentArmor = mc.player.getEquippedStack(slot);
 
             if (currentArmor.isEmpty()) continue;
-            if (!currentArmor.isDamageableItem()) continue;
+            if (!currentArmor.isDamageable()) continue;
 
             int maxDamage = currentArmor.getMaxDamage();
-            int currentDamage = currentArmor.getDamageValue();
+            int currentDamage = currentArmor.getDamage();
             int durabilityLeft = maxDamage - currentDamage;
             float percentage = (durabilityLeft / (float) maxDamage) * 100.0F;
 
             if (percentage <= threshold.getValue()) {
                 for (int invSlot = 9; invSlot < 36; invSlot++) {
-                    ItemStack invStack = mc.player.getInventory().getItem(invSlot);
+                    ItemStack invStack = mc.player.getInventory().getStack(invSlot);
 
                     if (invStack.isEmpty()) continue;
-                    if (!invStack.isDamageableItem()) continue;
+                    if (!invStack.isDamageable()) continue;
 
-                    if (ItemStack.isSameItemSameComponents(invStack, currentArmor)) {
-                        int invDurability = invStack.getMaxDamage() - invStack.getDamageValue();
-                        int currentDurabilityLeft = currentArmor.getMaxDamage() - currentArmor.getDamageValue();
+                    if (ItemStack.areItemsAndComponentsEqual(invStack, currentArmor)) {
+                        int invDurability = invStack.getMaxDamage() - invStack.getDamage();
+                        int currentDurabilityLeft = currentArmor.getMaxDamage() - currentArmor.getDamage();
 
                         if (invDurability > currentDurabilityLeft) {
-                            int armorSlotId = 8 - slot.getIndex();
-                            mc.gameMode.handleInventoryMouseClick(
-                                    mc.player.inventoryMenu.containerId,
+                            int armorSlotId = 8 - slot.getEntitySlotId();
+                            mc.interactionManager.clickSlot(
+                                    mc.player.playerScreenHandler.syncId,
                                     invSlot,
                                     armorSlotId - 36,
-                                    ClickType.SWAP,
+                                    SlotActionType.SWAP,
                                     mc.player
                             );
                             return;

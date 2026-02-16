@@ -4,14 +4,14 @@ import io.client.Category;
 import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.BlockItem;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public class Scaffold extends Module {
     public final BooleanSetting rotate = new BooleanSetting("Rotate", true);
@@ -38,11 +38,11 @@ public class Scaffold extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
 
 
-        if (!(mc.player.getMainHandItem().getItem() instanceof BlockItem)) return;
+        if (!(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
 
 
         BlockPos targetPos;
@@ -61,13 +61,13 @@ public class Scaffold extends Module {
         }
 
 
-        if (mc.options.keyJump.isDown() && !isMoving()) {
+        if (mc.options.jumpKey.isPressed() && !isMoving()) {
             lockYLevel = (int) Math.floor(mc.player.getY() - 1);
         }
 
 
-        BlockState targetState = mc.level.getBlockState(targetPos);
-        if (!targetState.isAir() && !targetState.canBeReplaced()) return;
+        BlockState targetState = mc.world.getBlockState(targetPos);
+        if (!targetState.isAir() && !targetState.isReplaceable()) return;
 
 
         BlockPosWithFacing placeInfo = findPlaceablePosition(mc, targetPos);
@@ -75,42 +75,42 @@ public class Scaffold extends Module {
 
 
         if (rotate.isEnabled()) {
-            Vec3 hitVec = Vec3.atCenterOf(placeInfo.pos).add(Vec3.atLowerCornerOf(placeInfo.facing.getUnitVec3i()).scale(0.5));
-            float[] angles = calculateAngles(mc.player.getEyePosition(), hitVec);
-            mc.player.setYRot(angles[0]);
-            mc.player.setXRot(angles[1]);
+            Vec3d hitVec = Vec3d.ofCenter(placeInfo.pos).add(Vec3d.of(placeInfo.facing.getVector()).multiply(0.5));
+            float[] angles = calculateAngles(mc.player.getEyePos(), hitVec);
+            mc.player.setYaw(angles[0]);
+            mc.player.setPitch(angles[1]);
         }
 
 
-        if (tower.isEnabled() && mc.options.keyJump.isDown() && !isMoving() && mc.player.onGround()) {
+        if (tower.isEnabled() && mc.options.jumpKey.isPressed() && !isMoving() && mc.player.isOnGround()) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastTowerTime > 1500) {
-                mc.player.setDeltaMovement(mc.player.getDeltaMovement().x, towerSpeed.getValue(), mc.player.getDeltaMovement().z);
+                mc.player.setVelocity(mc.player.getVelocity().x, towerSpeed.getValue(), mc.player.getVelocity().z);
                 lastTowerTime = currentTime;
             }
         }
 
 
-        Vec3 hitVec = Vec3.atCenterOf(placeInfo.pos).add(Vec3.atLowerCornerOf(placeInfo.facing.getUnitVec3i()).scale(0.5));
+        Vec3d hitVec = Vec3d.ofCenter(placeInfo.pos).add(Vec3d.of(placeInfo.facing.getVector()).multiply(0.5));
         BlockHitResult hitResult = new BlockHitResult(hitVec, placeInfo.facing, placeInfo.pos, false);
 
-        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hitResult);
-        mc.player.swing(InteractionHand.MAIN_HAND);
+        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hitResult);
+        mc.player.swingHand(Hand.MAIN_HAND);
 
 
         lockYLevel = targetPos.getY();
     }
 
-    private BlockPosWithFacing findPlaceablePosition(Minecraft mc, BlockPos targetPos) {
+    private BlockPosWithFacing findPlaceablePosition(MinecraftClient mc, BlockPos targetPos) {
 
         Direction[] directions = {Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP};
 
         for (Direction dir : directions) {
-            BlockPos neighborPos = targetPos.relative(dir);
-            BlockState neighborState = mc.level.getBlockState(neighborPos);
+            BlockPos neighborPos = targetPos.offset(dir);
+            BlockState neighborState = mc.world.getBlockState(neighborPos);
 
 
-            if (!neighborState.isAir() && !neighborState.canBeReplaced()) {
+            if (!neighborState.isAir() && !neighborState.isReplaceable()) {
                 return new BlockPosWithFacing(neighborPos, dir.getOpposite());
             }
         }
@@ -121,15 +121,15 @@ public class Scaffold extends Module {
                 for (int z = -2; z <= 2; z++) {
                     if (x == 0 && y == 0 && z == 0) continue;
 
-                    BlockPos extendedPos = targetPos.offset(x, y, z);
-                    BlockState extendedState = mc.level.getBlockState(extendedPos);
+                    BlockPos extendedPos = targetPos.add(x, y, z);
+                    BlockState extendedState = mc.world.getBlockState(extendedPos);
 
-                    if (!extendedState.isAir() && !extendedState.canBeReplaced()) {
+                    if (!extendedState.isAir() && !extendedState.isReplaceable()) {
 
                         for (Direction dir : directions) {
-                            BlockPos checkPos = extendedPos.relative(dir);
-                            BlockState checkState = mc.level.getBlockState(checkPos);
-                            if (checkState.isAir() || checkState.canBeReplaced()) {
+                            BlockPos checkPos = extendedPos.offset(dir);
+                            BlockState checkState = mc.world.getBlockState(checkPos);
+                            if (checkState.isAir() || checkState.isReplaceable()) {
                                 return new BlockPosWithFacing(extendedPos, dir.getOpposite());
                             }
                         }
@@ -141,7 +141,7 @@ public class Scaffold extends Module {
         return null;
     }
 
-    private float[] calculateAngles(Vec3 from, Vec3 to) {
+    private float[] calculateAngles(Vec3d from, Vec3d to) {
         double diffX = to.x - from.x;
         double diffY = to.y - from.y;
         double diffZ = to.z - from.z;
@@ -155,8 +155,8 @@ public class Scaffold extends Module {
     }
 
     private boolean isMoving() {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.options.keyUp.isDown() || mc.options.keyDown.isDown() || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        return mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() || mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed();
     }
 
     private static class BlockPosWithFacing {

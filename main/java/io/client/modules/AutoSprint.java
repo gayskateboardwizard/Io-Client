@@ -2,8 +2,8 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 
 public class AutoSprint extends Module {
 
@@ -13,29 +13,29 @@ public class AutoSprint extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
-        LocalPlayer player = mc.player;
+        ClientPlayerEntity player = mc.player;
 
-        boolean canSprint = mc.options.keyUp.isDown() &&
-                !player.isCrouching() &&
-                player.getFoodData().getFoodLevel() > 6.0f;
+        boolean canSprint = mc.options.forwardKey.isPressed() &&
+                !player.isInSneakingPose() &&
+                player.getHungerManager().getFoodLevel() > 6.0f;
 
 
         if (canSprint) {
-            mc.options.keySprint.setDown(true);
+            mc.options.sprintKey.setPressed(true);
         } else {
-            mc.options.keySprint.setDown(false);
+            mc.options.sprintKey.setPressed(false);
         }
     }
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
-            if (mc.options.keySprint.isDown()) {
-                mc.options.keySprint.setDown(false);
+            if (mc.options.sprintKey.isPressed()) {
+                mc.options.sprintKey.setPressed(false);
             }
         }
         if (mc.player != null && mc.player.isSprinting()) {

@@ -2,7 +2,7 @@ package io.client.commands;
 
 import io.client.ModuleManager;
 import io.client.modules.HUD;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 public class ChordTargetCommand implements Command {
     @Override
@@ -14,7 +14,7 @@ public class ChordTargetCommand implements Command {
         }
 
         if (args.length == 0) {
-            Minecraft mc = Minecraft.getInstance();
+            MinecraftClient mc = MinecraftClient.getInstance();
             if (mc.player != null) {
                 double x = mc.player.getX();
                 double y = mc.player.getY();

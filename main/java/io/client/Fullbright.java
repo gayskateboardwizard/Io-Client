@@ -1,14 +1,14 @@
 package io.client;
 
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 
 public class Fullbright extends Module {
 
     private static final double MAX_GAMMA = 10000000000000000000.0;
-    private final Minecraft mc = Minecraft.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
     private double originalGamma;
     private RadioSetting modeSetting;
 
@@ -27,9 +27,9 @@ public class Fullbright extends Module {
         if (mc.player == null || mc.options == null) return;
 
         if (modeSetting.isSelected("Gamma")) {
-            this.originalGamma = mc.options.gamma().get();
-            mc.options.gamma().set(MAX_GAMMA);
-            mc.options.save();
+            this.originalGamma = mc.options.getGamma().getValue();
+            mc.options.getGamma().setValue(MAX_GAMMA);
+            mc.options.write();
         }
     }
 
@@ -38,12 +38,12 @@ public class Fullbright extends Module {
         if (mc.player == null || mc.options == null) return;
 
         if (modeSetting.isSelected("Gamma")) {
-            mc.options.gamma().set(this.originalGamma);
-            mc.options.save();
+            mc.options.getGamma().setValue(this.originalGamma);
+            mc.options.write();
         }
 
         if (modeSetting.isSelected("Potion")) {
-            mc.player.removeEffect(MobEffects.NIGHT_VISION);
+            mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION);
         }
     }
 
@@ -52,8 +52,8 @@ public class Fullbright extends Module {
         if (mc.player == null) return;
 
         if (modeSetting.isSelected("Potion")) {
-            if (!mc.player.hasEffect(MobEffects.NIGHT_VISION)) {
-                mc.player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, -1, 0));
+            if (!mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) {
+                mc.player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, -1, 0));
             }
         }
     }

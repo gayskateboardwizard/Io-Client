@@ -2,9 +2,9 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 
 public class AutoMine extends Module {
 
@@ -14,27 +14,27 @@ public class AutoMine extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.gameMode == null) return;
-        HitResult hitResult = mc.hitResult;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.interactionManager == null) return;
+        HitResult hitResult = mc.crosshairTarget;
 
         if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
             BlockHitResult blockHit = (BlockHitResult) hitResult;
 
-            mc.gameMode.startDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection());
+            mc.interactionManager.attackBlock(blockHit.getBlockPos(), blockHit.getSide());
 
-            mc.gameMode.continueDestroyBlock(blockHit.getBlockPos(), blockHit.getDirection());
+            mc.interactionManager.updateBlockBreakingProgress(blockHit.getBlockPos(), blockHit.getSide());
 
         } else {
-            mc.gameMode.stopDestroyBlock();
+            mc.interactionManager.cancelBlockBreaking();
         }
     }
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.gameMode != null) {
-            mc.gameMode.stopDestroyBlock();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.interactionManager != null) {
+            mc.interactionManager.cancelBlockBreaking();
         }
     }
 }

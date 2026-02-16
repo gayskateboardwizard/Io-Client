@@ -3,11 +3,10 @@ package io.client.modules;
 import io.client.Category;
 import io.client.Module;
 import io.client.settings.NumberSetting;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.world.item.ItemStack;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.Map;
@@ -40,9 +39,9 @@ public class ExtraItemInfo extends Module {
     public static int getItemSize(ItemStack stack) {
         try {
             var result = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, stack).result();
-            if (result.isPresent() && result.get() instanceof CompoundTag compound) {
+            if (result.isPresent() && result.get() instanceof NbtCompound compound) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                NbtIo.write(compound, new DataOutputStream(baos));
+                NbtIo.writeCompound(compound, new DataOutputStream(baos));
                 return baos.size();
             }
         } catch (Exception ignored) {

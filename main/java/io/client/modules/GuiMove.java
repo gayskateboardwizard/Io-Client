@@ -3,10 +3,10 @@ package io.client.modules;
 import io.client.Category;
 import io.client.Module;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
 public class GuiMove extends Module {
@@ -20,32 +20,32 @@ public class GuiMove extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        LocalPlayer player = mc.player;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ClientPlayerEntity player = mc.player;
 
         if (player == null) return;
         if (player.getVehicle() != null) return;
-        if (mc.screen == null) return;
-        if (mc.screen instanceof ChatScreen) return;
+        if (mc.currentScreen == null) return;
+        if (mc.currentScreen instanceof ChatScreen) return;
 
-        float yaw = player.getYRot();
-        Vec3 motion = new Vec3(0, player.getDeltaMovement().y, 0);
+        float yaw = player.getYaw();
+        Vec3d motion = new Vec3d(0, player.getVelocity().y, 0);
 
-        if (isKeyDown(GLFW.GLFW_KEY_W)) motion = motion.add(forwardVec(yaw).scale(speed.getValue()));
-        if (isKeyDown(GLFW.GLFW_KEY_S)) motion = motion.add(forwardVec(yaw).scale(-speed.getValue()));
-        if (isKeyDown(GLFW.GLFW_KEY_A)) motion = motion.add(forwardVec(yaw - 90).scale(speed.getValue()));
-        if (isKeyDown(GLFW.GLFW_KEY_D)) motion = motion.add(forwardVec(yaw + 90).scale(speed.getValue()));
+        if (isKeyDown(GLFW.GLFW_KEY_W)) motion = motion.add(forwardVec(yaw).multiply(speed.getValue()));
+        if (isKeyDown(GLFW.GLFW_KEY_S)) motion = motion.add(forwardVec(yaw).multiply(-speed.getValue()));
+        if (isKeyDown(GLFW.GLFW_KEY_A)) motion = motion.add(forwardVec(yaw - 90).multiply(speed.getValue()));
+        if (isKeyDown(GLFW.GLFW_KEY_D)) motion = motion.add(forwardVec(yaw + 90).multiply(speed.getValue()));
 
-        player.setDeltaMovement(motion);
-        player.hurtMarked = true;
+        player.setVelocity(motion);
+        player.velocityModified = true;
     }
 
     private boolean isKeyDown(int glfwKey) {
-        return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), glfwKey) == GLFW.GLFW_PRESS;
+        return GLFW.glfwGetKey(MinecraftClient.getInstance().getWindow().getHandle(), glfwKey) == GLFW.GLFW_PRESS;
     }
 
-    private Vec3 forwardVec(float yaw) {
+    private Vec3d forwardVec(float yaw) {
         double rad = Math.toRadians(yaw);
-        return new Vec3(-Math.sin(rad), 0, Math.cos(rad));
+        return new Vec3d(-Math.sin(rad), 0, Math.cos(rad));
     }
 }

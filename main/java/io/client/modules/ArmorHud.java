@@ -7,13 +7,12 @@ import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
-
 import java.awt.*;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.util.math.MathHelper;
 
 public class ArmorHud extends Module {
     private final BooleanSetting percentIcon;
@@ -77,52 +76,52 @@ public class ArmorHud extends Module {
         addSetting(lowColorCategory);
     }
 
-    public void render(GuiGraphics context, float tickDelta) {
-        Minecraft mc = Minecraft.getInstance();
+    public void render(DrawContext context, float tickDelta) {
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
-        int width = mc.getWindow().getGuiScaledWidth();
-        int height = mc.getWindow().getGuiScaledHeight();
+        int width = mc.getWindow().getScaledWidth();
+        int height = mc.getWindow().getScaledHeight();
 
         int centerX = width / 2;
         int iteration = 0;
-        int y = height - 55 - (mc.player.isEyeInFluid(FluidTags.WATER) ? 10 : 0);
+        int y = height - 55 - (mc.player.isSubmergedIn(FluidTags.WATER) ? 10 : 0);
 
         for (int i = 0; i < 4; i++) {
-            ItemStack armor = mc.player.getInventory().getItem(36 + i);
+            ItemStack armor = mc.player.getInventory().getStack(36 + i);
             iteration++;
             if (armor.isEmpty()) continue;
 
             int x = centerX - 90 + (9 - iteration) * 20 + 2;
 
-            context.renderItem(armor, x, y);
-            context.renderItemDecorations(mc.font, armor, x, y);
+            context.drawItem(armor, x, y);
+            context.drawStackOverlay(mc.textRenderer, armor, x, y);
 
             if (armor.getCount() > 1) {
                 String countStr = armor.getCount() + "";
-                context.drawString(mc.font, countStr,
-                        x + 19 - 2 - mc.font.width(countStr),
+                context.drawTextWithShadow(mc.textRenderer, countStr,
+                        x + 19 - 2 - mc.textRenderer.getWidth(countStr),
                         y + 9, 0xFFFFFF);
             }
 
-            if (armor.isDamageableItem() && !colorMode.isSelected("None")) {
-                float durabilityPercent = ((float) armor.getMaxDamage() - (float) armor.getDamageValue()) / (float) armor.getMaxDamage();
+            if (armor.isDamageable() && !colorMode.isSelected("None")) {
+                float durabilityPercent = ((float) armor.getMaxDamage() - (float) armor.getDamage()) / (float) armor.getMaxDamage();
                 int dmg = Math.round(durabilityPercent * 100);
 
                 String dmgStr = dmg + (percentIcon.isEnabled() ? "%" : "");
                 Color color = getArmorColor(dmg);
 
                 if (small.isEnabled()) {
-                    context.pose().pushMatrix();
-                    context.pose().scale(0.625f, 0.625f);
-                    context.drawString(mc.font, dmgStr,
-                            (int) (((x + 6) * 1.6f) - (mc.font.width(dmgStr) / 2.0f) * 0.6f),
+                    context.getMatrices().pushMatrix();
+                    context.getMatrices().scale(0.625f, 0.625f);
+                    context.drawTextWithShadow(mc.textRenderer, dmgStr,
+                            (int) (((x + 6) * 1.6f) - (mc.textRenderer.getWidth(dmgStr) / 2.0f) * 0.6f),
                             (int) ((y * 1.6f) - 11),
                             color.getRGB());
-                    context.pose().popMatrix();
+                    context.getMatrices().popMatrix();
                 } else {
-                    context.drawString(mc.font, dmgStr,
-                            (int) (x + 8 - mc.font.width(dmgStr) / 2.0f),
+                    context.drawTextWithShadow(mc.textRenderer, dmgStr,
+                            (int) (x + 8 - mc.textRenderer.getWidth(dmgStr) / 2.0f),
                             y - 9,
                             color.getRGB());
                 }
@@ -146,12 +145,12 @@ public class ArmorHud extends Module {
         if (dmg > 75) {
             return highColor;
         } else if (dmg > 66) {
-            float t = Mth.clamp(normalize(dmg, 66, 75), 0, 1);
+            float t = MathHelper.clamp(normalize(dmg, 66, 75), 0, 1);
             return interpolate(t, highColor, midColor);
         } else if (dmg > 50) {
             return midColor;
         } else if (dmg > 33) {
-            float t = Mth.clamp(normalize(dmg, 33, 50), 0, 1);
+            float t = MathHelper.clamp(normalize(dmg, 33, 50), 0, 1);
             return interpolate(t, midColor, lowColor);
         } else {
             return lowColor;

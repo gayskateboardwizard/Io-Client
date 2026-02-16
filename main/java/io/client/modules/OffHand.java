@@ -3,11 +3,11 @@ package io.client.modules;
 import io.client.Category;
 import io.client.Module;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class OffHand extends Module {
 
@@ -29,16 +29,16 @@ public class OffHand extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
 
-        if (mc.player == null || mc.getConnection() == null || mc.player.containerMenu == null) return;
+        if (mc.player == null || mc.getNetworkHandler() == null || mc.player.currentScreenHandler == null) return;
         if (isSwapping) return;
 
-        ItemStack offhand = mc.player.getOffhandItem();
+        ItemStack offhand = mc.player.getOffHandStack();
         String selectedItem = itemSetting.getSelectedOption();
 
 
-        if (!isCorrectItem(offhand, selectedItem) && mc.player.containerMenu.getCarried().isEmpty()) {
+        if (!isCorrectItem(offhand, selectedItem) && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
 
 
             if (selectedItem.equals("Empty")) {
@@ -60,13 +60,13 @@ public class OffHand extends Module {
     private boolean isCorrectItem(ItemStack stack, String itemType) {
         switch (itemType) {
             case "Totem":
-                return stack.is(Items.TOTEM_OF_UNDYING);
+                return stack.isOf(Items.TOTEM_OF_UNDYING);
             case "Crystal":
-                return stack.is(Items.END_CRYSTAL);
+                return stack.isOf(Items.END_CRYSTAL);
             case "Gapple":
-                return stack.is(Items.ENCHANTED_GOLDEN_APPLE);
+                return stack.isOf(Items.ENCHANTED_GOLDEN_APPLE);
             case "Obsidian":
-                return stack.is(Items.OBSIDIAN);
+                return stack.isOf(Items.OBSIDIAN);
             case "Empty":
                 return stack.isEmpty();
             default:
@@ -74,8 +74,8 @@ public class OffHand extends Module {
         }
     }
 
-    private int findItemSlot(Inventory inventory, String itemType) {
-        net.minecraft.world.item.Item targetItem = null;
+    private int findItemSlot(PlayerInventory inventory, String itemType) {
+        net.minecraft.item.Item targetItem = null;
 
         switch (itemType) {
             case "Totem":
@@ -96,7 +96,7 @@ public class OffHand extends Module {
 
 
         for (int i = 0; i < 36; i++) {
-            if (inventory.getItem(i).is(targetItem)) {
+            if (inventory.getStack(i).isOf(targetItem)) {
                 return i;
             }
         }
@@ -104,16 +104,16 @@ public class OffHand extends Module {
         return -1;
     }
 
-    private void swapItem(Minecraft mc, int inventorySlot) {
+    private void swapItem(MinecraftClient mc, int inventorySlot) {
         isSwapping = true;
 
         if (inventorySlot == -1) {
 
-            mc.gameMode.handleInventoryMouseClick(
-                    mc.player.containerMenu.containerId,
+            mc.interactionManager.clickSlot(
+                    mc.player.currentScreenHandler.syncId,
                     OFFHAND_CONTAINER_SLOT,
                     0,
-                    ClickType.PICKUP,
+                    SlotActionType.PICKUP,
                     mc.player
             );
         } else {
@@ -132,30 +132,30 @@ public class OffHand extends Module {
             }
 
 
-            mc.gameMode.handleInventoryMouseClick(
-                    mc.player.containerMenu.containerId,
+            mc.interactionManager.clickSlot(
+                    mc.player.currentScreenHandler.syncId,
                     containerSlot,
                     0,
-                    ClickType.PICKUP,
+                    SlotActionType.PICKUP,
                     mc.player
             );
 
 
-            mc.gameMode.handleInventoryMouseClick(
-                    mc.player.containerMenu.containerId,
+            mc.interactionManager.clickSlot(
+                    mc.player.currentScreenHandler.syncId,
                     OFFHAND_CONTAINER_SLOT,
                     0,
-                    ClickType.PICKUP,
+                    SlotActionType.PICKUP,
                     mc.player
             );
 
 
-            if (!mc.player.containerMenu.getCarried().isEmpty()) {
-                mc.gameMode.handleInventoryMouseClick(
-                        mc.player.containerMenu.containerId,
+            if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                mc.interactionManager.clickSlot(
+                        mc.player.currentScreenHandler.syncId,
                         containerSlot,
                         0,
-                        ClickType.PICKUP,
+                        SlotActionType.PICKUP,
                         mc.player
                 );
             }

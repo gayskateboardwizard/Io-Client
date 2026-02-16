@@ -7,22 +7,21 @@ import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 
 public class Killaura extends Module {
     public final CategorySetting general = new CategorySetting("General");
@@ -151,10 +150,10 @@ public class Killaura extends Module {
     @Override
     public void onEnable() {
         super.onEnable();
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
-            currentYaw = mc.player.getYRot();
-            currentPitch = mc.player.getXRot();
+            currentYaw = mc.player.getYaw();
+            currentPitch = mc.player.getPitch();
         }
         rotationRamp = 1.0f;
         microOffsetYaw = 0f;
@@ -164,13 +163,13 @@ public class Killaura extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         if (mc.player.isUsingItem()) {
             switch (multiTask.getSelectedOption()) {
                 case "Soft":
-                    if (!mc.player.getUsedItemHand().equals(InteractionHand.OFF_HAND)) {
+                    if (!mc.player.getActiveHand().equals(Hand.OFF_HAND)) {
                         target = null;
                         switchBack(mc);
                         reactionDelayActive = false;
@@ -245,7 +244,7 @@ public class Killaura extends Module {
 
         boolean canAttack = false;
         if (delayMode.getSelectedOption().equals("Cooldown")) {
-            canAttack = mc.player.getAttackStrengthScale(0.0F) >= 1.0F;
+            canAttack = mc.player.getAttackCooldownProgress(0.0F) >= 1.0F;
         } else {
             long currentTime = System.currentTimeMillis();
 
@@ -270,10 +269,10 @@ public class Killaura extends Module {
             }
         }
 
-        Vec3 targetVec = getAttackRotateVec(target, mc);
+        Vec3d targetVec = getAttackRotateVec(target, mc);
 
         if (enabled.isEnabled() && targetPrediction.isEnabled()) {
-            Vec3 velocity = target.getDeltaMovement();
+            Vec3d velocity = target.getVelocity();
             float predStr = predictionStrength.getValue();
 
             lastTargetVelocity[0] = lastTargetVelocity[0] * 0.7f + (float)velocity.x * 0.3f;
@@ -296,14 +295,14 @@ public class Killaura extends Module {
                 focusDelayActive = false;
             }
 
-            float[] rotation = calculateRotation(mc.player.getEyePosition(), targetVec);
+            float[] rotation = calculateRotation(mc.player.getEyePos(), targetVec);
 
             if (target != lastTarget) {
                 targetYaw = rotation[0];
                 targetPitch = rotation[1];
                 lastTarget = target;
-                currentYaw = mc.player.getYRot();
-                currentPitch = mc.player.getXRot();
+                currentYaw = mc.player.getYaw();
+                currentPitch = mc.player.getPitch();
             } else {
                 targetYaw = rotation[0];
                 targetPitch = rotation[1];
@@ -322,7 +321,7 @@ public class Killaura extends Module {
                 lastDriftUpdate = currentTime;
             }
 
-            if (enabled.isEnabled() && movementDrift.isEnabled() && mc.player.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
+            if (enabled.isEnabled() && movementDrift.isEnabled() && mc.player.getVelocity().horizontalLengthSquared() > 0.01) {
                 float driftOffset = (random.nextFloat() - 0.5F) * driftAmount.getValue();
                 targetYaw += driftOffset;
                 targetPitch += driftOffset * 0.4F;
@@ -407,19 +406,19 @@ public class Killaura extends Module {
                 currentYaw = normalizeAngle(currentYaw);
                 currentPitch = Math.max(-90.0F, Math.min(90.0F, currentPitch));
 
-                mc.player.setYRot(currentYaw);
-                mc.player.setXRot(currentPitch);
+                mc.player.setYaw(currentYaw);
+                mc.player.setPitch(currentPitch);
             } else {
-                mc.player.setYRot(normalizeAngle(targetYaw));
-                mc.player.setXRot(Math.max(-90.0F, Math.min(90.0F, targetPitch)));
+                mc.player.setYaw(normalizeAngle(targetYaw));
+                mc.player.setPitch(Math.max(-90.0F, Math.min(90.0F, targetPitch)));
                 currentYaw = normalizeAngle(targetYaw);
                 currentPitch = Math.max(-90.0F, Math.min(90.0F, targetPitch));
             }
         }
 
         if (canAttack && isCrosshairAligned(mc, targetVec)) {
-            mc.gameMode.attack(mc.player, target);
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.interactionManager.attackEntity(mc.player, target);
+            mc.player.swingHand(Hand.MAIN_HAND);
             lastHitTime = System.currentTimeMillis();
         }
     }
@@ -427,7 +426,7 @@ public class Killaura extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
             switchBack(mc);
         }
@@ -441,16 +440,16 @@ public class Killaura extends Module {
         microOffsetPitch = 0f;
     }
 
-    private boolean isCrosshairAligned(Minecraft mc, Vec3 targetVec) {
+    private boolean isCrosshairAligned(MinecraftClient mc, Vec3d targetVec) {
         if (!enabled.isEnabled() || !smoothMovement.isEnabled()) {
             return true;
         }
 
-        Vec3 eyePos = mc.player.getEyePosition();
+        Vec3d eyePos = mc.player.getEyePos();
         float[] neededRot = calculateRotation(eyePos, targetVec);
 
-        float yawDiff = Math.abs(normalizeAngle(neededRot[0] - mc.player.getYRot()));
-        float pitchDiff = Math.abs(neededRot[1] - mc.player.getXRot());
+        float yawDiff = Math.abs(normalizeAngle(neededRot[0] - mc.player.getYaw()));
+        float pitchDiff = Math.abs(neededRot[1] - mc.player.getPitch());
 
         return (yawDiff + pitchDiff) <= alignmentThreshold.getValue();
     }
@@ -461,9 +460,9 @@ public class Killaura extends Module {
         return angle;
     }
 
-    private Entity findTarget(Minecraft mc) {
-        Vec3 playerPos = mc.player.getEyePosition();
-        AABB searchBox = new AABB(
+    private Entity findTarget(MinecraftClient mc) {
+        Vec3d playerPos = mc.player.getEyePos();
+        Box searchBox = new Box(
                 playerPos.x - range.getValue(),
                 playerPos.y - range.getValue(),
                 playerPos.z - range.getValue(),
@@ -472,7 +471,7 @@ public class Killaura extends Module {
                 playerPos.z + range.getValue()
         );
 
-        List<Entity> entities = mc.level.getEntities(mc.player, searchBox);
+        List<Entity> entities = mc.world.getOtherEntities(mc.player, searchBox);
 
         Stream<Entity> entityStream = entities.stream()
                 .filter(e -> e instanceof LivingEntity)
@@ -493,56 +492,56 @@ public class Killaura extends Module {
             default:
                 return entityStream
                         .min(Comparator.comparingDouble(e -> {
-                            Vec3 targetVec = getAttackRotateVec(e, mc);
+                            Vec3d targetVec = getAttackRotateVec(e, mc);
                             float[] rot = calculateRotation(playerPos, targetVec);
-                            float yawDiff = Math.abs(normalizeAngle(rot[0] - mc.player.getYRot()));
-                            float pitchDiff = Math.abs(rot[1] - mc.player.getXRot());
+                            float yawDiff = Math.abs(normalizeAngle(rot[0] - mc.player.getYaw()));
+                            float pitchDiff = Math.abs(rot[1] - mc.player.getPitch());
                             return yawDiff + pitchDiff;
                         }))
                         .orElse(null);
         }
     }
 
-    private boolean isInAttackRange(Vec3 pos, Entity entity, Minecraft mc) {
-        Vec3 targetVec = getAttackRotateVec(entity, mc);
+    private boolean isInAttackRange(Vec3d pos, Entity entity, MinecraftClient mc) {
+        Vec3d targetVec = getAttackRotateVec(entity, mc);
         double dist = pos.distanceTo(targetVec);
 
         if (dist > range.getValue()) {
             return false;
         }
 
-        BlockHitResult result = mc.level.clip(new ClipContext(
+        BlockHitResult result = mc.world.raycast(new RaycastContext(
                 pos,
                 targetVec,
-                ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE,
+                RaycastContext.ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE,
                 mc.player
         ));
 
         return result.getType() == HitResult.Type.MISS || dist <= wallsRange.getValue();
     }
 
-    private Vec3 getAttackRotateVec(Entity entity, Minecraft mc) {
-        Vec3 feetPos = entity.position();
+    private Vec3d getAttackRotateVec(Entity entity, MinecraftClient mc) {
+        Vec3d feetPos = entity.getPos();
 
         return switch (rotateType.getSelectedOption()) {
             case "Feet" -> feetPos;
-            case "Torso" -> feetPos.add(0.0, entity.getBbHeight() / 2.0, 0.0);
-            case "Head" -> entity.getEyePosition();
+            case "Torso" -> feetPos.add(0.0, entity.getHeight() / 2.0, 0.0);
+            case "Head" -> entity.getEyePos();
             case "Auto" -> {
-                Vec3 torsoPos = feetPos.add(0.0, entity.getBbHeight() / 2.0, 0.0);
-                Vec3 eyesPos = entity.getEyePosition();
-                Vec3 playerEye = mc.player.getEyePosition();
+                Vec3d torsoPos = feetPos.add(0.0, entity.getHeight() / 2.0, 0.0);
+                Vec3d eyesPos = entity.getEyePos();
+                Vec3d playerEye = mc.player.getEyePos();
 
                 yield Stream.of(feetPos, torsoPos, eyesPos)
-                        .min(Comparator.comparing(v -> playerEye.distanceToSqr(v)))
+                        .min(Comparator.comparing(v -> playerEye.squaredDistanceTo(v)))
                         .orElse(eyesPos);
             }
-            default -> entity.getEyePosition();
+            default -> entity.getEyePos();
         };
     }
 
-    private float[] calculateRotation(Vec3 from, Vec3 to) {
+    private float[] calculateRotation(Vec3d from, Vec3d to) {
         double diffX = to.x - from.x;
         double diffY = to.y - from.y;
         double diffZ = to.z - from.z;
@@ -555,14 +554,14 @@ public class Killaura extends Module {
         return new float[]{yaw, pitch};
     }
 
-    private boolean isHoldingWeapon(Minecraft mc) {
-        ItemStack stack = mc.player.getMainHandItem();
+    private boolean isHoldingWeapon(MinecraftClient mc) {
+        ItemStack stack = mc.player.getMainHandStack();
         return stack.getItem().toString().toLowerCase().contains("sword") ||
                 stack.getItem().toString().toLowerCase().contains("axe") ||
                 stack.getItem() == Items.TRIDENT;
     }
 
-    private void switchWeapon(Minecraft mc) {
+    private void switchWeapon(MinecraftClient mc) {
         int weaponSlot = findBestWeaponSlot(mc);
         int currentSlot = mc.player.getInventory().getSelectedSlot();
 
@@ -575,9 +574,9 @@ public class Killaura extends Module {
         }
     }
 
-    private int findBestWeaponSlot(Minecraft mc) {
+    private int findBestWeaponSlot(MinecraftClient mc) {
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getItem(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty()) continue;
 
             String itemName = stack.getItem().toString().toLowerCase();
@@ -589,7 +588,7 @@ public class Killaura extends Module {
         return -1;
     }
 
-    private void switchBack(Minecraft mc) {
+    private void switchBack(MinecraftClient mc) {
         if (hasSwitched && previousSlot != -1) {
             mc.player.getInventory().setSelectedSlot(previousSlot);
             previousSlot = -1;

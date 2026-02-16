@@ -2,14 +2,14 @@ package io.client.commands;
 
 import io.client.ModuleManager;
 import io.client.modules.DonkeyBoatDupe;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 
 public class MarkChestCommand implements Command {
-    private final Minecraft mc = Minecraft.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     @Override
     public void execute(String[] args) throws Exception {
@@ -28,7 +28,7 @@ public class MarkChestCommand implements Command {
         }
 
 
-        HitResult hit = mc.hitResult;
+        HitResult hit = mc.crosshairTarget;
 
         if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
             CommandManager.INSTANCE.sendMessage("§cYou must be looking at a chest!");
@@ -38,7 +38,7 @@ public class MarkChestCommand implements Command {
         BlockHitResult blockHit = (BlockHitResult) hit;
         BlockPos pos = blockHit.getBlockPos();
 
-        if (!(mc.level.getBlockEntity(pos) instanceof ChestBlockEntity)) {
+        if (!(mc.world.getBlockEntity(pos) instanceof ChestBlockEntity)) {
             CommandManager.INSTANCE.sendMessage("§cThat's not a chest!");
             return;
         }

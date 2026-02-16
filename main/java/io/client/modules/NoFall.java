@@ -3,11 +3,11 @@ package io.client.modules;
 import io.client.Category;
 import io.client.Module;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.Box;
+import net.minecraft.world.World;
 
 public class NoFall extends Module {
     public final RadioSetting mode = new RadioSetting("Mode", "Packet");
@@ -25,40 +25,40 @@ public class NoFall extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         if (!isFalling(mc)) return;
 
         switch (mode.getSelectedOption()) {
             case "Packet":
 
-                mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, true));
                 mc.player.fallDistance = 0.0f;
                 break;
 
             case "Grim":
 
-                mc.player.connection.send(new ServerboundMovePlayerPacket.PosRot(
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(
                         mc.player.getX(),
                         mc.player.getY() + 1.0e-9,
                         mc.player.getZ(),
-                        mc.player.getYRot(),
-                        mc.player.getXRot(),
+                        mc.player.getYaw(),
+                        mc.player.getPitch(),
                         true,
                         true
                 ));
-                mc.player.resetFallDistance();
+                mc.player.onLanding();
                 break;
 
             case "Latency":
 
-                if (mc.level.dimension() == Level.NETHER) {
-                    mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
+                if (mc.world.getRegistryKey() == World.NETHER) {
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                             mc.player.getX(), 0, mc.player.getZ(), true, true
                     ));
                 } else {
-                    mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                             0, 64, 0, true, true
                     ));
                 }
@@ -68,12 +68,12 @@ public class NoFall extends Module {
             case "Spoof":
 
                 if (predict(mc) && mc.player.fallDistance >= 3) {
-                    mc.player.setDeltaMovement(
-                            mc.player.getDeltaMovement().x,
+                    mc.player.setVelocity(
+                            mc.player.getVelocity().x,
                             0,
-                            mc.player.getDeltaMovement().z
+                            mc.player.getVelocity().z
                     );
-                    mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
                             mc.player.getX(),
                             predictY,
                             mc.player.getZ(),
@@ -86,30 +86,30 @@ public class NoFall extends Module {
         }
     }
 
-    private boolean isFalling(Minecraft mc) {
+    private boolean isFalling(MinecraftClient mc) {
         if (mc.player.fallDistance <= 3.0f) return false;
         if (isAboveWater(mc) || isInWater(mc)) return false;
         return true;
     }
 
-    private boolean predict(Minecraft mc) {
+    private boolean predict(MinecraftClient mc) {
         predictY = getGroundLevel(mc) - 0.1;
         return mc.player.getY() - predictY < 3.0;
     }
 
-    private boolean isAboveWater(Minecraft mc) {
-        return mc.level.getFluidState(mc.player.blockPosition().below()).is(Fluids.WATER);
+    private boolean isAboveWater(MinecraftClient mc) {
+        return mc.world.getFluidState(mc.player.getBlockPos().down()).isOf(Fluids.WATER);
     }
 
-    private boolean isInWater(Minecraft mc) {
-        return mc.player.isInWater();
+    private boolean isInWater(MinecraftClient mc) {
+        return mc.player.isTouchingWater();
     }
 
-    private double getGroundLevel(Minecraft mc) {
+    private double getGroundLevel(MinecraftClient mc) {
         double y = mc.player.getY();
         while (y > -64) {
-            AABB box = mc.player.getBoundingBox().move(0, y - mc.player.getY(), 0);
-            if (!mc.level.noCollision(mc.player, box)) {
+            Box box = mc.player.getBoundingBox().offset(0, y - mc.player.getY(), 0);
+            if (!mc.world.isSpaceEmpty(mc.player, box)) {
                 return y + 1;
             }
             y -= 0.5;

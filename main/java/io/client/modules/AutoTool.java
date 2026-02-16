@@ -2,12 +2,12 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 
 public class AutoTool extends Module {
     private int previousSlot = -1;
@@ -19,27 +19,27 @@ public class AutoTool extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.hitResult == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null || mc.crosshairTarget == null) return;
 
-        if (mc.gameMode.isDestroying() && mc.hitResult.getType() == HitResult.Type.BLOCK) {
-            BlockPos pos = ((BlockHitResult) mc.hitResult).getBlockPos();
+        if (mc.interactionManager.isBreakingBlock() && mc.crosshairTarget.getType() == HitResult.Type.BLOCK) {
+            BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
             switchTool(mc, pos);
         } else {
             switchBack(mc);
         }
     }
 
-    private void switchTool(Minecraft mc, BlockPos pos) {
-        BlockState state = mc.level.getBlockState(pos);
+    private void switchTool(MinecraftClient mc, BlockPos pos) {
+        BlockState state = mc.world.getBlockState(pos);
         float bestSpeed = 1.0F;
         int bestSlot = -1;
 
         for (int slot = 0; slot < 9; slot++) {
-            ItemStack stack = mc.player.getInventory().getItem(slot);
+            ItemStack stack = mc.player.getInventory().getStack(slot);
             if (stack.isEmpty()) continue;
 
-            float speed = stack.getDestroySpeed(state);
+            float speed = stack.getMiningSpeedMultiplier(state);
             if (speed > bestSpeed) {
                 bestSpeed = speed;
                 bestSlot = slot;
@@ -57,7 +57,7 @@ public class AutoTool extends Module {
         }
     }
 
-    private void switchBack(Minecraft mc) {
+    private void switchBack(MinecraftClient mc) {
         if (hasSwitched && previousSlot != -1) {
             mc.player.getInventory().setSelectedSlot(previousSlot);
             previousSlot = -1;
@@ -67,7 +67,7 @@ public class AutoTool extends Module {
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
             switchBack(mc);
         }

@@ -5,12 +5,11 @@ import io.client.ClickGuiScreen;
 import io.client.Module;
 import io.client.ModuleManager;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 
 public class ModuleHUD extends Module {
     private final RadioSetting horizontal;
@@ -38,10 +37,10 @@ public class ModuleHUD extends Module {
         addSetting(sorting);
     }
 
-    public void render(GuiGraphics graphics) {
+    public void render(DrawContext graphics) {
         if (!isEnabled()) return;
 
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
         float scale = 1.0f;
@@ -58,7 +57,7 @@ public class ModuleHUD extends Module {
         }
 
         if (sorting.isSelected("Length")) {
-            activeModules.sort(Comparator.comparingInt(m -> -mc.font.width(m.getName())));
+            activeModules.sort(Comparator.comparingInt(m -> -mc.textRenderer.getWidth(m.getName())));
         } else if (sorting.isSelected("Alphabetical")) {
             activeModules.sort(Comparator.comparing(Module::getName));
         }
@@ -66,19 +65,19 @@ public class ModuleHUD extends Module {
         boolean isTop = vertical.isSelected("Top");
         boolean isLeft = horizontal.isSelected("Left");
 
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int screenWidth = mc.getWindow().getScaledWidth();
+        int screenHeight = mc.getWindow().getScaledHeight();
 
         int lineHeight = (int)(10 * scale);
         int startY = isTop ? 2 : screenHeight - (activeModules.size() * lineHeight + 2);
 
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(scale, scale);
+        graphics.getMatrices().pushMatrix();
+        graphics.getMatrices().scale(scale, scale);
 
         for (int i = 0; i < activeModules.size(); i++) {
             Module module = activeModules.get(i);
             String name = module.getName();
-            int textWidth = mc.font.width(name);
+            int textWidth = mc.textRenderer.getWidth(name);
 
             int y = isTop ? (startY + i * lineHeight) : (startY + i * lineHeight);
             int x = isLeft ? 2 : (screenWidth - (int)(textWidth * scale) - 2);
@@ -86,9 +85,9 @@ public class ModuleHUD extends Module {
             int scaledX = (int) (x / scale);
             int scaledY = (int) (y / scale);
 
-            graphics.drawString(mc.font, name, scaledX, scaledY, ClickGuiScreen.currentTheme.moduleEnabled, true);
+            graphics.drawText(mc.textRenderer, name, scaledX, scaledY, ClickGuiScreen.currentTheme.moduleEnabled, true);
         }
 
-        graphics.pose().popMatrix();
+        graphics.getMatrices().popMatrix();
     }
 }

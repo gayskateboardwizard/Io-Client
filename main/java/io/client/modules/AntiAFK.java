@@ -2,7 +2,7 @@ package io.client.modules;
 
 import io.client.Category;
 import io.client.Module;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 public class AntiAFK extends Module {
 
@@ -14,22 +14,22 @@ public class AntiAFK extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
-        mc.options.keyUp.setDown(true);
+        mc.options.forwardKey.setPressed(true);
 
-        mc.player.setYRot(mc.player.getYRot() + yawSpeed);
+        mc.player.setYaw(mc.player.getYaw() + yawSpeed);
 
-        mc.player.yHeadRot = mc.player.getYRot();
-        mc.player.yBodyRot = mc.player.getYRot();
+        mc.player.headYaw = mc.player.getYaw();
+        mc.player.bodyYaw = mc.player.getYaw();
     }
 
     @Override
     public void onDisable() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
 
-        mc.options.keyUp.setDown(false);
+        mc.options.forwardKey.setPressed(false);
     }
 }

@@ -5,20 +5,19 @@ import io.client.Module;
 import io.client.TargetManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-
 import java.util.List;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public class ArsonAura extends Module {
     public final NumberSetting range = new NumberSetting("Range", 3.5F, 1.0F, 6.0F);
@@ -41,7 +40,7 @@ public class ArsonAura extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
             switchBack(mc);
         }
@@ -49,8 +48,8 @@ public class ArsonAura extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
         Entity validTarget = findValidTarget(mc);
 
@@ -59,11 +58,11 @@ public class ArsonAura extends Module {
             return;
         }
 
-        InteractionHand hand = null;
-        if (mc.player.getMainHandItem().getItem() == Items.FLINT_AND_STEEL) {
-            hand = InteractionHand.MAIN_HAND;
-        } else if (mc.player.getOffhandItem().getItem() == Items.FLINT_AND_STEEL) {
-            hand = InteractionHand.OFF_HAND;
+        Hand hand = null;
+        if (mc.player.getMainHandStack().getItem() == Items.FLINT_AND_STEEL) {
+            hand = Hand.MAIN_HAND;
+        } else if (mc.player.getOffHandStack().getItem() == Items.FLINT_AND_STEEL) {
+            hand = Hand.OFF_HAND;
         }
 
         if (hand == null) {
@@ -75,31 +74,31 @@ public class ArsonAura extends Module {
                 return;
             }
 
-            hand = InteractionHand.MAIN_HAND;
+            hand = Hand.MAIN_HAND;
         }
 
         tickCounter++;
         if (tickCounter < delay.getValue()) return;
         tickCounter = 0;
 
-        BlockPos entityPos = validTarget.blockPosition();
-        BlockPos belowPos = entityPos.below();
+        BlockPos entityPos = validTarget.getBlockPos();
+        BlockPos belowPos = entityPos.down();
 
-        BlockState belowState = mc.level.getBlockState(belowPos);
-        BlockState entityState = mc.level.getBlockState(entityPos);
+        BlockState belowState = mc.world.getBlockState(belowPos);
+        BlockState entityState = mc.world.getBlockState(entityPos);
 
         if (!belowState.isAir() && entityState.isAir()) {
-            Vec3 hitVec = new Vec3(entityPos.getX() + 0.5, entityPos.getY(), entityPos.getZ() + 0.5);
+            Vec3d hitVec = new Vec3d(entityPos.getX() + 0.5, entityPos.getY(), entityPos.getZ() + 0.5);
             BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, belowPos, false);
 
-            mc.gameMode.useItemOn(mc.player, hand, hitResult);
+            mc.interactionManager.interactBlock(mc.player, hand, hitResult);
         }
     }
 
-    private Entity findValidTarget(Minecraft mc) {
+    private Entity findValidTarget(MinecraftClient mc) {
         double rangeValue = range.getValue();
-        AABB searchBox = mc.player.getBoundingBox().inflate(rangeValue);
-        List<Entity> entities = mc.level.getEntities(mc.player, searchBox);
+        Box searchBox = mc.player.getBoundingBox().expand(rangeValue);
+        List<Entity> entities = mc.world.getOtherEntities(mc.player, searchBox);
 
         for (Entity entity : entities) {
             if (!TargetManager.INSTANCE.isValidTarget(entity)) continue;
@@ -107,11 +106,11 @@ public class ArsonAura extends Module {
 
             if (!relight.isEnabled() && entity.isOnFire()) continue;
 
-            BlockPos entityPos = entity.blockPosition();
-            BlockPos belowPos = entityPos.below();
+            BlockPos entityPos = entity.getBlockPos();
+            BlockPos belowPos = entityPos.down();
 
-            BlockState belowState = mc.level.getBlockState(belowPos);
-            BlockState entityState = mc.level.getBlockState(entityPos);
+            BlockState belowState = mc.world.getBlockState(belowPos);
+            BlockState entityState = mc.world.getBlockState(entityPos);
 
             if (!belowState.isAir() && entityState.isAir()) {
                 return entity;
@@ -121,7 +120,7 @@ public class ArsonAura extends Module {
         return null;
     }
 
-    private boolean switchToFlintAndSteel(Minecraft mc) {
+    private boolean switchToFlintAndSteel(MinecraftClient mc) {
         int flintSlot = findFlintAndSteelSlot(mc);
         int currentSlot = mc.player.getInventory().getSelectedSlot();
 
@@ -137,9 +136,9 @@ public class ArsonAura extends Module {
         return flintSlot != -1;
     }
 
-    private int findFlintAndSteelSlot(Minecraft mc) {
+    private int findFlintAndSteelSlot(MinecraftClient mc) {
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getItem(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.getItem() == Items.FLINT_AND_STEEL) {
                 return i;
             }
@@ -147,7 +146,7 @@ public class ArsonAura extends Module {
         return -1;
     }
 
-    private void switchBack(Minecraft mc) {
+    private void switchBack(MinecraftClient mc) {
         if (hasSwitched && previousSlot != -1) {
             mc.player.getInventory().setSelectedSlot(previousSlot);
             previousSlot = -1;

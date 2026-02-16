@@ -2,9 +2,8 @@ package io.client.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import java.util.Arrays;
 
 public class PlayerEvents {
@@ -23,17 +22,17 @@ public class PlayerEvents {
 
     @FunctionalInterface
     public interface TickEnd {
-        void onEndTick(Player player);
+        void onEndTick(PlayerEntity player);
     }
 
     @FunctionalInterface
     public interface XPChange {
-        void onXpChange(Player player, int amount);
+        void onXpChange(PlayerEntity player, int amount);
     }
 
     @FunctionalInterface
     public interface LevelChange {
-        void onLevelChange(Player player, int amount);
+        void onLevelChange(PlayerEntity player, int amount);
     }
 
     @FunctionalInterface

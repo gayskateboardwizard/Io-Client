@@ -9,6 +9,7 @@ import io.client.settings.RadioSetting;
 
 public class ThemeChanger extends Module {
     public final RadioSetting themeSelect = new RadioSetting("Theme", "Io");
+    public final RadioSetting clickGuiMode = new RadioSetting("ClickGui", "IO");
     private String lastSelectedTheme = "Io";
 
     public ThemeChanger() {
@@ -21,8 +22,12 @@ public class ThemeChanger extends Module {
         themeSelect.addOption("Thebe");
         themeSelect.addOption("Metis");
         themeSelect.addOption("Adrastea");
+        themeSelect.addOption("Future");
+        clickGuiMode.addOption("IO");
+        clickGuiMode.addOption("Future");
 
         addSetting(themeSelect);
+        addSetting(clickGuiMode);
 
         Theme savedTheme = ModuleManager.INSTANCE.loadTheme();
         if (savedTheme != null) {
@@ -63,11 +68,16 @@ public class ThemeChanger extends Module {
             case "Thebe" -> ClickGuiScreen.currentTheme = Theme.THEBE;
             case "Metis" -> ClickGuiScreen.currentTheme = Theme.METIS;
             case "Adrastea" -> ClickGuiScreen.currentTheme = Theme.ADRASTEA;
+            case "Future" -> ClickGuiScreen.currentTheme = Theme.FUTURE;
         }
         ModuleManager.INSTANCE.saveTheme(ClickGuiScreen.currentTheme);
     }
 
     public String getSelectedTheme() {
         return themeSelect.getSelectedOption();
+    }
+
+    public String getSelectedClickGuiMode() {
+        return clickGuiMode.getSelectedOption();
     }
 }

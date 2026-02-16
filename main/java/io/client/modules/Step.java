@@ -5,13 +5,12 @@ import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.phys.AABB;
-
 import java.util.stream.StreamSupport;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.Box;
 
 public class Step extends Module {
     public final NumberSetting stepHeight = new NumberSetting("Height", 2.1F, 0.1F, 7.0F);
@@ -34,9 +33,9 @@ public class Step extends Module {
 
     @Override
     public void onEnable() {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
-            AttributeInstance stepAttribute = mc.player.getAttribute(Attributes.STEP_HEIGHT);
+            EntityAttributeInstance stepAttribute = mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT);
             if (stepAttribute != null) {
                 previousStepHeight = stepAttribute.getBaseValue();
             }
@@ -47,7 +46,7 @@ public class Step extends Module {
     @Override
     public void onDisable() {
         super.onDisable();
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player != null) {
             setStepHeight(mc, (float) previousStepHeight);
         }
@@ -56,8 +55,8 @@ public class Step extends Module {
 
     @Override
     public void onUpdate() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
 
         if (mode.getSelectedOption().equals("Vanilla")) {
@@ -69,34 +68,34 @@ public class Step extends Module {
         handleNormalMode(mc);
     }
 
-    private void handleVanillaMode(Minecraft mc) {
-        if (mc.player.isInWater() || mc.player.isInLava() || mc.player.isFallFlying()) {
+    private void handleVanillaMode(MinecraftClient mc) {
+        if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.isGliding()) {
             setStepHeight(mc, 0.6f);
             return;
         }
 
-        if (mc.player.onGround() && System.currentTimeMillis() - stepTimer > 50) {
+        if (mc.player.isOnGround() && System.currentTimeMillis() - stepTimer > 50) {
             setStepHeight(mc, stepHeight.getValue());
         } else {
             setStepHeight(mc, 0.6f);
         }
     }
 
-    private void handleNormalMode(Minecraft mc) {
+    private void handleNormalMode(MinecraftClient mc) {
 
-        if (mc.player.isInWater() || mc.player.isInLava() || mc.player.isFallFlying()) {
+        if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.isGliding()) {
             setStepHeight(mc, 0.6f);
             return;
         }
 
-        if (mc.player.onGround() && System.currentTimeMillis() - stepTimer > 50) {
+        if (mc.player.isOnGround() && System.currentTimeMillis() - stepTimer > 50) {
             setStepHeight(mc, stepHeight.getValue());
         } else {
             setStepHeight(mc, 0.6f);
         }
 
 
-        double height = mc.player.getY() - mc.player.yo;
+        double height = mc.player.getY() - mc.player.lastY;
         if (height <= 0.5 || height > stepHeight.getValue()) {
             return;
         }
@@ -108,10 +107,10 @@ public class Step extends Module {
 
         double[] offsets = getStepOffsets(height);
         for (double off : offsets) {
-            mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
-                    mc.player.xo,
-                    mc.player.yo + off,
-                    mc.player.zo,
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.lastX,
+                    mc.player.lastY + off,
+                    mc.player.lastZ,
                     false,
                     false
             ));
@@ -120,34 +119,34 @@ public class Step extends Module {
         stepTimer = System.currentTimeMillis();
     }
 
-    public void doNCPStep(Minecraft mc, double[] dir, boolean forceStep) {
-        if (mc.player == null || mc.level == null) return;
+    public void doNCPStep(MinecraftClient mc, double[] dir, boolean forceStep) {
+        if (mc.player == null || mc.world == null) return;
 
         boolean two = false;
         boolean onefive = false;
         boolean one = false;
 
-        AABB playerBox = mc.player.getBoundingBox();
+        Box playerBox = mc.player.getBoundingBox();
 
 
-        if (isCollisionFree(mc, playerBox.move(dir[0], 2.1, dir[1])) &&
-                !isCollisionFree(mc, playerBox.move(dir[0], 1.9, dir[1]))) {
+        if (isCollisionFree(mc, playerBox.offset(dir[0], 2.1, dir[1])) &&
+                !isCollisionFree(mc, playerBox.offset(dir[0], 1.9, dir[1]))) {
             two = true;
         }
 
-        if (isCollisionFree(mc, playerBox.move(dir[0], 1.6, dir[1])) &&
-                !isCollisionFree(mc, playerBox.move(dir[0], 1.4, dir[1]))) {
+        if (isCollisionFree(mc, playerBox.offset(dir[0], 1.6, dir[1])) &&
+                !isCollisionFree(mc, playerBox.offset(dir[0], 1.4, dir[1]))) {
             onefive = true;
         }
 
-        if (isCollisionFree(mc, playerBox.move(dir[0], 1.0, dir[1])) &&
-                !isCollisionFree(mc, playerBox.move(dir[0], 0.6, dir[1]))) {
+        if (isCollisionFree(mc, playerBox.offset(dir[0], 1.0, dir[1])) &&
+                !isCollisionFree(mc, playerBox.offset(dir[0], 0.6, dir[1]))) {
             one = true;
         }
 
         if (mc.player.horizontalCollision &&
-                ((mc.player.zza != 0 || mc.player.xxa != 0) || forceStep) &&
-                mc.player.onGround()) {
+                ((mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0) || forceStep) &&
+                mc.player.isOnGround()) {
 
             if (one && stepHeight.getValue() >= 1.0) {
                 sendStepPackets(mc, 1.0);
@@ -159,23 +158,23 @@ public class Step extends Module {
         }
     }
 
-    private void sendStepPackets(Minecraft mc, double height) {
+    private void sendStepPackets(MinecraftClient mc, double height) {
         double[] offsets = getStepOffsets(height);
         for (double v : offsets) {
-            mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(
-                    mc.player.xo,
-                    mc.player.yo + v,
-                    mc.player.zo,
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.lastX,
+                    mc.player.lastY + v,
+                    mc.player.lastZ,
                     false,
                     false
             ));
         }
-        mc.player.setPos(mc.player.getX(), mc.player.getY() + height, mc.player.getZ());
+        mc.player.setPosition(mc.player.getX(), mc.player.getY() + height, mc.player.getZ());
     }
 
-    private boolean isCollisionFree(Minecraft mc, AABB box) {
+    private boolean isCollisionFree(MinecraftClient mc, Box box) {
         return StreamSupport.stream(
-                mc.level.getCollisions(mc.player, box).spliterator(),
+                mc.world.getCollisions(mc.player, box).spliterator(),
                 false
         ).findAny().isEmpty();
     }
@@ -211,8 +210,8 @@ public class Step extends Module {
         return offsets;
     }
 
-    private void setStepHeight(Minecraft mc, float height) {
-        AttributeInstance stepAttribute = mc.player.getAttribute(Attributes.STEP_HEIGHT);
+    private void setStepHeight(MinecraftClient mc, float height) {
+        EntityAttributeInstance stepAttribute = mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT);
         if (stepAttribute != null) {
             stepAttribute.setBaseValue(height);
         }

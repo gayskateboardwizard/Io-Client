@@ -5,11 +5,10 @@ import io.client.Module;
 import io.client.ModuleManager;
 import io.client.TargetsScreen;
 import io.client.settings.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 
 public class InputHandler {
     private final Screen parentScreen;
@@ -32,7 +31,7 @@ public class InputHandler {
                 }
 
                 if (panel.category == Category.COMBAT && mouseX >= panel.x + panelWidth - 32 && mouseX <= panel.x + panelWidth - 20) {
-                    Minecraft.getInstance().setScreen(new TargetsScreen(parentScreen));
+                    MinecraftClient.getInstance().setScreen(new TargetsScreen(parentScreen));
                     return true;
                 }
 
@@ -199,9 +198,9 @@ public class InputHandler {
 
         for (CategoryPanel panel : panels.values()) {
             if (panel.dragging) {
-                Minecraft mc = Minecraft.getInstance();
-                int screenWidth = mc.getWindow().getGuiScaledWidth();
-                int screenHeight = mc.getWindow().getGuiScaledHeight();
+                MinecraftClient mc = MinecraftClient.getInstance();
+                int screenWidth = mc.getWindow().getScaledWidth();
+                int screenHeight = mc.getWindow().getScaledHeight();
                 int panelWidth = PanelRenderer.getPanelWidth();
                 int titleBarHeight = PanelRenderer.getTitleBarHeight();
 
