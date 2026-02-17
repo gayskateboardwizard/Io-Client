@@ -1,11 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "io_client",
-  "version": "Indev V1.4",
+  "version": "Indev V1.5",
   "name": "Io Client",
   "description": "A fabric utility client mod made for anarchy servers.",
   "authors": [
-    "MAD"
+    "Lev",
+    "Aureal",
+    "Prime",
+    "Enzo"
   ],
   "contact": {
     "sources": "https://github.com/gayskateboardwizard/Io-Client"

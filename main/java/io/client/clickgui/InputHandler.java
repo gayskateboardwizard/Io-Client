@@ -3,7 +3,6 @@ package io.client.clickgui;
 import io.client.Category;
 import io.client.Module;
 import io.client.ModuleManager;
-import io.client.TargetsScreen;
 import io.client.settings.*;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +26,6 @@ public class InputHandler {
                 if (mouseX >= panel.x + panelWidth - 15) {
                     panel.collapsed = !panel.collapsed;
                     ModuleManager.INSTANCE.saveUiConfig(panels);
-                    return true;
-                }
-
-                if (panel.category == Category.COMBAT && mouseX >= panel.x + panelWidth - 32 && mouseX <= panel.x + panelWidth - 20) {
-                    MinecraftClient.getInstance().setScreen(new TargetsScreen(parentScreen));
                     return true;
                 }
 

@@ -183,18 +183,12 @@ public class FutureClickGuiScreen extends Screen {
             if (!open) {
                 if (angle > 0)
                     angle -= 8;
-                if (category == Category.COMBAT) {
-                    drawGuiTextWithShadow(context, "T", x + width - 17, y + 4, palette.accentStrong);
-                }
                 drawArrow(context, x + width - 8, y + 7, angle);
                 return;
             }
 
             if (angle < 180)
                 angle += 8;
-            if (category == Category.COMBAT) {
-                drawGuiTextWithShadow(context, "T", x + width - 17, y + 4, palette.accentStrong);
-            }
             drawArrow(context, x + width - 8, y + 7, angle);
             context.fill(x, y + HEADER_HEIGHT, x + width, y + HEADER_HEIGHT + getBodyHeight(), palette.panelBody);
 
@@ -216,12 +210,7 @@ public class FutureClickGuiScreen extends Screen {
 
         private void mouseClicked(int mouseX, int mouseY, int button) {
             if (hoveringHeader(mouseX, mouseY)) {
-                if (category == Category.COMBAT && mouseX >= x + width - 22 && mouseX <= x + width - 12) {
-                    if (FutureClickGuiScreen.this.client != null) {
-                        FutureClickGuiScreen.this.client.setScreen(new TargetsScreen(FutureClickGuiScreen.this));
-                    }
-                    return;
-                }
+
                 if (button == 0) {
                     dragging = true;
                     dragOffsetX = x - mouseX;

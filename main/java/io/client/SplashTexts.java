@@ -17,7 +17,8 @@ public class SplashTexts {
             "§l§o§e188.114.96.0",
             "§e<Funny Message>",
             "§eИо-клиент",
-            ""
+            "§e§lHave You Ever Been Mellow, Have You Ever Tried?",
+            "§bUsing IO client makes your stash 600% bigger! §9§lWOW"
     );
 
     private static final String SELECTED_SPLASH = SPLASHES.get(new Random().nextInt(SPLASHES.size()));

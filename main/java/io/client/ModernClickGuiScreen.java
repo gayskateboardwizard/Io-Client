@@ -233,10 +233,6 @@ public class ModernClickGuiScreen extends Screen {
             int iconX = x + width - 20;
             drawGuiTextWithShadow(context, icon, iconX, y + 10, palette.textSecondary);
 
-            if (category == Category.COMBAT) {
-                drawGuiTextWithShadow(context, "⚔", x + width - 38, y + 10, palette.accent);
-            }
-
             context.fill(x + 8, y + HEADER_HEIGHT - 1, x + width - 8, y + HEADER_HEIGHT, palette.borderDim);
         }
 
@@ -260,12 +256,6 @@ public class ModernClickGuiScreen extends Screen {
 
         private void mouseClicked(int mouseX, int mouseY, int button) {
             if (hoveringHeader(mouseX, mouseY)) {
-                if (category == Category.COMBAT && mouseX >= x + width - 43 && mouseX <= x + width - 33) {
-                    if (ModernClickGuiScreen.this.client != null) {
-                        ModernClickGuiScreen.this.client.setScreen(new TargetsScreen(ModernClickGuiScreen.this));
-                    }
-                    return;
-                }
                 if (button == 0) {
                     dragging = true;
                     dragOffsetX = x - mouseX;

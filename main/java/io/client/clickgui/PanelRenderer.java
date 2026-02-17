@@ -116,7 +116,6 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(targetsX, panel.y + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            drawGuiText(graphics, font, "T", 0, 0, theme.moduleEnabled, false);
             graphics.getMatrices().popMatrix();
         }
     }
