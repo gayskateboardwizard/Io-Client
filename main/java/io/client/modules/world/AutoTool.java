@@ -26,7 +26,7 @@ public class AutoTool extends Module {
     private final NumberSetting switchDelay = new NumberSetting("Switch Delay", 0f, 0f, 20f);
 
     public AutoTool() {
-        super("AutoTool", "Automatically switches to the most effective tool when performing an action.", -1, Category.WORLD);
+        super("AutoTool", "Switches to the best tool", -1, Category.WORLD);
         addSetting(antiBreak);
         addSetting(breakDurability);
         addSetting(switchBack);
