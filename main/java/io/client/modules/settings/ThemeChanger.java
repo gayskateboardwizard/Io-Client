@@ -28,8 +28,11 @@ public class ThemeChanger extends Module {
         themeSelect.addOption("Phobos");
         themeSelect.addOption("Deimos");
         themeSelect.addOption("Triton");
+
         clickGuiMode.addOption("IO");
         clickGuiMode.addOption("Future");
+        clickGuiMode.addOption("Modern");
+
         guiFont.addOption("Minecraft");
         guiFont.addOption("JetBrains Mono");
         guiFont.addOption("Verdana");

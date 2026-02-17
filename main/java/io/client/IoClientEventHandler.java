@@ -104,6 +104,8 @@ public class IoClientEventHandler {
                     String guiMode = themeChanger != null ? themeChanger.getSelectedClickGuiMode() : "IO";
                     if ("Future".equalsIgnoreCase(guiMode)) {
                         mc.setScreen(new FutureClickGuiScreen());
+                    } else if ("Modern".equalsIgnoreCase(guiMode)) {
+                        mc.setScreen(new ModernClickGuiScreen());
                     } else {
                         mc.setScreen(new ClickGuiScreen());
                     }

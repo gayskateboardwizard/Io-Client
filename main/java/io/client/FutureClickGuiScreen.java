@@ -1,6 +1,8 @@
 package io.client;
 
+import io.client.clickgui.SavedPanelConfig;
 import io.client.clickgui.Theme;
+import io.client.modules.settings.GUIScale;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
@@ -12,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -25,47 +28,90 @@ public class FutureClickGuiScreen extends Screen {
     private static final Identifier GEAR_TEXTURE = Identifier.of("io_client", "textures/future/gear.png");
     private final List<Panel> panels = new ArrayList<>();
     private final Map<String, Float> textScrollOffsets = new HashMap<>();
+    private float guiScale = 1.0f;
 
     public FutureClickGuiScreen() {
         super(Text.literal("Future GUI"));
+
+        GUIScale guiScaleModule = ModuleManager.INSTANCE.getModule(GUIScale.class);
+        if (guiScaleModule != null) {
+            guiScale = guiScaleModule.getScale();
+        }
+
         initializePanels();
     }
 
     private void initializePanels() {
         panels.clear();
-        int x = 6;
+        Map<Category, SavedPanelConfig> loadedConfig = ModuleManager.INSTANCE.loadUiConfig();
+        int defaultX = 6;
+
         for (Category category : Category.values()) {
-            Panel panel = new Panel(category.name(), category, x, 8);
+            SavedPanelConfig config = loadedConfig.get(category);
+            Panel panel;
+
+            if (config != null) {
+                panel = new Panel(category.name(), category, config.x, config.y);
+                panel.open = !config.collapsed;
+            } else {
+                panel = new Panel(category.name(), category, defaultX, 8);
+                defaultX += (int)(96 * guiScale);
+            }
+
             panels.add(panel);
-            x += panel.width + 4;
         }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        GUIScale guiScaleModule = ModuleManager.INSTANCE.getModule(GUIScale.class);
+        if (guiScaleModule != null) {
+            guiScale = guiScaleModule.getScale();
+        }
+
         Theme theme = ClickGuiScreen.currentTheme;
         FuturePalette palette = FuturePalette.fromTheme(theme);
         int width = this.client != null ? this.client.getWindow().getScaledWidth() : 0;
         int height = this.client != null ? this.client.getWindow().getScaledHeight() : 0;
+
         context.fillGradient(0, 0, width, height, palette.backgroundTop, palette.backgroundBottom);
+
+        context.getMatrices().pushMatrix();
+        context.getMatrices().scale(guiScale, guiScale);
+
+        float invScale = 1.0f / guiScale;
+        int scaledMouseX = (int)(mouseX * invScale);
+        int scaledMouseY = (int)(mouseY * invScale);
+
         for (Panel panel : panels) {
-            panel.render(context, mouseX, mouseY, delta, palette);
+            panel.render(context, scaledMouseX, scaledMouseY, delta, palette);
         }
+
+        context.getMatrices().popMatrix();
+
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        float invScale = 1.0f / guiScale;
+        int scaledMouseX = (int)(mouseX * invScale);
+        int scaledMouseY = (int)(mouseY * invScale);
+
         for (Panel panel : panels) {
-            panel.mouseClicked((int) mouseX, (int) mouseY, button);
+            panel.mouseClicked(scaledMouseX, scaledMouseY, button);
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        float invScale = 1.0f / guiScale;
+        int scaledMouseX = (int)(mouseX * invScale);
+        int scaledMouseY = (int)(mouseY * invScale);
+
         for (Panel panel : panels) {
-            panel.mouseReleased((int) mouseX, (int) mouseY, button);
+            panel.mouseReleased(scaledMouseX, scaledMouseY, button);
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
@@ -73,8 +119,12 @@ public class FutureClickGuiScreen extends Screen {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (button == 0) {
+            float invScale = 1.0f / guiScale;
+            int scaledMouseX = (int)(mouseX * invScale);
+            int scaledMouseY = (int)(mouseY * invScale);
+
             for (Panel panel : panels) {
-                panel.drag((int) mouseX, (int) mouseY);
+                panel.drag(scaledMouseX, scaledMouseY);
             }
         }
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -83,6 +133,23 @@ public class FutureClickGuiScreen extends Screen {
     @Override
     public boolean shouldPause() {
         return false;
+    }
+
+    @Override
+    public void close() {
+        Map<Category, io.client.clickgui.CategoryPanel> configMap = new HashMap<>();
+        for (Panel panel : panels) {
+            io.client.clickgui.CategoryPanel categoryPanel = new io.client.clickgui.CategoryPanel(
+                    panel.category, panel.x, panel.y, !panel.open
+            );
+            configMap.put(panel.category, categoryPanel);
+        }
+        ModuleManager.INSTANCE.saveUiConfig(configMap);
+        ModuleManager.INSTANCE.saveModules();
+        ModuleManager.INSTANCE.saveTheme(ClickGuiScreen.currentTheme);
+        if (this.client != null) {
+            this.client.setScreen(null);
+        }
     }
 
     private final class Panel {
@@ -348,15 +415,18 @@ public class FutureClickGuiScreen extends Screen {
             }
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
+            int markerColor = setting.isEnabled() ? palette.accentStrong : palette.textMuted;
             int markerX = labelStart;
-            int markerWidth = 0;
+            String marker = setting.isEnabled() ? "[x] " : "[ ] ";
+            int markerWidth = getGuiTextWidth(marker);
+            drawGuiTextWithShadow(context, marker, markerX, y + 3, markerColor);
             drawScrollableText(
                     context,
                     "bool:" + System.identityHashCode(this),
                     setting.getName(),
                     labelStart + markerWidth,
                     y + 3,
-                    setting.isEnabled() ? palette.accentStrong : palette.textMain,
+                    palette.textMain,
                     labelStart + markerWidth,
                     labelEnd,
                     hovering(mouseX, mouseY),
@@ -704,7 +774,7 @@ public class FutureClickGuiScreen extends Screen {
     private int getGuiTextWidth(String text) {
         if (textRenderer == null)
             return 0;
-        if (!ClickGuiScreen.useCustomGuiFont())
+        if (!ClickGuiScreen.useJetBrainsMonoFont())
             return textRenderer.getWidth(text);
         return textRenderer.getWidth(ClickGuiScreen.styledGuiText(text));
     }
@@ -712,7 +782,7 @@ public class FutureClickGuiScreen extends Screen {
     private void drawGuiTextWithShadow(DrawContext context, String text, int x, int y, int color) {
         if (textRenderer == null)
             return;
-        if (!ClickGuiScreen.useCustomGuiFont()) {
+        if (!ClickGuiScreen.useJetBrainsMonoFont()) {
             context.drawTextWithShadow(textRenderer, text, x, y, color);
             return;
         }
@@ -789,14 +859,13 @@ public class FutureClickGuiScreen extends Screen {
     }
 
     private static void playClick() {
-        if (MinecraftClientHolder.CLIENT == null || MinecraftClientHolder.CLIENT.getSoundManager() == null)
-            return;
-        MinecraftClientHolder.CLIENT.getSoundManager()
-                .play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f));
-    }
-
-    private static final class MinecraftClientHolder {
-        private static final net.minecraft.client.MinecraftClient CLIENT = net.minecraft.client.MinecraftClient
-                .getInstance();
+        try {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client != null && client.getSoundManager() != null) {
+                client.getSoundManager().play(
+                        PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f)
+                );
+            }
+        } catch (Exception ignored) {}
     }
 }
