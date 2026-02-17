@@ -77,6 +77,7 @@ public class ModuleManager {
         modules.add(new CapeSettings());
         modules.add(new HUD());
         modules.add(new ESP());
+        modules.add(new Tracers());
         modules.add(new Chams());
         modules.add(new ArsonAura());
         modules.add(new Surround());

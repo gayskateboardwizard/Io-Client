@@ -5,6 +5,7 @@ import io.client.modules.combat.OffHand;
 import io.client.modules.render.ModuleHUD;
 import io.client.modules.render.ArmorHud;
 import io.client.modules.render.ESP;
+import io.client.modules.render.Tracers;
 import io.client.modules.misc.IoSwag;
 import io.client.modules.settings.ThemeChanger;
 import io.client.network.IoUserCapeService;
@@ -85,6 +86,11 @@ public class IoClientEventHandler {
                 esp.render(drawContext, tickDelta.getDynamicDeltaTicks());
             }
 
+            Tracers tracers = ModuleManager.INSTANCE.getModule(Tracers.class);
+            if (tracers != null && tracers.isEnabled()) {
+                tracers.render(drawContext, tickDelta.getDynamicDeltaTicks());
+            }
+
             ArmorHud armorHud = ModuleManager.INSTANCE.getModule(ArmorHud.class);
             if (armorHud != null && armorHud.isEnabled()) {
                 armorHud.render(drawContext, tickDelta.getDynamicDeltaTicks());
@@ -98,7 +104,7 @@ public class IoClientEventHandler {
         }
 
         long window = mc.getWindow().getHandle();
-        boolean rightClickNow = isPressed(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+        boolean rightClickNow = isMousePressed(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
 
         OffHand offHand = ModuleManager.INSTANCE.getModule(OffHand.class);
         if (offHand != null && offHand.isEnabled()) {
@@ -174,5 +180,9 @@ public class IoClientEventHandler {
 
     private boolean isPressed(long window, int key) {
         return GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
+    }
+
+    private boolean isMousePressed(long window, int mouseButton) {
+        return GLFW.glfwGetMouseButton(window, mouseButton) == GLFW.GLFW_PRESS;
     }
 }
