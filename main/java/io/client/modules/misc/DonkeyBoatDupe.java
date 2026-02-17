@@ -133,6 +133,8 @@ public class DonkeyBoatDupe extends Module {
             return;
         ticks++;
 
+        mc.options.pauseOnLostFocus = false;
+
         if (modeSetting.isSelected("Boat")) {
             updateBoatMode();
         } else {
