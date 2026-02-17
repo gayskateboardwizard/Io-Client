@@ -15,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -39,7 +40,6 @@ public class IoClientEventHandler {
             return !CommandManager.INSTANCE.handleMessage(message);
         });
 
-
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null)
                 return;
@@ -48,7 +48,6 @@ public class IoClientEventHandler {
             handleMouse(client);
             ModuleManager.INSTANCE.onUpdate();
         });
-
 
         ClientSendMessageEvents.MODIFY_CHAT.register(message -> {
             IoSwag ioSwag = ModuleManager.INSTANCE.getModule(IoSwag.class);
@@ -68,10 +67,8 @@ public class IoClientEventHandler {
             return message;
         });
 
-
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
-            io.client.modules.render.HUD hud =
-                    ModuleManager.INSTANCE.getModule(io.client.modules.render.HUD.class);
+            io.client.modules.render.HUD hud = ModuleManager.INSTANCE.getModule(io.client.modules.render.HUD.class);
             if (hud != null && hud.isEnabled()) {
                 hud.render(drawContext);
             }
@@ -126,7 +123,6 @@ public class IoClientEventHandler {
 
         long window = mc.getWindow().getHandle();
 
-
         if (mc.currentScreen == null) {
             if (isPressed(window, ClickGuiScreen.clickGuiKey)) {
                 if (!KeyManager.INSTANCE.isKeyPressed(ClickGuiScreen.clickGuiKey)) {
@@ -142,7 +138,6 @@ public class IoClientEventHandler {
             }
         }
 
-
         if (mc.currentScreen == null) {
             for (int key = GLFW.GLFW_KEY_SPACE; key <= GLFW.GLFW_KEY_LAST; key++) {
                 if (isPressed(window, key)) {
@@ -155,8 +150,6 @@ public class IoClientEventHandler {
                 }
             }
         }
-
-
 
         if (mc.currentScreen instanceof ChatScreen chat) {
             if (chat.getFocused() instanceof TextFieldWidget editBox) {

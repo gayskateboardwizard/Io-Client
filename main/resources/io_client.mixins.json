@@ -22,7 +22,8 @@
   "client": [
     "IMinecraftAccessor",
     "PlayerListEntryMixin",
-    "AbstractClientPlayerEntityMixin"
+    "AbstractClientPlayerEntityMixin",
+    "ClientPlayNetworkHandlerMixin"
   ],
   "minVersion": "0.8.4",
   "excludeClasses": [
