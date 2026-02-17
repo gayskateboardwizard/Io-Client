@@ -398,25 +398,22 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            context.fill(x, y, x + width, y + getHeight(), palette.panelBody);
+            int bg = setting.isEnabled() ? palette.moduleEnabled : palette.panelBody;
+            context.fill(x, y, x + width, y + getHeight(), bg);
             if (hovering(mouseX, mouseY)) {
                 context.fill(x, y, x + width, y + getHeight(), palette.rowHover);
             }
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
-            int markerColor = setting.isEnabled() ? palette.accentStrong : palette.textMuted;
-            int markerX = labelStart;
-            String marker = setting.isEnabled() ? "[x] " : "[ ] ";
-            int markerWidth = getGuiTextWidth(marker);
-            drawGuiTextWithShadow(context, marker, markerX, y + 3, markerColor);
+            int textColor = setting.isEnabled() ? 0xFFFFFFFF : palette.textMain;
             drawScrollableText(
                     context,
                     "bool:" + System.identityHashCode(this),
                     setting.getName(),
-                    labelStart + markerWidth,
+                    labelStart,
                     y + 3,
-                    palette.textMain,
-                    labelStart + markerWidth,
+                    textColor,
+                    labelStart,
                     labelEnd,
                     hovering(mouseX, mouseY),
                     0.5f);

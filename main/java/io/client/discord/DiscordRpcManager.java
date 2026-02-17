@@ -17,32 +17,40 @@ public final class DiscordRpcManager {
             return;
         running = true;
 
-        DiscordRPC rpc = DiscordRPC.INSTANCE;
-        DiscordEventHandlers handlers = new DiscordEventHandlers();
-        rpc.Discord_Initialize(APPLICATION_ID, handlers, true, null);
+        try {
+            DiscordRPC rpc = DiscordRPC.INSTANCE;
+            DiscordEventHandlers handlers = new DiscordEventHandlers();
+            rpc.Discord_Initialize(APPLICATION_ID, handlers, true, null);
 
-        DiscordRichPresence presence = new DiscordRichPresence();
-        presence.startTimestamp = System.currentTimeMillis() / 1000L;
-        presence.details = "Playing IO Client";
-        presence.state = "Indev";
-        presence.largeImageKey = "io";
-        presence.largeImageText = "IO Client";
-        rpc.Discord_UpdatePresence(presence);
+            DiscordRichPresence presence = new DiscordRichPresence();
+            presence.startTimestamp = System.currentTimeMillis() / 1000L;
+            presence.details = "Playing IO Client";
+            presence.state = "Indev";
+            presence.largeImageKey = "io";
+            presence.largeImageText = "IO Client";
+            rpc.Discord_UpdatePresence(presence);
 
-        callbackThread = new Thread(() -> {
-            while (running) {
-                try {
-                    rpc.Discord_RunCallbacks();
-                    Thread.sleep(2000L);
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                    break;
-                } catch (Throwable ignored) {
+            callbackThread = new Thread(() -> {
+                while (running) {
+                    try {
+                        rpc.Discord_RunCallbacks();
+                        Thread.sleep(2000L);
+                    } catch (InterruptedException ignored) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    } catch (Throwable ignored) {
+                    }
                 }
-            }
-        }, "io-client-discord-rpc");
-        callbackThread.setDaemon(true);
-        callbackThread.start();
+            }, "io-client-discord-rpc");
+            callbackThread.setDaemon(true);
+            callbackThread.start();
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Discord RPC native library not available for this platform: " + e.getMessage());
+            running = false;
+        } catch (Throwable e) {
+            System.err.println("Failed to initialize Discord RPC: " + e.getMessage());
+            running = false;
+        }
     }
 
     public static void shutdown() {

@@ -65,6 +65,7 @@ public class ModuleManager {
         modules.add(new Scaffold());
         modules.add(new AutoMine());
         modules.add(new AutoTool());
+        modules.add(new EXPThrower());
         modules.add(new IoSwag());
         modules.add(new CrystalAura());
         modules.add(new AutoEat());

@@ -1,6 +1,7 @@
 package io.client;
 
 import io.client.commands.CommandManager;
+import io.client.modules.combat.OffHand;
 import io.client.modules.render.ModuleHUD;
 import io.client.modules.render.ArmorHud;
 import io.client.modules.render.ESP;
@@ -21,6 +22,7 @@ import org.lwjgl.glfw.GLFW;
 public class IoClientEventHandler {
 
     private static final IoClientEventHandler INSTANCE = new IoClientEventHandler();
+    private boolean rightClickPressed = false;
 
     private IoClientEventHandler() {
     }
@@ -41,6 +43,7 @@ public class IoClientEventHandler {
                 return;
             IoUserCapeService.onClientTick(client);
             handleKeys(client);
+            handleMouse(client);
             ModuleManager.INSTANCE.onUpdate();
         });
 
@@ -86,6 +89,26 @@ public class IoClientEventHandler {
                 armorHud.render(drawContext, tickDelta.getDynamicDeltaTicks());
             }
         });
+    }
+
+    private void handleMouse(MinecraftClient mc) {
+        if (mc.getWindow() == null || mc.currentScreen != null) {
+            return;
+        }
+
+        long window = mc.getWindow().getHandle();
+        boolean rightClickNow = isPressed(window, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+
+        OffHand offHand = ModuleManager.INSTANCE.getModule(OffHand.class);
+        if (offHand != null && offHand.isEnabled()) {
+            if (rightClickNow && !rightClickPressed) {
+                offHand.setClicking(true);
+            } else if (!rightClickNow && rightClickPressed) {
+                offHand.setClicking(false);
+            }
+        }
+
+        rightClickPressed = rightClickNow;
     }
 
     private void handleKeys(MinecraftClient mc) {
