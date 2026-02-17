@@ -68,6 +68,7 @@ public class ModuleManager {
         modules.add(new EXPThrower());
         modules.add(new IoSwag());
         modules.add(new CrystalAura());
+        modules.add(new CrystalAuraV2());
         modules.add(new AutoEat());
         modules.add(new AntiAFK());
         modules.add(new MessageSpammer());

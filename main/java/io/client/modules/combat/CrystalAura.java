@@ -17,6 +17,7 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
@@ -39,6 +40,7 @@ public class CrystalAura extends Module {
     private final CategorySetting targetCategory = new CategorySetting("Target");
     private final RadioSetting targetLogic = new RadioSetting("TargetLogic", "Distance");
     private final NumberSetting targetRange = new NumberSetting("TargetRange", 10.0F, 1.0F, 20.0F);
+    private final BooleanSetting allowZombieTesting = new BooleanSetting("ZombieTesting", true);
 
     private final CategorySetting placeCategory = new CategorySetting("Place");
     private final BooleanSetting doPlace = new BooleanSetting("Place", true);
@@ -134,6 +136,7 @@ public class CrystalAura extends Module {
         addSetting(targetCategory);
         targetCategory.addSetting(targetLogic);
         targetCategory.addSetting(targetRange);
+        targetCategory.addSetting(allowZombieTesting);
 
         addSetting(placeCategory);
         placeCategory.addSetting(doPlace);
@@ -270,7 +273,9 @@ public class CrystalAura extends Module {
     		if (e == mc.player || e instanceof EndCrystalEntity || e instanceof ItemEntity) continue;
     		if (!(e instanceof LivingEntity living)) continue;
     		if (living.getHealth() <= 0) continue;
-   	 	if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
+            boolean isConfiguredTarget = TargetManager.INSTANCE.isValidTarget(e);
+            boolean isZombieTestTarget = allowZombieTesting.isEnabled() && e instanceof ZombieEntity;
+    		if (!isConfiguredTarget && !isZombieTestTarget) continue;
 
             double distSq = mc.player.squaredDistanceTo(e);
             if (distSq > maxRangeSq) continue;
@@ -676,12 +681,13 @@ public class CrystalAura extends Module {
         BlockPos above = pos.up();
         if (!mc.world.getBlockState(above).isAir()) return false;
 
-        if (oldPlace.isEnabled() && !mc.world.getBlockState(above.up()).isAir()) {
+        // 1.13+ requires two air blocks; 1.12 mode allows the older single-block rule.
+        if (!oldPlace.isEnabled() && !mc.world.getBlockState(above.up()).isAir()) {
             return false;
         }
 
         Box box = new Box(above);
-        if (oldPlace.isEnabled()) {
+        if (!oldPlace.isEnabled()) {
             box = box.stretch(0, 1, 0);
         }
 
