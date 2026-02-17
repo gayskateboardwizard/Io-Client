@@ -25,6 +25,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
@@ -61,6 +62,11 @@ public class CrystalAuraV2 extends Module {
     private final BooleanSetting obbyOnlyGround = new BooleanSetting("ObbyOnlyGround", true);
     private final BooleanSetting obbySmart = new BooleanSetting("Smart", true);
 
+    private final CategorySetting autoProtectCategory = new CategorySetting("AutoProtect");
+    private final BooleanSetting autoProtect = new BooleanSetting("AutoProtect", false);
+    private final NumberSetting protectDelay = new NumberSetting("ProtectDelay", 4.0f, 0.0f, 20.0f);
+    private final BooleanSetting protectOnlyGround = new BooleanSetting("ProtectOnlyGround", true);
+
     private final CategorySetting switchCategory = new CategorySetting("Switch");
     private final RadioSetting switchMode = new RadioSetting("Switch", "Normal");
     private final BooleanSetting noGapSwitch = new BooleanSetting("NoGapSwitch", true);
@@ -80,6 +86,7 @@ public class CrystalAuraV2 extends Module {
     private int placeTimer;
     private int breakTimer;
     private int obbyTimer;
+    private int protectTimer;
     private int previousSlot = -1;
     private boolean hasSwitched;
 
@@ -123,6 +130,11 @@ public class CrystalAuraV2 extends Module {
         autoObbyCategory.addSetting(obbyOnlyGround);
         autoObbyCategory.addSetting(obbySmart);
 
+        addSetting(autoProtectCategory);
+        autoProtectCategory.addSetting(autoProtect);
+        autoProtectCategory.addSetting(protectDelay);
+        autoProtectCategory.addSetting(protectOnlyGround);
+
         addSetting(switchCategory);
         switchCategory.addSetting(switchMode);
         switchCategory.addSetting(noGapSwitch);
@@ -141,6 +153,7 @@ public class CrystalAuraV2 extends Module {
         placeTimer = 0;
         breakTimer = 0;
         obbyTimer = 0;
+        protectTimer = 0;
         target = null;
         bestCrystal = null;
         bestPlacePos = null;
@@ -156,6 +169,7 @@ public class CrystalAuraV2 extends Module {
         placeTimer = Math.max(0, placeTimer - 1);
         breakTimer = Math.max(0, breakTimer - 1);
         obbyTimer = Math.max(0, obbyTimer - 1);
+        protectTimer = Math.max(0, protectTimer - 1);
 
         if (shouldPause(mc)) {
             switchBack(mc);
@@ -170,6 +184,14 @@ public class CrystalAuraV2 extends Module {
 
         findBestCrystal(mc);
         findBestPlacePos(mc);
+
+        if (autoProtect.isEnabled() && protectTimer <= 0) {
+            if (placeAutoProtect(mc)) {
+                protectTimer = (int) protectDelay.getValue();
+                return;
+            }
+        }
+
         if (autoObsidian.isEnabled() && bestPlacePos == null && obbyTimer <= 0) {
             findBestObsidianPos(mc);
             if (bestObbyPos != null) {
@@ -449,6 +471,55 @@ public class CrystalAuraV2 extends Module {
         obbyTimer = (int) obbyDelay.getValue();
     }
 
+    private boolean placeAutoProtect(MinecraftClient mc) {
+        if (protectOnlyGround.isEnabled() && !mc.player.isOnGround()) {
+            return false;
+        }
+
+        Direction facing = yawToHorizontalDirection(mc.player.getYaw());
+        BlockPos lower = mc.player.getBlockPos().offset(facing);
+        BlockPos upper = lower.up();
+
+        boolean placedAny = false;
+        boolean offhand = mc.player.getOffHandStack().isOf(Items.OBSIDIAN);
+
+        if (!offhand && !mc.player.getMainHandStack().isOf(Items.OBSIDIAN)) {
+            if ("None".equals(switchMode.getSelectedOption())) return false;
+            if (shouldPauseForItem(mc)) return false;
+
+            int slot = findObsidianSlot(mc);
+            if (slot == -1) return false;
+
+            if (!hasSwitched) {
+                previousSlot = mc.player.getInventory().getSelectedSlot();
+                hasSwitched = true;
+            }
+            mc.player.getInventory().setSelectedSlot(slot);
+        }
+
+        Hand hand = offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+
+        if (!mc.world.getBlockState(lower).isOf(Blocks.OBSIDIAN) && canPlaceProtectObsidian(mc, lower)) {
+            Vec3d hitVec = Vec3d.ofCenter(lower.down()).add(0, 1, 0);
+            if (rotate.isEnabled()) applyRotation(mc, Vec3d.ofCenter(lower));
+            BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, lower.down(), false);
+            mc.interactionManager.interactBlock(mc.player, hand, hit);
+            mc.player.swingHand(hand);
+            placedAny = true;
+        }
+
+        if (!mc.world.getBlockState(upper).isOf(Blocks.OBSIDIAN) && canPlaceProtectObsidian(mc, upper)) {
+            Vec3d hitVec = Vec3d.ofCenter(upper.down()).add(0, 1, 0);
+            if (rotate.isEnabled()) applyRotation(mc, Vec3d.ofCenter(upper));
+            BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, upper.down(), false);
+            mc.interactionManager.interactBlock(mc.player, hand, hit);
+            mc.player.swingHand(hand);
+            placedAny = true;
+        }
+
+        return placedAny;
+    }
+
     private boolean canPlaceCrystal(MinecraftClient mc, BlockPos pos) {
         if (!mc.world.getBlockState(pos).isOf(Blocks.OBSIDIAN) && !mc.world.getBlockState(pos).isOf(Blocks.BEDROCK)) {
             return false;
@@ -470,6 +541,23 @@ public class CrystalAuraV2 extends Module {
             return false;
         }
         return true;
+    }
+
+    private boolean canPlaceProtectObsidian(MinecraftClient mc, BlockPos pos) {
+        if (!mc.world.getBlockState(pos).isReplaceable()) return false;
+
+        Box box = new Box(pos);
+        for (Entity e : mc.world.getOtherEntities(null, box)) {
+            if (e instanceof ItemEntity) continue;
+            return false;
+        }
+
+        if (mc.world.getBlockState(pos.down()).isSolid()) return true;
+        for (Direction dir : Direction.values()) {
+            if (dir == Direction.UP || dir == Direction.DOWN) continue;
+            if (mc.world.getBlockState(pos.offset(dir)).isSolid()) return true;
+        }
+        return false;
     }
 
     private boolean canSee(MinecraftClient mc, Vec3d to) {
@@ -554,5 +642,15 @@ public class CrystalAuraV2 extends Module {
 
     private static double sq(double v) {
         return v * v;
+    }
+
+    private Direction yawToHorizontalDirection(float yaw) {
+        int i = MathHelper.floor((yaw * 4.0f / 360.0f) + 0.5f) & 3;
+        return switch (i) {
+            case 0 -> Direction.SOUTH;
+            case 1 -> Direction.WEST;
+            case 2 -> Direction.NORTH;
+            default -> Direction.EAST;
+        };
     }
 }
