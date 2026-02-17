@@ -25,7 +25,7 @@ public class DonkeyBoatDupe extends Module {
     private final NumberSetting distanceSetting = new NumberSetting("Distance", 128.0f, 1.0f, 256.0f);
     private final BooleanSetting useForwardDistance = new BooleanSetting("UseForwardDistanceForReturn", true);
     private final NumberSetting returnDistance = new NumberSetting("ReturnDistance", 128.0f, 1.0f, 256.0f);
-    private final NumberSetting boatSpeed = new NumberSetting("BoatSpeed", 0.5f, 0.1f, 2.0f);
+    private final NumberSetting boatSpeed = new NumberSetting("BoatSpeed", 0.5f, 0.1f, 3.0f);
     private final NumberSetting exitGracePeriod = new NumberSetting("ExitGraceTicks", 5.0f, 1.0f, 20.0f);
 
     private final CategorySetting homeCategory = new CategorySetting("Home Settings");
@@ -129,7 +129,8 @@ public class DonkeyBoatDupe extends Module {
 
     @Override
     public void onUpdate() {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.world == null)
+            return;
         ticks++;
 
         if (modeSetting.isSelected("Boat")) {
@@ -338,7 +339,8 @@ public class DonkeyBoatDupe extends Module {
         }
 
         invTickCounter++;
-        if (invTickCounter < currentRandomDelay) return;
+        if (invTickCounter < currentRandomDelay)
+            return;
 
         invTickCounter = 0;
         updateRandomDelay();
@@ -441,7 +443,8 @@ public class DonkeyBoatDupe extends Module {
         }
 
         invTickCounter++;
-        if (invTickCounter < currentRandomDelay) return;
+        if (invTickCounter < currentRandomDelay)
+            return;
 
         invTickCounter = 0;
         updateRandomDelay();
@@ -669,7 +672,8 @@ public class DonkeyBoatDupe extends Module {
         }
 
         invTickCounter++;
-        if (invTickCounter < currentRandomDelay) return;
+        if (invTickCounter < currentRandomDelay)
+            return;
 
         invTickCounter = 0;
         updateRandomDelay();
@@ -816,7 +820,8 @@ public class DonkeyBoatDupe extends Module {
         }
 
         invTickCounter++;
-        if (invTickCounter < currentRandomDelay) return;
+        if (invTickCounter < currentRandomDelay)
+            return;
 
         invTickCounter = 0;
         updateRandomDelay();
@@ -917,4 +922,3 @@ public class DonkeyBoatDupe extends Module {
         this.markedChest = pos;
     }
 }
-
