@@ -32,6 +32,7 @@ public class ThemeChanger extends Module {
         clickGuiMode.addOption("IO");
         clickGuiMode.addOption("Future");
         clickGuiMode.addOption("Modern");
+        clickGuiMode.addOption("Basic");
 
         guiFont.addOption("Minecraft");
         guiFont.addOption("JetBrains Mono");

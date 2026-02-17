@@ -129,6 +129,8 @@ public class IoClientEventHandler {
                         mc.setScreen(new FutureClickGuiScreen());
                     } else if ("Modern".equalsIgnoreCase(guiMode)) {
                         mc.setScreen(new ModernClickGuiScreen());
+                    } else if ("Basic".equalsIgnoreCase(guiMode)) {
+                        mc.setScreen(new BasicClickGuiScreen());
                     } else {
                         mc.setScreen(new ClickGuiScreen());
                     }

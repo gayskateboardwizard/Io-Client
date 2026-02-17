@@ -82,8 +82,11 @@ public class FutureClickGuiScreen extends Screen {
         float invScale = 1.0f / guiScale;
         int scaledMouseX = (int)(mouseX * invScale);
         int scaledMouseY = (int)(mouseY * invScale);
+        int scaledScreenW = (int)(width * invScale);
+        int scaledScreenH = (int)(height * invScale);
 
         for (Panel panel : panels) {
+            panel.clamp(scaledScreenW, scaledScreenH);
             panel.render(context, scaledMouseX, scaledMouseY, delta, palette);
         }
 
@@ -176,6 +179,11 @@ public class FutureClickGuiScreen extends Screen {
                     .forEach(module -> rows.add(new ModuleRow(module)));
         }
 
+        private void clamp(int screenW, int screenH) {
+            x = Math.max(0, Math.min(x, screenW - width));
+            y = Math.max(0, Math.min(y, screenH - HEADER_HEIGHT));
+        }
+
         private void render(DrawContext context, int mouseX, int mouseY, float delta, FuturePalette palette) {
             context.fill(x, y, x + width, y + HEADER_HEIGHT, palette.panelHeader);
             context.fill(x, y + HEADER_HEIGHT - 1, x + width, y + HEADER_HEIGHT, palette.accentSoft);
@@ -210,7 +218,6 @@ public class FutureClickGuiScreen extends Screen {
 
         private void mouseClicked(int mouseX, int mouseY, int button) {
             if (hoveringHeader(mouseX, mouseY)) {
-
                 if (button == 0) {
                     dragging = true;
                     dragOffsetX = x - mouseX;
@@ -244,8 +251,16 @@ public class FutureClickGuiScreen extends Screen {
         private void drag(int mouseX, int mouseY) {
             if (!dragging)
                 return;
-            this.x = dragOffsetX + mouseX;
-            this.y = dragOffsetY + mouseY;
+
+            MinecraftClient mc = MinecraftClient.getInstance();
+            int screenWidth = (int)(mc.getWindow().getScaledWidth() / guiScale);
+            int screenHeight = (int)(mc.getWindow().getScaledHeight() / guiScale);
+
+            int newX = dragOffsetX + mouseX;
+            int newY = dragOffsetY + mouseY;
+
+            this.x = Math.max(0, Math.min(newX, screenWidth - width));
+            this.y = Math.max(0, Math.min(newY, screenHeight - HEADER_HEIGHT));
         }
 
         private boolean hoveringHeader(int mouseX, int mouseY) {

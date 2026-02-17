@@ -32,8 +32,8 @@ public class AutoEat extends Module {
     public final NumberSetting minHunger = new NumberSetting("Min Hunger", 16.0F, 0.0F, 20.0F);
     public final NumberSetting minHealth = new NumberSetting("Min Health", 14.0F, 0.0F, 20.0F);
     public final RadioSetting handMode = new RadioSetting("Hand", "Auto");
-    public final BooleanSetting prioritizeGapples = new BooleanSetting("Prioritize Gapples", true);
-    public final BooleanSetting eatWhileMoving = new BooleanSetting("Eat While Moving", true);
+    public final BooleanSetting prioritizeGapples = new BooleanSetting("PrioritizeGapps", true);
+    public final BooleanSetting eatWhileMoving = new BooleanSetting("EatWhileMoving", true);
 
     private int previousSlot = -1;
     private boolean hasSwitchedSlot = false;

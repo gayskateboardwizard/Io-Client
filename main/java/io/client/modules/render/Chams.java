@@ -6,12 +6,15 @@ import io.client.TargetManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
+import io.client.settings.RadioSetting;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class Chams extends Module {
+    private final RadioSetting targetMode = new RadioSetting("TargetMode", "Targets");
+
     private final CategorySetting playerSettings = new CategorySetting("PlayerChams");
     private final CategorySetting hostileSettings = new CategorySetting("HostileChams");
     private final CategorySetting passiveSettings = new CategorySetting("PassiveChams");
@@ -43,19 +46,25 @@ public class Chams extends Module {
     private final NumberSetting passiveA = new NumberSetting("PassiveA", 255.0f, 0.0f, 255.0f);
 
     public Chams() {
-        super("Chams", "Renders colored entity outlines through walls", -1, Category.RENDER);
+        super("Chams", "Renders colored entities through walls", -1, Category.RENDER);
+
+        targetMode.addOption("Everything");
+        targetMode.addOption("Targets");
+        targetMode.addOption("Players");
+        addSetting(targetMode);
 
         playerSettings.addSetting(players);
         playerSettings.addSetting(ignoreSelf);
-        playerSettings.addSetting(friendColor);
         playerSettings.addSetting(playerR);
         playerSettings.addSetting(playerG);
         playerSettings.addSetting(playerB);
         playerSettings.addSetting(playerA);
-        playerSettings.addSetting(friendR);
-        playerSettings.addSetting(friendG);
-        playerSettings.addSetting(friendB);
-        playerSettings.addSetting(friendA);
+
+        friendSettings.addSetting(friendColor);
+        friendSettings.addSetting(friendR);
+        friendSettings.addSetting(friendG);
+        friendSettings.addSetting(friendB);
+        friendSettings.addSetting(friendA);
 
         hostileSettings.addSetting(hostiles);
         hostileSettings.addSetting(hostileR);
@@ -69,26 +78,42 @@ public class Chams extends Module {
         passiveSettings.addSetting(passiveB);
         passiveSettings.addSetting(passiveA);
 
-        friendSettings.addSetting(playerSettings);
-        friendSettings.addSetting(hostileSettings);
-        friendSettings.addSetting(passiveSettings);
+        addSetting(playerSettings);
+        addSetting(friendSettings);
+        addSetting(hostileSettings);
+        addSetting(passiveSettings);
     }
 
     public boolean shouldRender(Entity entity) {
-        if (!isEnabled())
-            return false;
-        if (entity == null)
-            return false;
+        if (!isEnabled()) return false;
+        if (entity == null) return false;
+
         if (entity == net.minecraft.client.MinecraftClient.getInstance().player && ignoreSelf.isEnabled())
             return false;
 
-        if (entity instanceof PlayerEntity)
-            return players.isEnabled();
-        if (entity instanceof HostileEntity)
-            return hostiles.isEnabled();
-        if (entity instanceof AnimalEntity)
-            return passives.isEnabled();
-        return false;
+        String mode = targetMode.getSelectedOption();
+
+        switch (mode) {
+            case "Everything" -> {
+                if (entity instanceof PlayerEntity) return players.isEnabled();
+                if (entity instanceof HostileEntity) return hostiles.isEnabled();
+                if (entity instanceof AnimalEntity) return passives.isEnabled();
+                return false;
+            }
+            case "Targets" -> {
+                if (!TargetManager.INSTANCE.isValidTarget(entity)) return false;
+                if (entity instanceof PlayerEntity) return players.isEnabled();
+                if (entity instanceof HostileEntity) return hostiles.isEnabled();
+                if (entity instanceof AnimalEntity) return passives.isEnabled();
+                return true;
+            }
+            case "Players" -> {
+                return entity instanceof PlayerEntity && players.isEnabled();
+            }
+            default -> {
+                return false;
+            }
+        }
     }
 
     public int[] getColor(Entity entity) {
@@ -108,11 +133,10 @@ public class Chams extends Module {
     }
 
     private static int[] rgba(NumberSetting r, NumberSetting g, NumberSetting b, NumberSetting a) {
-        return new int[] { (int) r.getValue(), (int) g.getValue(), (int) b.getValue(), (int) a.getValue() };
+        return new int[]{(int) r.getValue(), (int) g.getValue(), (int) b.getValue(), (int) a.getValue()};
     }
 
     private static int[] rgba(int r, int g, int b, int a) {
-        return new int[] { r, g, b, a };
+        return new int[]{r, g, b, a};
     }
 }
-
