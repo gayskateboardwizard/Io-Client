@@ -1,4 +1,4 @@
-//this implementation fucking sucks btw
+
 
 package io.client.modules.combat;
 
@@ -154,11 +154,12 @@ public class AutoEat extends Module {
         PlayerInventory inv = player.getInventory();
 
         if (foodSlot.hand == Hand.MAIN_HAND) {
-            int currSlot = getCurrentSlot(inv);
+            int currSlot = player.getInventory().getSelectedSlot();
             if (currSlot != foodSlot.slot) {
                 previousSlot = currSlot;
                 hasSwitchedSlot = true;
-                setSelectedSlot(mc, inv, foodSlot.slot);
+                player.getInventory().setSelectedSlot(foodSlot.slot);
+                mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(foodSlot.slot));
                 lastSwapTime = now;
                 return;
             }
@@ -173,7 +174,8 @@ public class AutoEat extends Module {
         mc.options.useKey.setPressed(false);
 
         if (hasSwitchedSlot && previousSlot != -1) {
-            setSelectedSlot(mc, player.getInventory(), previousSlot);
+            player.getInventory().setSelectedSlot(previousSlot);
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(previousSlot));
             previousSlot = -1;
             hasSwitchedSlot = false;
         }
@@ -182,28 +184,7 @@ public class AutoEat extends Module {
         eatingHand = null;
     }
 
-    private int getCurrentSlot(PlayerInventory inventory) {
-        try {
-            var field = PlayerInventory.class.getDeclaredField("selected");
-            field.setAccessible(true);
-            return field.getInt(inventory);
-        } catch (Exception e) {
-            return -1;
-        }
-    }
 
-    private void setSelectedSlot(MinecraftClient mc, PlayerInventory inventory, int slot) {
-        try {
-            var field = PlayerInventory.class.getDeclaredField("selected");
-            field.setAccessible(true);
-            field.setInt(inventory, slot);
-        } catch (Exception ignored) {
-        }
-
-        if (mc.player != null && mc.player.networkHandler != null) {
-            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
-        }
-    }
 
     @Override
     public void onDisable() {
