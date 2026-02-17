@@ -4,14 +4,17 @@ import io.client.Category;
 import io.client.ClickGuiScreen;
 import io.client.Module;
 import io.client.ModuleManager;
+import io.client.clickgui.ClickGuiModeRegistry;
 import io.client.clickgui.Theme;
 import io.client.settings.RadioSetting;
+import net.minecraft.client.MinecraftClient;
 
 public class ThemeChanger extends Module {
     public final RadioSetting themeSelect = new RadioSetting("Theme", "Io");
-    public final RadioSetting clickGuiMode = new RadioSetting("ClickGui", "IO");
+    public final RadioSetting clickGuiMode = new RadioSetting("ClickGui", ClickGuiModeRegistry.getDefaultModeName());
     public final RadioSetting guiFont = new RadioSetting("GuiFont", "Minecraft");
     private String lastSelectedTheme = "Io";
+    private String lastSelectedClickGuiMode = ClickGuiModeRegistry.getDefaultModeName();
 
     public ThemeChanger() {
         super("Themes", "Change the UI colors", -1, Category.SETTINGS);
@@ -29,10 +32,9 @@ public class ThemeChanger extends Module {
         themeSelect.addOption("Deimos");
         themeSelect.addOption("Triton");
 
-        clickGuiMode.addOption("IO");
-        clickGuiMode.addOption("Future");
-        clickGuiMode.addOption("Modern");
-        clickGuiMode.addOption("Basic");
+        for (String modeName : ClickGuiModeRegistry.getModeNames()) {
+            clickGuiMode.addOption(modeName);
+        }
 
         guiFont.addOption("Minecraft");
         guiFont.addOption("JetBrains Mono");
@@ -59,6 +61,12 @@ public class ThemeChanger extends Module {
         if (!currentSelection.equals(lastSelectedTheme)) {
             selectTheme(currentSelection);
             lastSelectedTheme = currentSelection;
+        }
+
+        String selectedGuiMode = clickGuiMode.getSelectedOption();
+        if (!selectedGuiMode.equals(lastSelectedClickGuiMode)) {
+            applyClickGuiMode(selectedGuiMode);
+            lastSelectedClickGuiMode = selectedGuiMode;
         }
     }
 
@@ -100,5 +108,13 @@ public class ThemeChanger extends Module {
 
     public String getSelectedFontMode() {
         return guiFont.getSelectedOption();
+    }
+
+    private void applyClickGuiMode(String modeName) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.currentScreen != null && ClickGuiModeRegistry.isClickGuiScreen(mc.currentScreen)) {
+            mc.setScreen(ClickGuiModeRegistry.createScreen(modeName));
+        }
+        ModuleManager.INSTANCE.saveModules();
     }
 }

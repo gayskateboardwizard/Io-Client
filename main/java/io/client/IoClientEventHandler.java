@@ -8,6 +8,7 @@ import io.client.modules.render.ESP;
 import io.client.modules.misc.IoSwag;
 import io.client.modules.settings.ThemeChanger;
 import io.client.network.IoUserCapeService;
+import io.client.clickgui.ClickGuiModeRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -124,16 +125,10 @@ public class IoClientEventHandler {
             if (isPressed(window, ClickGuiScreen.clickGuiKey)) {
                 if (!KeyManager.INSTANCE.isKeyPressed(ClickGuiScreen.clickGuiKey)) {
                     ThemeChanger themeChanger = ModuleManager.INSTANCE.getModule(ThemeChanger.class);
-                    String guiMode = themeChanger != null ? themeChanger.getSelectedClickGuiMode() : "IO";
-                    if ("Future".equalsIgnoreCase(guiMode)) {
-                        mc.setScreen(new FutureClickGuiScreen());
-                    } else if ("Modern".equalsIgnoreCase(guiMode)) {
-                        mc.setScreen(new ModernClickGuiScreen());
-                    } else if ("Basic".equalsIgnoreCase(guiMode)) {
-                        mc.setScreen(new BasicClickGuiScreen());
-                    } else {
-                        mc.setScreen(new ClickGuiScreen());
-                    }
+                    String guiMode = themeChanger != null
+                            ? themeChanger.getSelectedClickGuiMode()
+                            : ClickGuiModeRegistry.getDefaultModeName();
+                    mc.setScreen(ClickGuiModeRegistry.createScreen(guiMode));
                     KeyManager.INSTANCE.addKey(ClickGuiScreen.clickGuiKey);
                 }
             } else {
