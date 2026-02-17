@@ -21,7 +21,7 @@ Macros and Binding
 <img width="578" height="139" alt="image" src="https://github.com/user-attachments/assets/4115638b-9582-44e6-95bd-1eb654507a00" />
 
 # Credits
-I took some code (mainly from the following clients:
+I took some code (mainly) from the following clients:
 Meteor, Sn0w and thunderhack
 
 <img alt="image" src="https://cdn.discordapp.com/attachments/1455235908419846177/1473064659165646848/image.png?ex=6994d9de&is=6993885e&hm=5c6c5de9b7cb439e4b30db840707f8434dbe95833fce2e415c54a803654643f0&" />
