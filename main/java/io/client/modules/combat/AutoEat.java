@@ -1,5 +1,4 @@
 
-
 package io.client.modules.combat;
 
 import io.client.Category;
@@ -26,8 +25,7 @@ public class AutoEat extends Module {
             Items.POISONOUS_POTATO,
             Items.PUFFERFISH,
             Items.CHICKEN,
-            Items.SUSPICIOUS_STEW
-    );
+            Items.SUSPICIOUS_STEW);
 
     public final NumberSetting minHunger = new NumberSetting("Min Hunger", 16.0F, 0.0F, 20.0F);
     public final NumberSetting minHealth = new NumberSetting("Min Health", 14.0F, 0.0F, 20.0F);
@@ -38,7 +36,6 @@ public class AutoEat extends Module {
     private int previousSlot = -1;
     private boolean hasSwitchedSlot = false;
     private boolean isEating = false;
-    private Hand eatingHand = null;
     private long lastSwapTime = 0;
 
     public AutoEat() {
@@ -58,18 +55,26 @@ public class AutoEat extends Module {
     @Override
     public void onUpdate() {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (!(mc.player instanceof ClientPlayerEntity player) || mc.interactionManager == null) return;
+        if (!(mc.player instanceof ClientPlayerEntity player) || mc.interactionManager == null)
+            return;
 
         int hunger = player.getHungerManager().getFoodLevel();
         float health = player.getHealth();
         long now = System.currentTimeMillis();
+        boolean shouldEat = hunger < minHunger.getValue() || health < minHealth.getValue();
 
-        if (hunger >= minHunger.getValue() && health >= minHealth.getValue()) {
+        if (!shouldEat) {
             stopEating(mc, player);
             return;
         }
 
         if (player.isUsingItem()) {
+            // Only treat active use as AutoEat when the active item is valid food.
+            if (!isValidFood(player.getActiveItem())) {
+                stopEating(mc, player);
+                return;
+            }
+
             isEating = true;
             if (!eatWhileMoving.isEnabled()) {
                 mc.options.forwardKey.setPressed(false);
@@ -82,14 +87,16 @@ public class AutoEat extends Module {
 
         if (isEating && !player.isUsingItem()) {
             isEating = false;
-            eatingHand = null;
+            mc.options.useKey.setPressed(false);
         }
 
-        if (!isEating && (hunger < minHunger.getValue() || health < minHealth.getValue())) {
-            if (now - lastSwapTime < SWAP_DELAY_MS) return;
+        if (!isEating && shouldEat) {
+            if (now - lastSwapTime < SWAP_DELAY_MS)
+                return;
 
             FoodSlot foodSlot = findBestFood(player);
             if (foodSlot == null) {
+                stopEating(mc, player);
                 return;
             }
 
@@ -135,24 +142,27 @@ public class AutoEat extends Module {
     }
 
     private boolean isValidFood(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        if (FOOD_BLACKLIST.contains(stack.getItem())) return false;
+        if (stack.isEmpty())
+            return false;
+        if (FOOD_BLACKLIST.contains(stack.getItem()))
+            return false;
 
         FoodComponent food = stack.getItem().getComponents().get(net.minecraft.component.DataComponentTypes.FOOD);
         return food != null;
     }
 
     private int getFoodPriority(ItemStack stack) {
-        if (!prioritizeGapples.isEnabled()) return 1;
+        if (!prioritizeGapples.isEnabled())
+            return 1;
 
-        if (stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) return 3;
-        if (stack.isOf(Items.GOLDEN_APPLE)) return 2;
+        if (stack.isOf(Items.ENCHANTED_GOLDEN_APPLE))
+            return 3;
+        if (stack.isOf(Items.GOLDEN_APPLE))
+            return 2;
         return 1;
     }
 
     private void startEating(MinecraftClient mc, ClientPlayerEntity player, FoodSlot foodSlot, long now) {
-        PlayerInventory inv = player.getInventory();
-
         if (foodSlot.hand == Hand.MAIN_HAND) {
             int currSlot = player.getInventory().getSelectedSlot();
             if (currSlot != foodSlot.slot) {
@@ -166,12 +176,13 @@ public class AutoEat extends Module {
         }
 
         mc.options.useKey.setPressed(true);
-        eatingHand = foodSlot.hand;
         isEating = true;
     }
 
     private void stopEating(MinecraftClient mc, ClientPlayerEntity player) {
-        mc.options.useKey.setPressed(false);
+        if (isEating) {
+            mc.options.useKey.setPressed(false);
+        }
 
         if (hasSwitchedSlot && previousSlot != -1) {
             player.getInventory().setSelectedSlot(previousSlot);
@@ -181,10 +192,7 @@ public class AutoEat extends Module {
         }
 
         isEating = false;
-        eatingHand = null;
     }
-
-
 
     @Override
     public void onDisable() {
@@ -209,4 +217,3 @@ public class AutoEat extends Module {
         }
     }
 }
-
