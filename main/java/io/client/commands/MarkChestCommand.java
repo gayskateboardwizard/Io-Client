@@ -1,7 +1,7 @@
 package io.client.commands;
 
 import io.client.ModuleManager;
-import io.client.modules.DonkeyBoatDupe;
+import io.client.modules.misc.DonkeyBoatDupe;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.hit.BlockHitResult;

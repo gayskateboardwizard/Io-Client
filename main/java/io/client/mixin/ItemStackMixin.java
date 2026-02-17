@@ -1,6 +1,6 @@
 package io.client.mixin;
 
-import io.client.modules.ExtraItemInfo;
+import io.client.modules.misc.ExtraItemInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

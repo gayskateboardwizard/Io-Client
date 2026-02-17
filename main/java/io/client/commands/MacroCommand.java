@@ -1,7 +1,7 @@
 package io.client.commands;
 
 import io.client.MacroManager;
-import io.client.modules.Macro;
+import io.client.modules.macros.Macro;
 import org.lwjgl.glfw.GLFW;
 
 public class MacroCommand implements Command {
@@ -218,3 +218,4 @@ public class MacroCommand implements Command {
         };
     }
 }
+

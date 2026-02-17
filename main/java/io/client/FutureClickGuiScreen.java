@@ -348,18 +348,15 @@ public class FutureClickGuiScreen extends Screen {
             }
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
-            int markerColor = setting.isEnabled() ? palette.accentStrong : palette.textMuted;
             int markerX = labelStart;
-            String marker = setting.isEnabled() ? "[x] " : "[ ] ";
-            int markerWidth = getGuiTextWidth(marker);
-            drawGuiTextWithShadow(context, marker, markerX, y + 3, markerColor);
+            int markerWidth = 0;
             drawScrollableText(
                     context,
                     "bool:" + System.identityHashCode(this),
                     setting.getName(),
                     labelStart + markerWidth,
                     y + 3,
-                    palette.textMain,
+                    setting.isEnabled() ? palette.accentStrong : palette.textMain,
                     labelStart + markerWidth,
                     labelEnd,
                     hovering(mouseX, mouseY),
@@ -707,7 +704,7 @@ public class FutureClickGuiScreen extends Screen {
     private int getGuiTextWidth(String text) {
         if (textRenderer == null)
             return 0;
-        if (!ClickGuiScreen.useJetBrainsMonoFont())
+        if (!ClickGuiScreen.useCustomGuiFont())
             return textRenderer.getWidth(text);
         return textRenderer.getWidth(ClickGuiScreen.styledGuiText(text));
     }
@@ -715,7 +712,7 @@ public class FutureClickGuiScreen extends Screen {
     private void drawGuiTextWithShadow(DrawContext context, String text, int x, int y, int color) {
         if (textRenderer == null)
             return;
-        if (!ClickGuiScreen.useJetBrainsMonoFont()) {
+        if (!ClickGuiScreen.useCustomGuiFont()) {
             context.drawTextWithShadow(textRenderer, text, x, y, color);
             return;
         }

@@ -252,17 +252,9 @@ public class PanelRenderer {
             graphics.fill(settingX1, settingY1, settingX2, settingY2, theme.hoverHighlight);
         }
 
-        int indicatorColor = boolSetting.isEnabled() ? theme.moduleEnabled : theme.moduleDisabled;
-        String indicatorText = boolSetting.isEnabled() ? "[x]" : "[ ]";
+        int textColor = boolSetting.isEnabled() ? theme.moduleEnabled : 0xFFFFFFFF;
         float indicatorX = panel.x + indent * SCALE;
-
-        graphics.getMatrices().pushMatrix();
-        graphics.getMatrices().translate(indicatorX, yOffset + 2 * SCALE);
-        graphics.getMatrices().scale(SCALE, SCALE);
-        drawGuiText(graphics, font, indicatorText, 0, 0, indicatorColor, false);
-        graphics.getMatrices().popMatrix();
-
-        float indicatorWidth = font.getWidth(indicatorText) * SCALE;
+        float indicatorWidth = 0;
 
         String settingName = boolSetting.getName();
         int maxWidth = (int)((PANEL_WIDTH - indicatorWidth - indent * SCALE - 6 * SCALE) / SCALE);
@@ -288,14 +280,14 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(indicatorX + indicatorWidth + 4 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            drawGuiText(graphics, font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, scrollText, 0, 0, textColor, false);
             graphics.getMatrices().popMatrix();
             graphics.disableScissor();
         } else {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(indicatorX + indicatorWidth + 4 * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            drawGuiText(graphics, font, settingName, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, settingName, 0, 0, textColor, false);
             graphics.getMatrices().popMatrix();
         }
 
@@ -468,7 +460,7 @@ public class PanelRenderer {
             int color,
             boolean shadow
     ) {
-        if (!ClickGuiScreen.useJetBrainsMonoFont()) {
+        if (!ClickGuiScreen.useCustomGuiFont()) {
             graphics.drawText(font, text, x, y, color, shadow);
             return;
         }

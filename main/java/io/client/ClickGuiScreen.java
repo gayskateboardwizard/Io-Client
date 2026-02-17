@@ -1,7 +1,7 @@
 package io.client;
 
 import io.client.clickgui.*;
-import io.client.modules.ThemeChanger;
+import io.client.modules.settings.ThemeChanger;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -21,6 +21,7 @@ public class ClickGuiScreen extends Screen {
     public static boolean opened = false;
     public static Theme currentTheme = Theme.IO;
     public static final Identifier JETBRAINS_MONO_FONT = Identifier.of("io_client", "jetbrains_mono");
+    public static final Identifier VERDANA_FONT = Identifier.of("io_client", "verdana");
 
     private final Map<Category, CategoryPanel> panels = new HashMap<>();
     private final PanelRenderer renderer;
@@ -30,7 +31,8 @@ public class ClickGuiScreen extends Screen {
         super(Text.literal("IO Client"));
 
         Theme savedTheme = ModuleManager.INSTANCE.loadTheme();
-        if (savedTheme != null) currentTheme = savedTheme;
+        if (savedTheme != null)
+            currentTheme = savedTheme;
 
         this.renderer = new PanelRenderer(currentTheme);
         this.inputHandler = new InputHandler(this);
@@ -39,17 +41,31 @@ public class ClickGuiScreen extends Screen {
     }
 
     public static boolean useJetBrainsMonoFont() {
+        return "JetBrains Mono".equals(getSelectedGuiFontMode());
+    }
+
+    public static boolean useCustomGuiFont() {
+        return !"Minecraft".equals(getSelectedGuiFontMode());
+    }
+
+    public static String getSelectedGuiFontMode() {
         Module themeModule = ModuleManager.INSTANCE.getModuleByName("Themes");
         if (themeModule instanceof ThemeChanger changer) {
-            return "JetBrains Mono".equals(changer.getSelectedFontMode());
+            return changer.getSelectedFontMode();
         }
-        return false;
+        return "Minecraft";
     }
 
     public static Text styledGuiText(String text) {
         Text literal = Text.literal(text);
-        if (!useJetBrainsMonoFont()) return literal;
-        return literal.copy().styled(style -> style.withFont(JETBRAINS_MONO_FONT));
+        String fontMode = getSelectedGuiFontMode();
+        if ("JetBrains Mono".equals(fontMode)) {
+            return literal.copy().styled(style -> style.withFont(JETBRAINS_MONO_FONT));
+        }
+        if ("Verdana".equals(fontMode)) {
+            return literal.copy().styled(style -> style.withFont(VERDANA_FONT));
+        }
+        return literal;
     }
 
     private void initializePanels() {
@@ -79,7 +95,8 @@ public class ClickGuiScreen extends Screen {
 
         for (CategoryPanel panel : panels.values()) {
             String desc = renderer.renderPanel(graphics, textRenderer, panel, mouseX, mouseY);
-            if (desc != null) hoveredDescription = desc;
+            if (desc != null)
+                hoveredDescription = desc;
         }
 
         if (hoveredDescription != null) {
@@ -106,9 +123,12 @@ public class ClickGuiScreen extends Screen {
         int tipX = 0;
         int tipY = 0;
 
-        if ((mouseX + 10 + tipWidth * scale) > screenWidth) tipX = (int)(-(tipWidth + 15) * scale);
-        if ((mouseY - 5 + tipHeight * scale) > screenHeight) tipY = (int)((screenHeight - mouseY - tipHeight - 5) / scale);
-        if ((mouseY - 5) < 0) tipY = (int)(-mouseY / scale);
+        if ((mouseX + 10 + tipWidth * scale) > screenWidth)
+            tipX = (int) (-(tipWidth + 15) * scale);
+        if ((mouseY - 5 + tipHeight * scale) > screenHeight)
+            tipY = (int) ((screenHeight - mouseY - tipHeight - 5) / scale);
+        if ((mouseY - 5) < 0)
+            tipY = (int) (-mouseY / scale);
 
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + tipHeight, 0xE0000000);
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + 1, 0x44FFFFFF);

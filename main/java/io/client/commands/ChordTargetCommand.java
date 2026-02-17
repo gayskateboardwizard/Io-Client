@@ -1,7 +1,7 @@
 package io.client.commands;
 
 import io.client.ModuleManager;
-import io.client.modules.HUD;
+import io.client.modules.render.HUD;
 import net.minecraft.client.MinecraftClient;
 
 public class ChordTargetCommand implements Command {

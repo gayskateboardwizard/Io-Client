@@ -14,6 +14,7 @@ public class HelpCommand implements Command {
         CommandManager.INSTANCE.sendMessage("§d|friendlist §7- Shows your friend list");
         CommandManager.INSTANCE.sendMessage("§d|markchest §7- Marks the chest you are looking at for duping");
         CommandManager.INSTANCE.sendMessage("§d|bindlist §7- Shows your bind list");
+        CommandManager.INSTANCE.sendMessage("§d|ioswag <suffix|preset|presets|greentext|clear> ... §7- Customize IoSwag chat style");
         CommandManager.INSTANCE.sendMessage("§d|help §7- Shows this message");
     }
 }

@@ -1,6 +1,6 @@
 package io.client;
 
-import io.client.modules.Macro;
+import io.client.modules.macros.Macro;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -90,3 +90,4 @@ public class MacroManager {
         }
     }
 }
+

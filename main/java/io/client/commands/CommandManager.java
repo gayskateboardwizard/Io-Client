@@ -50,6 +50,7 @@ public class CommandManager {
         commands.put("markchest", new MarkChestCommand());
         commands.put("bindlist", new BindListCommand());
         commands.put("macro", new MacroCommand());
+        commands.put("ioswag", new IoSwagCommand());
 
     }
 

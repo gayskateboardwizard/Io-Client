@@ -2,7 +2,7 @@ package io.client.mixin;
 
 import io.client.ModuleManager;
 import io.client.mixininterface.IWorldRenderer;
-import io.client.modules.Chams;
+import io.client.modules.render.Chams;
 import io.client.utils.render.postprocess.EntityShader;
 import io.client.utils.render.postprocess.PostProcessShaders;
 import it.unimi.dsi.fastutil.Stack;
@@ -119,4 +119,5 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         this.framebufferSet.entityOutlineFramebuffer = io_client$framebufferHandleStack.pop();
     }
 }
+
 

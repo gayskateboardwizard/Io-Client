@@ -3,7 +3,7 @@ package io.client.commands;
 import io.client.ClickGuiScreen;
 import io.client.Module;
 import io.client.ModuleManager;
-import io.client.modules.Macro;
+import io.client.modules.macros.Macro;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;

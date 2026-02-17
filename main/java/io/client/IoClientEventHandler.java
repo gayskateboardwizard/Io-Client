@@ -1,11 +1,11 @@
 package io.client;
 
 import io.client.commands.CommandManager;
-import io.client.modules.ModuleHUD;
-import io.client.modules.ArmorHud;
-import io.client.modules.ESP;
-import io.client.modules.IoSwag;
-import io.client.modules.ThemeChanger;
+import io.client.modules.render.ModuleHUD;
+import io.client.modules.render.ArmorHud;
+import io.client.modules.render.ESP;
+import io.client.modules.misc.IoSwag;
+import io.client.modules.settings.ThemeChanger;
 import io.client.network.IoUserCapeService;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -65,8 +65,8 @@ public class IoClientEventHandler {
 
 
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
-            io.client.modules.HUD hud =
-                    ModuleManager.INSTANCE.getModule(io.client.modules.HUD.class);
+            io.client.modules.render.HUD hud =
+                    ModuleManager.INSTANCE.getModule(io.client.modules.render.HUD.class);
             if (hud != null && hud.isEnabled()) {
                 hud.render(drawContext);
             }

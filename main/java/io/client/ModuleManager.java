@@ -4,8 +4,13 @@ import io.client.clickgui.CategoryPanel;
 import io.client.clickgui.SavedPanelConfig;
 import io.client.clickgui.Theme;
 import io.client.commands.CommandManager;
-import io.client.MacroManager;
-import io.client.modules.*;
+import io.client.modules.combat.*;
+import io.client.modules.macros.Macro;
+import io.client.modules.misc.*;
+import io.client.modules.movement.*;
+import io.client.modules.render.*;
+import io.client.modules.settings.*;
+import io.client.modules.world.*;
 import io.client.settings.*;
 import org.lwjgl.glfw.GLFW;
 import java.io.*;
@@ -39,7 +44,8 @@ public class ModuleManager {
     }
 
     public void init() {
-        if (initialized) return;
+        if (initialized)
+            return;
         initialized = true;
 
         modules.add(new ElytraFlight());
@@ -82,13 +88,11 @@ public class ModuleManager {
         modules.add(new FastUse());
         modules.add(new ModuleHUD());
         modules.add(new GUIScale());
-        //modules.add(new );
-        //modules.add(new );
-        //modules.add(new );
-        //modules.add(new );
-        //modules.add(new );
-
-
+        // modules.add(new );
+        // modules.add(new );
+        // modules.add(new );
+        // modules.add(new );
+        // modules.add(new );
 
         System.out.println("Loaded " + modules.size() + " modules");
 
@@ -111,7 +115,8 @@ public class ModuleManager {
     private File getFile(String fileName) {
         Path gameDir = MinecraftClient.getInstance().runDirectory.toPath();
         File clientFolder = gameDir.resolve(CLIENT_FOLDER_NAME).toFile();
-        if (!clientFolder.exists()) clientFolder.mkdirs();
+        if (!clientFolder.exists())
+            clientFolder.mkdirs();
         return clientFolder.toPath().resolve(fileName).toFile();
     }
 
@@ -131,16 +136,19 @@ public class ModuleManager {
 
     public void loadKeybinds() {
         File configFile = getFile(KEYBIND_CONFIG_FILE);
-        if (!configFile.exists()) return;
+        if (!configFile.exists())
+            return;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
-                if (parts.length != 2) continue;
+                if (parts.length != 2)
+                    continue;
 
                 Module module = getModuleByName(parts[0]);
-                if (module == null) continue;
+                if (module == null)
+                    continue;
 
                 try {
                     int key = Integer.parseInt(parts[1]);
@@ -181,7 +189,8 @@ public class ModuleManager {
             writer.write(moduleName + ":setting:" + setting.getName() + ":" + ((StringSetting) setting).getValue());
             writer.newLine();
         } else if (setting instanceof RadioSetting) {
-            writer.write(moduleName + ":setting:" + setting.getName() + ":" + ((RadioSetting) setting).getSelectedOption());
+            writer.write(
+                    moduleName + ":setting:" + setting.getName() + ":" + ((RadioSetting) setting).getSelectedOption());
             writer.newLine();
         } else if (setting instanceof CategorySetting) {
             CategorySetting catSetting = (CategorySetting) setting;
@@ -195,25 +204,30 @@ public class ModuleManager {
 
     public void loadModules() {
         File configFile = getFile(MODULE_CONFIG_FILE);
-        if (!configFile.exists()) return;
+        if (!configFile.exists())
+            return;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
-                if (parts.length < 3) continue;
+                if (parts.length < 3)
+                    continue;
 
                 Module module = getModuleByName(parts[0]);
-                if (module == null) continue;
+                if (module == null)
+                    continue;
 
                 switch (parts[1]) {
                     case "enabled" -> {
                         boolean enabled = Boolean.parseBoolean(parts[2]);
-                        if (enabled && !module.isEnabled()) module.toggle();
+                        if (enabled && !module.isEnabled())
+                            module.toggle();
                     }
                     case "extended" -> module.setExtended(Boolean.parseBoolean(parts[2]));
                     case "setting" -> {
-                        if (parts.length < 4) continue;
+                        if (parts.length < 4)
+                            continue;
                         Setting setting = findSettingByName(module, parts[2]);
                         if (setting != null) {
                             loadSetting(setting, parts);
@@ -227,7 +241,8 @@ public class ModuleManager {
     }
 
     private void loadSetting(Setting setting, String[] parts) {
-        if (parts.length < 4) return;
+        if (parts.length < 4)
+            return;
 
         if (setting instanceof NumberSetting) {
             try {
@@ -254,7 +269,8 @@ public class ModuleManager {
             }
             if (setting instanceof CategorySetting) {
                 Setting found = findSettingInCategory((CategorySetting) setting, name);
-                if (found != null) return found;
+                if (found != null)
+                    return found;
             }
         }
         return null;
@@ -286,7 +302,8 @@ public class ModuleManager {
     public Map<Category, SavedPanelConfig> loadUiConfig() {
         File configFile = getFile(UI_CONFIG_FILE);
         Map<Category, SavedPanelConfig> configMap = new HashMap<>();
-        if (!configFile.exists()) return configMap;
+        if (!configFile.exists())
+            return configMap;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             String line;
@@ -321,7 +338,8 @@ public class ModuleManager {
 
     public Theme loadTheme() {
         File configFile = getFile(THEME_CONFIG_FILE);
-        if (!configFile.exists()) return Theme.IO;
+        if (!configFile.exists())
+            return Theme.IO;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             String line = reader.readLine();
@@ -354,16 +372,22 @@ public class ModuleManager {
     }
 
     public Module getModuleByName(String name) {
-        for (Module module : modules) if (module.getName().equalsIgnoreCase(name)) return module;
+        for (Module module : modules)
+            if (module.getName().equalsIgnoreCase(name))
+                return module;
         return null;
     }
 
     public void onUpdate() {
-        for (Module module : modules) if (module.isEnabled()) module.onUpdate();
+        for (Module module : modules)
+            if (module.isEnabled())
+                module.onUpdate();
     }
 
     public <T extends Module> T getModule(Class<T> clazz) {
-        for (Module m : modules) if (clazz.isInstance(m)) return clazz.cast(m);
+        for (Module m : modules)
+            if (clazz.isInstance(m))
+                return clazz.cast(m);
         return null;
     }
 
@@ -378,7 +402,8 @@ public class ModuleManager {
     public File getConfigDir() {
         Path gameDir = MinecraftClient.getInstance().runDirectory.toPath();
         File clientFolder = gameDir.resolve(CLIENT_FOLDER_NAME).toFile();
-        if (!clientFolder.exists()) clientFolder.mkdirs();
+        if (!clientFolder.exists())
+            clientFolder.mkdirs();
         return clientFolder;
     }
 
@@ -386,7 +411,7 @@ public class ModuleManager {
         long window = MinecraftClient.getInstance().getWindow().getHandle();
 
         for (Module module : modules) {
-            if (module instanceof io.client.modules.Macro macro) {
+            if (module instanceof Macro macro) {
                 if (macro.getKeyCodes()[macro.getKeyCodes().length - 1] == key && macro.matchesKeys(window)) {
                     if (isExactKeyMatch(window, macro.getKeyCodes())) {
                         macro.toggle();
@@ -397,7 +422,7 @@ public class ModuleManager {
             } else if (module.getKey() == key) {
                 boolean isPartOfMacro = false;
                 for (Module m : modules) {
-                    if (m instanceof io.client.modules.Macro macro2 && macro2.matchesKeys(window)) {
+                    if (m instanceof Macro macro2 && macro2.matchesKeys(window)) {
                         isPartOfMacro = true;
                         break;
                     }
@@ -409,8 +434,7 @@ public class ModuleManager {
 
                     CommandManager.INSTANCE.sendMessage(
                             "§a" + module.getName() + " is now " +
-                                    (module.isEnabled() ? "enabled" : "§cdisabled")
-                    );
+                                    (module.isEnabled() ? "enabled" : "§cdisabled"));
                 }
             }
         }

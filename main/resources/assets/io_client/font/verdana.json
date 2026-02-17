@@ -1,0 +1,14 @@
+{
+    "providers": [
+        {
+            "type": "ttf",
+            "file": "io_client:verdana.ttf",
+            "shift": [
+                0.0,
+                1.0
+            ],
+            "size": 11.0,
+            "oversample": 2.0
+        }
+    ]
+}
