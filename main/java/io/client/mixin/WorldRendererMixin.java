@@ -111,7 +111,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
 
         io_client$framebufferHandleStack.push(this.framebufferSet.entityOutlineFramebuffer);
         this.framebufferSet.entityOutlineFramebuffer = () -> framebuffer;
-    }
+        }
 
     @Override
     public void io_client$popEntityOutlineFramebuffer() {

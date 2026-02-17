@@ -20,6 +20,7 @@ dependencies {
     mappings "net.fabricmc:yarn:1.21.8+build.1:v2"
     modImplementation "net.fabricmc:fabric-loader:0.18.4"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.136.1+1.21.8"
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
 loom {
@@ -38,7 +39,7 @@ loom {
 sourceSets {
     main {
         java {
-            srcDirs = ['main/java']
+            srcDirs = ['main/java', 'main/club']
         }
         resources {
             srcDirs = ['main/resources']
@@ -46,7 +47,7 @@ sourceSets {
     }
     client {
         java {
-            srcDirs = ['main/java']
+            srcDirs = ['main/java', 'main/club']
         }
         resources {
             srcDirs = ['main/resources']

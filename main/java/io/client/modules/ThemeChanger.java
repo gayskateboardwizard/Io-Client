@@ -10,6 +10,7 @@ import io.client.settings.RadioSetting;
 public class ThemeChanger extends Module {
     public final RadioSetting themeSelect = new RadioSetting("Theme", "Io");
     public final RadioSetting clickGuiMode = new RadioSetting("ClickGui", "IO");
+    public final RadioSetting guiFont = new RadioSetting("GuiFont", "Minecraft");
     private String lastSelectedTheme = "Io";
 
     public ThemeChanger() {
@@ -25,9 +26,12 @@ public class ThemeChanger extends Module {
         themeSelect.addOption("Future");
         clickGuiMode.addOption("IO");
         clickGuiMode.addOption("Future");
+        guiFont.addOption("Minecraft");
+        guiFont.addOption("JetBrains Mono");
 
         addSetting(themeSelect);
         addSetting(clickGuiMode);
+        addSetting(guiFont);
 
         Theme savedTheme = ModuleManager.INSTANCE.loadTheme();
         if (savedTheme != null) {
@@ -79,5 +83,9 @@ public class ThemeChanger extends Module {
 
     public String getSelectedClickGuiMode() {
         return clickGuiMode.getSelectedOption();
+    }
+
+    public String getSelectedFontMode() {
+        return guiFont.getSelectedOption();
     }
 }

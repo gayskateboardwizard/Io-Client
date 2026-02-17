@@ -67,6 +67,7 @@ public class ModuleManager {
         modules.add(new GuiMove());
         modules.add(new Safety());
         modules.add(new ThemeChanger());
+        modules.add(new CapeSettings());
         modules.add(new HUD());
         modules.add(new ESP());
         modules.add(new Chams());

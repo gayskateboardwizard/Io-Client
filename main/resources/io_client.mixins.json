@@ -20,7 +20,9 @@
     "defaultRequire": 1
   },
   "client": [
-    "IMinecraftAccessor"
+    "IMinecraftAccessor",
+    "PlayerListEntryMixin",
+    "AbstractClientPlayerEntityMixin"
   ],
   "minVersion": "0.8.4",
   "excludeClasses": [

@@ -6,6 +6,7 @@ import io.client.modules.ArmorHud;
 import io.client.modules.ESP;
 import io.client.modules.IoSwag;
 import io.client.modules.ThemeChanger;
+import io.client.network.IoUserCapeService;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -38,6 +39,7 @@ public class IoClientEventHandler {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null)
                 return;
+            IoUserCapeService.onClientTick(client);
             handleKeys(client);
             ModuleManager.INSTANCE.onUpdate();
         });

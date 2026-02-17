@@ -1,6 +1,7 @@
 package io.client;
 
 import io.client.clickgui.*;
+import io.client.modules.ThemeChanger;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class ClickGuiScreen extends Screen {
     private static final int PANEL_GAP = 10;
@@ -18,6 +20,7 @@ public class ClickGuiScreen extends Screen {
 
     public static boolean opened = false;
     public static Theme currentTheme = Theme.IO;
+    public static final Identifier JETBRAINS_MONO_FONT = Identifier.of("io_client", "jetbrains_mono");
 
     private final Map<Category, CategoryPanel> panels = new HashMap<>();
     private final PanelRenderer renderer;
@@ -33,6 +36,20 @@ public class ClickGuiScreen extends Screen {
         this.inputHandler = new InputHandler(this);
 
         initializePanels();
+    }
+
+    public static boolean useJetBrainsMonoFont() {
+        Module themeModule = ModuleManager.INSTANCE.getModuleByName("Themes");
+        if (themeModule instanceof ThemeChanger changer) {
+            return "JetBrains Mono".equals(changer.getSelectedFontMode());
+        }
+        return false;
+    }
+
+    public static Text styledGuiText(String text) {
+        Text literal = Text.literal(text);
+        if (!useJetBrainsMonoFont()) return literal;
+        return literal.copy().styled(style -> style.withFont(JETBRAINS_MONO_FONT));
     }
 
     private void initializePanels() {
@@ -81,7 +98,7 @@ public class ClickGuiScreen extends Screen {
         float scale = PanelRenderer.getPanelWidth() / 90.0f;
         graphics.getMatrices().scale(scale, scale);
 
-        int tipWidth = mc.textRenderer.getWidth(description) + 6;
+        int tipWidth = mc.textRenderer.getWidth(styledGuiText(description)) + 6;
         int tipHeight = mc.textRenderer.fontHeight + 6;
         int screenWidth = mc.getWindow().getScaledWidth();
         int screenHeight = mc.getWindow().getScaledHeight();
@@ -95,7 +112,7 @@ public class ClickGuiScreen extends Screen {
 
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + tipHeight, 0xE0000000);
         graphics.fill(tipX, tipY, tipX + tipWidth, tipY + 1, 0x44FFFFFF);
-        graphics.drawText(mc.textRenderer, description, tipX + 3, tipY + 3, 0xFFFFFFFF, false);
+        graphics.drawText(mc.textRenderer, styledGuiText(description), tipX + 3, tipY + 3, 0xFFFFFFFF, false);
 
         graphics.getMatrices().popMatrix();
     }

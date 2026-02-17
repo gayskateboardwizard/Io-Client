@@ -1,6 +1,7 @@
 package io.client.clickgui;
 
 import io.client.Category;
+import io.client.ClickGuiScreen;
 import io.client.Module;
 import io.client.ModuleManager;
 import io.client.settings.*;
@@ -100,14 +101,14 @@ public class PanelRenderer {
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(panel.x + 3 * SCALE, panel.y + 2 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, panel.category.name(), 0, 0, 0xFFFFFFFF, false);
+        drawGuiText(graphics, font, panel.category.name(), 0, 0, 0xFFFFFFFF, false);
         graphics.getMatrices().popMatrix();
 
         int collapseX = panel.x + PANEL_WIDTH - (int)(12 * SCALE);
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(collapseX, panel.y + 2 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, panel.collapsed ? "+" : "-", 0, 0, 0xFFAAAAAA, false);
+        drawGuiText(graphics, font, panel.collapsed ? "+" : "-", 0, 0, 0xFFAAAAAA, false);
         graphics.getMatrices().popMatrix();
 
         if (panel.category == Category.COMBAT) {
@@ -115,7 +116,7 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(targetsX, panel.y + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, "T", 0, 0, theme.moduleEnabled, false);
+            drawGuiText(graphics, font, "T", 0, 0, theme.moduleEnabled, false);
             graphics.getMatrices().popMatrix();
         }
     }
@@ -156,14 +157,14 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(panel.x + PANEL_WIDTH - 8 * SCALE, yOffset + 1 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, indicator, 0, 0, 0xFF888888, false);
+            drawGuiText(graphics, font, indicator, 0, 0, 0xFF888888, false);
             graphics.getMatrices().popMatrix();
         }
 
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(panel.x + 3 * SCALE, yOffset + 1 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, module.getName(), 0, 0, moduleColor, false);
+        drawGuiText(graphics, font, module.getName(), 0, 0, moduleColor, false);
         graphics.getMatrices().popMatrix();
 
         return isModuleHovered ? module.getDescription() : null;
@@ -198,13 +199,13 @@ public class PanelRenderer {
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(panel.x + PANEL_WIDTH - 8 * SCALE, yOffset + 1 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, catIndicator, 0, 0, theme.moduleDisabled, false);
+        drawGuiText(graphics, font, catIndicator, 0, 0, theme.moduleDisabled, false);
         graphics.getMatrices().popMatrix();
 
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(panel.x + 3 * SCALE, yOffset + 1 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, catSetting.getName(), 0, 0, theme.moduleEnabled, false);
+        drawGuiText(graphics, font, catSetting.getName(), 0, 0, theme.moduleEnabled, false);
         graphics.getMatrices().popMatrix();
 
         yOffset += SETTING_HEIGHT;
@@ -230,7 +231,7 @@ public class PanelRenderer {
                     graphics.getMatrices().pushMatrix();
                     graphics.getMatrices().translate(panel.x + 8 * SCALE, yOffset + 2 * SCALE);
                     graphics.getMatrices().scale(SCALE, SCALE);
-                    graphics.drawText(font, label, 0, 0, 0xFFFFFFFF, false);
+                    drawGuiText(graphics, font, label, 0, 0, 0xFFFFFFFF, false);
                     graphics.getMatrices().popMatrix();
                     yOffset += SETTING_HEIGHT;
                 } else if (catItem instanceof RadioSetting radioSetting) {
@@ -258,7 +259,7 @@ public class PanelRenderer {
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(indicatorX, yOffset + 2 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, indicatorText, 0, 0, indicatorColor, false);
+        drawGuiText(graphics, font, indicatorText, 0, 0, indicatorColor, false);
         graphics.getMatrices().popMatrix();
 
         float indicatorWidth = font.getWidth(indicatorText) * SCALE;
@@ -287,14 +288,14 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(indicatorX + indicatorWidth + 4 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, scrollText, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
             graphics.disableScissor();
         } else {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(indicatorX + indicatorWidth + 4 * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, settingName, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, settingName, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
         }
 
@@ -340,14 +341,14 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(panel.x + indent * SCALE - offset * SCALE, yOffset + 1 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, scrollText, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
             graphics.disableScissor();
         } else {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(panel.x + indent * SCALE, yOffset + 1 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, label, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, label, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
         }
 
@@ -387,14 +388,14 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(panel.x + 3 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, scrollText, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
             graphics.disableScissor();
         } else {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(panel.x + 3 * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, label, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, label, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
         }
 
@@ -417,7 +418,7 @@ public class PanelRenderer {
         graphics.getMatrices().pushMatrix();
         graphics.getMatrices().translate(indicatorX, yOffset + 2 * SCALE);
         graphics.getMatrices().scale(SCALE, SCALE);
-        graphics.drawText(font, indicatorText, 0, 0, indicatorColor, false);
+        drawGuiText(graphics, font, indicatorText, 0, 0, indicatorColor, false);
         graphics.getMatrices().popMatrix();
 
         String label = radioSetting.getName() + ": " + selected;
@@ -444,17 +445,33 @@ public class PanelRenderer {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(indicatorX + 12 * SCALE - offset * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, scrollText, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, scrollText, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
             graphics.disableScissor();
         } else {
             graphics.getMatrices().pushMatrix();
             graphics.getMatrices().translate(indicatorX + 12 * SCALE, yOffset + 2 * SCALE);
             graphics.getMatrices().scale(SCALE, SCALE);
-            graphics.drawText(font, label, 0, 0, 0xFFFFFFFF, false);
+            drawGuiText(graphics, font, label, 0, 0, 0xFFFFFFFF, false);
             graphics.getMatrices().popMatrix();
         }
 
         return yOffset + SETTING_HEIGHT;
+    }
+
+    private void drawGuiText(
+            DrawContext graphics,
+            TextRenderer font,
+            String text,
+            int x,
+            int y,
+            int color,
+            boolean shadow
+    ) {
+        if (!ClickGuiScreen.useJetBrainsMonoFont()) {
+            graphics.drawText(font, text, x, y, color, shadow);
+            return;
+        }
+        graphics.drawText(font, ClickGuiScreen.styledGuiText(text), x, y, color, shadow);
     }
 }

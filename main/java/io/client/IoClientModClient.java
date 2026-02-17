@@ -28,6 +28,7 @@ package io.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import io.client.discord.DiscordRpcManager;
 import io.client.utils.render.postprocess.PostProcessShaders;
 
 @Environment(EnvType.CLIENT)
@@ -37,6 +38,8 @@ public class IoClientModClient implements ClientModInitializer {
         ModuleManager.INSTANCE.init();
         IoClientEventHandler.getInstance().registerEvents();
         PostProcessShaders.init();
+        DiscordRpcManager.init();
+        Runtime.getRuntime().addShutdownHook(new Thread(DiscordRpcManager::shutdown));
 
     }
 

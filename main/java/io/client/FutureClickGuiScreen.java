@@ -49,7 +49,7 @@ public class FutureClickGuiScreen extends Screen {
         int height = this.client != null ? this.client.getWindow().getScaledHeight() : 0;
         context.fillGradient(0, 0, width, height, palette.backgroundTop, palette.backgroundBottom);
         for (Panel panel : panels) {
-            panel.render(context, mouseX, mouseY, delta, theme, palette);
+            panel.render(context, mouseX, mouseY, delta, palette);
         }
         super.render(context, mouseX, mouseY, delta);
     }
@@ -109,22 +109,24 @@ public class FutureClickGuiScreen extends Screen {
                     .forEach(module -> rows.add(new ModuleRow(module)));
         }
 
-        private void render(DrawContext context, int mouseX, int mouseY, float delta, Theme theme, FuturePalette palette) {
+        private void render(DrawContext context, int mouseX, int mouseY, float delta, FuturePalette palette) {
             context.fill(x, y, x + width, y + HEADER_HEIGHT, palette.panelHeader);
             context.fill(x, y + HEADER_HEIGHT - 1, x + width, y + HEADER_HEIGHT, palette.accentSoft);
-            context.drawTextWithShadow(textRenderer, name, x + 4, y + 4, palette.textMain);
+            drawGuiTextWithShadow(context, name, x + 4, y + 4, palette.textMain);
             if (!open) {
-                if (angle > 0) angle -= 8;
+                if (angle > 0)
+                    angle -= 8;
                 if (category == Category.COMBAT) {
-                    context.drawTextWithShadow(textRenderer, "T", x + width - 17, y + 4, palette.accentStrong);
+                    drawGuiTextWithShadow(context, "T", x + width - 17, y + 4, palette.accentStrong);
                 }
                 drawArrow(context, x + width - 8, y + 7, angle);
                 return;
             }
 
-            if (angle < 180) angle += 8;
+            if (angle < 180)
+                angle += 8;
             if (category == Category.COMBAT) {
-                context.drawTextWithShadow(textRenderer, "T", x + width - 17, y + 4, palette.accentStrong);
+                drawGuiTextWithShadow(context, "T", x + width - 17, y + 4, palette.accentStrong);
             }
             drawArrow(context, x + width - 8, y + 7, angle);
             context.fill(x, y + HEADER_HEIGHT, x + width, y + HEADER_HEIGHT + getBodyHeight(), palette.panelBody);
@@ -165,7 +167,8 @@ public class FutureClickGuiScreen extends Screen {
                     return;
                 }
             }
-            if (!open) return;
+            if (!open)
+                return;
             for (ModuleRow row : rows) {
                 row.mouseClicked(mouseX, mouseY, button);
             }
@@ -175,14 +178,16 @@ public class FutureClickGuiScreen extends Screen {
             if (button == 0) {
                 dragging = false;
             }
-            if (!open) return;
+            if (!open)
+                return;
             for (ModuleRow row : rows) {
                 row.mouseReleased(mouseX, mouseY, button);
             }
         }
 
         private void drag(int mouseX, int mouseY) {
-            if (!dragging) return;
+            if (!dragging)
+                return;
             this.x = dragOffsetX + mouseX;
             this.y = dragOffsetY + mouseY;
         }
@@ -214,7 +219,8 @@ public class FutureClickGuiScreen extends Screen {
         }
 
         private int getHeight() {
-            if (!open || settingRows.isEmpty()) return ROW_HEIGHT;
+            if (!open || settingRows.isEmpty())
+                return ROW_HEIGHT;
             int extra = 0;
             for (SettingRow row : settingRows) {
                 extra += row.getHeight();
@@ -223,12 +229,13 @@ public class FutureClickGuiScreen extends Screen {
         }
 
         private void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            int bg = module.isEnabled() ? palette.moduleEnabled : palette.moduleDisabled;
+            int bg = module.isEnabled() ? palette.moduleEnabled : palette.panelBody;
             context.fill(x, y, x + width, y + ROW_HEIGHT, bg);
             boolean hovered = hovering(mouseX, mouseY);
             if (hovered) {
                 context.fill(x, y, x + width, y + ROW_HEIGHT, palette.rowHover);
             }
+            int moduleTextColor = module.isEnabled() ? 0xFFFFFFFF : palette.moduleEnabled;
             int labelStart = x + 3;
             int labelEnd = settingRows.isEmpty() ? (x + width - 3) : (x + width - 14);
             drawScrollableText(
@@ -237,12 +244,11 @@ public class FutureClickGuiScreen extends Screen {
                     module.getName(),
                     labelStart,
                     y + 3,
-                    palette.textMain,
+                    moduleTextColor,
                     labelStart,
                     labelEnd,
                     hovered,
-                    0.5f
-            );
+                    0.5f);
             if (!settingRows.isEmpty()) {
                 if (open) {
                     gearAngle = Math.min(gearAngle + 10, 180);
@@ -252,7 +258,8 @@ public class FutureClickGuiScreen extends Screen {
                 drawGear(context, x + width - 7, y + 7, gearAngle);
             }
 
-            if (!open) return;
+            if (!open)
+                return;
             int sy = y + ROW_HEIGHT;
             for (SettingRow row : settingRows) {
                 row.setBounds(x + 1, sy, width - 2);
@@ -280,7 +287,8 @@ public class FutureClickGuiScreen extends Screen {
         }
 
         private void mouseReleased(int mouseX, int mouseY, int button) {
-            if (!open) return;
+            if (!open)
+                return;
             for (SettingRow row : settingRows) {
                 row.mouseReleased(mouseX, mouseY, button);
             }
@@ -334,22 +342,28 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            int color = setting.isEnabled() ? palette.settingEnabled : palette.settingDisabled;
-            context.fill(x, y, x + width, y + getHeight(), color);
+            context.fill(x, y, x + width, y + getHeight(), palette.panelBody);
+            if (hovering(mouseX, mouseY)) {
+                context.fill(x, y, x + width, y + getHeight(), palette.rowHover);
+            }
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
+            int markerColor = setting.isEnabled() ? palette.accentStrong : palette.textMuted;
+            int markerX = labelStart;
+            String marker = setting.isEnabled() ? "[x] " : "[ ] ";
+            int markerWidth = getGuiTextWidth(marker);
+            drawGuiTextWithShadow(context, marker, markerX, y + 3, markerColor);
             drawScrollableText(
                     context,
                     "bool:" + System.identityHashCode(this),
                     setting.getName(),
-                    labelStart,
+                    labelStart + markerWidth,
                     y + 3,
                     palette.textMain,
-                    labelStart,
+                    labelStart + markerWidth,
                     labelEnd,
                     hovering(mouseX, mouseY),
-                    0.5f
-            );
+                    0.5f);
         }
 
         @Override
@@ -371,19 +385,22 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            context.fill(x, y, x + width, y + getHeight(), palette.settingDisabled);
+            context.fill(x, y, x + width, y + getHeight(), palette.panelBody);
+            if (hovering(mouseX, mouseY)) {
+                context.fill(x, y, x + width, y + getHeight(), palette.rowHover);
+            }
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
             int baseY = y + 3;
             String namePart = setting.getName() + ": ";
             String optionPart = setting.getSelectedOption();
-            int nameWidth = textRenderer.getWidth(namePart);
-            int optionWidth = textRenderer.getWidth(optionPart);
+            int nameWidth = getGuiTextWidth(namePart);
+            int optionWidth = getGuiTextWidth(optionPart);
             int available = Math.max(0, labelEnd - labelStart);
 
             if ((nameWidth + optionWidth) <= available) {
-                context.drawTextWithShadow(textRenderer, namePart, labelStart, baseY, palette.textMuted);
-                context.drawTextWithShadow(textRenderer, optionPart, labelStart + nameWidth, baseY, palette.accentStrong);
+                drawGuiTextWithShadow(context, namePart, labelStart, baseY, palette.textMain);
+                drawGuiTextWithShadow(context, optionPart, labelStart + nameWidth, baseY, palette.textMain);
             } else {
                 String combined = namePart + optionPart;
                 drawScrollableText(
@@ -396,8 +413,7 @@ public class FutureClickGuiScreen extends Screen {
                         labelStart,
                         labelEnd,
                         hovering(mouseX, mouseY),
-                        0.5f
-                );
+                        0.5f);
             }
         }
 
@@ -430,29 +446,43 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            context.fill(x, y, x + width, y + getHeight(), palette.settingDisabled);
+            context.fill(x, y, x + width, y + getHeight(), palette.panelBody);
+            if (hovering(mouseX, mouseY)) {
+                context.fill(x, y, x + width, y + getHeight(), palette.rowHover);
+            }
             float range = setting.getMax() - setting.getMin();
             float normalized = range <= 0.0f ? 0.0f : (setting.getValue() - setting.getMin()) / range;
             int sliderStart = x + 2 + indent;
             int sliderWidth = Math.max(10, width - 4 - indent);
             int fill = (int) (normalized * sliderWidth);
-            context.fill(sliderStart, y + getHeight() - 3, sliderStart + sliderWidth, y + getHeight() - 1, palette.sliderTrack);
+            context.fill(sliderStart, y + getHeight() - 3, sliderStart + sliderWidth, y + getHeight() - 1,
+                    palette.sliderTrack);
             context.fill(sliderStart, y + getHeight() - 3, sliderStart + fill, y + getHeight() - 1, palette.sliderFill);
-            String label = setting.getName() + ": " + format(setting.getValue());
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
-            drawScrollableText(
-                    context,
-                    "number:" + System.identityHashCode(this),
-                    label,
-                    labelStart,
-                    y + 3,
-                    palette.textMain,
-                    labelStart,
-                    labelEnd,
-                    hovering(mouseX, mouseY),
-                    0.5f
-            );
+            int baseY = y + 3;
+            String namePart = setting.getName() + ": ";
+            String valuePart = format(setting.getValue());
+            int nameWidth = getGuiTextWidth(namePart);
+            int valueWidth = getGuiTextWidth(valuePart);
+            int available = Math.max(0, labelEnd - labelStart);
+            if ((nameWidth + valueWidth) <= available) {
+                drawGuiTextWithShadow(context, namePart, labelStart, baseY, palette.textMain);
+                drawGuiTextWithShadow(context, valuePart, labelStart + nameWidth, baseY, palette.textMain);
+            } else {
+                String label = namePart + valuePart;
+                drawScrollableText(
+                        context,
+                        "number:" + System.identityHashCode(this),
+                        label,
+                        labelStart,
+                        baseY,
+                        palette.textMain,
+                        labelStart,
+                        labelEnd,
+                        hovering(mouseX, mouseY),
+                        0.5f);
+            }
             if (dragging) {
                 setFromMouse(mouseX);
             }
@@ -494,22 +524,35 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            context.fill(x, y, x + width, y + getHeight(), palette.settingDisabled);
-            String label = setting.getName() + ": \"" + setting.getValue() + "\"";
+            context.fill(x, y, x + width, y + getHeight(), palette.panelBody);
+            if (hovering(mouseX, mouseY)) {
+                context.fill(x, y, x + width, y + getHeight(), palette.rowHover);
+            }
             int labelStart = x + 3 + indent;
             int labelEnd = x + width - 3;
-            drawScrollableText(
-                    context,
-                    "string:" + System.identityHashCode(this),
-                    label,
-                    labelStart,
-                    y + 3,
-                    palette.textMain,
-                    labelStart,
-                    labelEnd,
-                    hovering(mouseX, mouseY),
-                    0.5f
-            );
+            int baseY = y + 3;
+            String namePart = setting.getName() + ": ";
+            String valuePart = "\"" + setting.getValue() + "\"";
+            int nameWidth = getGuiTextWidth(namePart);
+            int valueWidth = getGuiTextWidth(valuePart);
+            int available = Math.max(0, labelEnd - labelStart);
+            if ((nameWidth + valueWidth) <= available) {
+                drawGuiTextWithShadow(context, namePart, labelStart, baseY, palette.textMain);
+                drawGuiTextWithShadow(context, valuePart, labelStart + nameWidth, baseY, palette.textMain);
+            } else {
+                String label = namePart + valuePart;
+                drawScrollableText(
+                        context,
+                        "string:" + System.identityHashCode(this),
+                        label,
+                        labelStart,
+                        baseY,
+                        palette.textMain,
+                        labelStart,
+                        labelEnd,
+                        hovering(mouseX, mouseY),
+                        0.5f);
+            }
         }
     }
 
@@ -526,8 +569,11 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
-            context.fill(x, y, x + width, y + getHeight(), palette.categoryRow);
-            context.drawTextWithShadow(textRenderer, open ? "-" : "+", x + 3 + indent, y + 3, palette.accentStrong);
+            context.fill(x, y, x + width, y + getHeight(), palette.panelBody);
+            if (hovering(mouseX, mouseY)) {
+                context.fill(x, y, x + width, y + getHeight(), palette.rowHover);
+            }
+            drawGuiTextWithShadow(context, open ? "-" : "+", x + 3 + indent, y + 3, palette.moduleDisabled);
             int labelStart = x + 12 + indent;
             int labelEnd = x + width - 3;
             drawScrollableText(
@@ -536,14 +582,14 @@ public class FutureClickGuiScreen extends Screen {
                     setting.getName(),
                     labelStart,
                     y + 3,
-                    palette.textMain,
+                    palette.accentStrong,
                     labelStart,
                     labelEnd,
                     hovering(mouseX, mouseY),
-                    0.5f
-            );
+                    0.5f);
 
-            if (!open) return;
+            if (!open)
+                return;
             int sy = y + 14;
             for (SettingRow child : children) {
                 child.setBounds(x, sy, width);
@@ -554,7 +600,8 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         int getHeight() {
-            if (!open) return 14;
+            if (!open)
+                return 14;
             int total = 14;
             for (SettingRow child : children) {
                 total += child.getHeight();
@@ -570,7 +617,8 @@ public class FutureClickGuiScreen extends Screen {
                 playClick();
                 return;
             }
-            if (!open) return;
+            if (!open)
+                return;
             for (SettingRow child : children) {
                 child.mouseClicked(mouseX, mouseY, button);
             }
@@ -578,7 +626,8 @@ public class FutureClickGuiScreen extends Screen {
 
         @Override
         void mouseReleased(int mouseX, int mouseY, int button) {
-            if (!open) return;
+            if (!open)
+                return;
             for (SettingRow child : children) {
                 child.mouseReleased(mouseX, mouseY, button);
             }
@@ -587,7 +636,8 @@ public class FutureClickGuiScreen extends Screen {
 
     private void appendSettingRows(List<SettingRow> targetRows, List<?> settings, int indent) {
         for (Object obj : settings) {
-            if (!(obj instanceof Setting setting)) continue;
+            if (!(obj instanceof Setting setting))
+                continue;
 
             if (setting instanceof CategorySetting categorySetting) {
                 CategorySettingRow categoryRow = new CategorySettingRow(categorySetting, indent);
@@ -606,7 +656,8 @@ public class FutureClickGuiScreen extends Screen {
     }
 
     private static String format(float value) {
-        if (Math.abs(value - Math.round(value)) < 0.001f) return Integer.toString(Math.round(value));
+        if (Math.abs(value - Math.round(value)) < 0.001f)
+            return Integer.toString(Math.round(value));
         return String.format("%.2f", value);
     }
 
@@ -620,15 +671,15 @@ public class FutureClickGuiScreen extends Screen {
             int clipX1,
             int clipX2,
             boolean hovered,
-            float speed
-    ) {
-        if (textRenderer == null) return;
+            float speed) {
+        if (textRenderer == null)
+            return;
         int maxWidth = Math.max(0, clipX2 - clipX1);
-        int textWidth = textRenderer.getWidth(text);
+        int textWidth = getGuiTextWidth(text);
 
         if (textWidth <= maxWidth) {
             textScrollOffsets.put(key, 0.0f);
-            context.drawTextWithShadow(textRenderer, text, x, y, color);
+            drawGuiTextWithShadow(context, text, x, y, color);
             return;
         }
 
@@ -636,7 +687,8 @@ public class FutureClickGuiScreen extends Screen {
         if (hovered) {
             offset += speed;
             float cycleWidth = textWidth + 30.0f;
-            if (offset > cycleWidth) offset = 0.0f;
+            if (offset > cycleWidth)
+                offset = 0.0f;
             textScrollOffsets.put(key, offset);
         } else {
             offset = 0.0f;
@@ -647,23 +699,31 @@ public class FutureClickGuiScreen extends Screen {
         context.enableScissor(clipX1, y, clipX2, y + 10);
         context.getMatrices().pushMatrix();
         context.getMatrices().translate(x - offset, y);
-        context.drawTextWithShadow(textRenderer, scrollText, 0, 0, color);
+        drawGuiTextWithShadow(context, scrollText, 0, 0, color);
         context.getMatrices().popMatrix();
         context.disableScissor();
     }
 
-    private static int withAlpha(int color, int alpha) {
-        return (alpha << 24) | (color & 0x00FFFFFF);
+    private int getGuiTextWidth(String text) {
+        if (textRenderer == null)
+            return 0;
+        if (!ClickGuiScreen.useJetBrainsMonoFont())
+            return textRenderer.getWidth(text);
+        return textRenderer.getWidth(ClickGuiScreen.styledGuiText(text));
     }
 
-    private static int blendRgb(int c1, int c2, float t) {
-        t = Math.max(0.0f, Math.min(1.0f, t));
-        int r1 = (c1 >> 16) & 0xFF, g1 = (c1 >> 8) & 0xFF, b1 = c1 & 0xFF;
-        int r2 = (c2 >> 16) & 0xFF, g2 = (c2 >> 8) & 0xFF, b2 = c2 & 0xFF;
-        int r = (int) (r1 + (r2 - r1) * t);
-        int g = (int) (g1 + (g2 - g1) * t);
-        int b = (int) (b1 + (b2 - b1) * t);
-        return (r << 16) | (g << 8) | b;
+    private void drawGuiTextWithShadow(DrawContext context, String text, int x, int y, int color) {
+        if (textRenderer == null)
+            return;
+        if (!ClickGuiScreen.useJetBrainsMonoFont()) {
+            context.drawTextWithShadow(textRenderer, text, x, y, color);
+            return;
+        }
+        context.drawTextWithShadow(textRenderer, ClickGuiScreen.styledGuiText(text), x, y, color);
+    }
+
+    private static int withAlpha(int color, int alpha) {
+        return (alpha << 24) | (color & 0x00FFFFFF);
     }
 
     private record FuturePalette(
@@ -676,42 +736,33 @@ public class FutureClickGuiScreen extends Screen {
             int moduleEnabled,
             int moduleDisabled,
             int rowHover,
-            int categoryRow,
-            int settingEnabled,
-            int settingDisabled,
             int sliderTrack,
             int sliderFill,
             int textMain,
-            int textMuted
-    ) {
+            int textMuted) {
         static FuturePalette fromTheme(Theme theme) {
             int accent = theme.moduleEnabled & 0x00FFFFFF;
             int text = 0xFFFFFFFF;
-            int bgDark = blendRgb(theme.panelBackground & 0x00FFFFFF, 0x000000, 0.55f);
-            int bgDeeper = blendRgb(theme.titleBar & 0x00FFFFFF, 0x000000, 0.65f);
-            int offBase = blendRgb(theme.moduleDisabled & 0x00FFFFFF, bgDark, 0.35f);
-            int onBase = blendRgb(accent, bgDark, 0.20f);
-            int settingOff = blendRgb(theme.sliderBackground & 0x00FFFFFF, bgDark, 0.20f);
-            int settingOn = blendRgb(theme.sliderForeground & 0x00FFFFFF, bgDark, 0.15f);
+            int bgDark = theme.panelBackground & 0x00FFFFFF;
+            int bgDeeper = theme.titleBar & 0x00FFFFFF;
+            int settingOff = theme.sliderBackground & 0x00FFFFFF;
+            int settingOn = theme.sliderForeground & 0x00FFFFFF;
+            int hover = theme.hoverHighlight & 0x00FFFFFF;
 
             return new FuturePalette(
-                    0x13000000 | bgDeeper,
-                    0xB8000000 | bgDark,
-                    withAlpha(bgDeeper, 235),
-                    withAlpha(bgDark, 195),
-                    withAlpha(accent, 140),
+                    withAlpha(bgDeeper, 70),
+                    withAlpha(bgDark, 170),
+                    withAlpha(bgDeeper, 255),
+                    withAlpha(bgDark, 255),
+                    withAlpha(hover, 180),
                     withAlpha(accent, 235),
-                    withAlpha(onBase, 225),
-                    withAlpha(offBase, 205),
-                    withAlpha(accent, 70),
-                    withAlpha(blendRgb(settingOff, accent, 0.12f), 215),
-                    withAlpha(settingOn, 220),
-                    withAlpha(settingOff, 220),
-                    withAlpha(blendRgb(settingOff, 0xFFFFFF, 0.08f), 255),
-                    withAlpha(accent, 255),
+                    withAlpha(theme.moduleEnabled & 0x00FFFFFF, 235),
+                    withAlpha(theme.moduleDisabled & 0x00FFFFFF, 235),
+                    withAlpha(hover, 120),
+                    withAlpha(settingOff, 255),
+                    withAlpha(settingOn, 255),
                     text,
-                    withAlpha(blendRgb(theme.moduleDisabled & 0x00FFFFFF, 0xB0B0B0, 0.45f), 255)
-            );
+                    withAlpha(theme.moduleDisabled & 0x00FFFFFF, 255));
         }
     }
 
@@ -733,19 +784,22 @@ public class FutureClickGuiScreen extends Screen {
 
     private static float calculateRotation(float angle) {
         angle %= 360.0f;
-        if (angle >= 180.0f) angle -= 360.0f;
-        if (angle < -180.0f) angle += 360.0f;
+        if (angle >= 180.0f)
+            angle -= 360.0f;
+        if (angle < -180.0f)
+            angle += 360.0f;
         return angle;
     }
 
     private static void playClick() {
-        if (MinecraftClientHolder.CLIENT == null || MinecraftClientHolder.CLIENT.getSoundManager() == null) return;
+        if (MinecraftClientHolder.CLIENT == null || MinecraftClientHolder.CLIENT.getSoundManager() == null)
+            return;
         MinecraftClientHolder.CLIENT.getSoundManager()
                 .play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f));
     }
 
     private static final class MinecraftClientHolder {
-        private static final net.minecraft.client.MinecraftClient CLIENT = net.minecraft.client.MinecraftClient.getInstance();
+        private static final net.minecraft.client.MinecraftClient CLIENT = net.minecraft.client.MinecraftClient
+                .getInstance();
     }
 }
-
