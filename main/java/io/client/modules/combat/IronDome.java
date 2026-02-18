@@ -7,6 +7,9 @@ import io.client.managers.PacketManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -37,6 +40,10 @@ public class IronDome extends Module {
     private final BooleanSetting autoSwitch;
     private final NumberSetting arrowDelay;
     private final RadioSetting placeBlock;
+    private final BooleanSetting smartPlacement;
+    private final NumberSetting maxBlocksPerCycle;
+    private final NumberSetting keepBlocksInInventory;
+    private final BooleanSetting includeDiagonals;
 
     private int tickCounter;
     private int arrowTickCounter;
@@ -58,6 +65,10 @@ public class IronDome extends Module {
         placeBlock = new RadioSetting("PlaceBlock", "Webs");
         placeBlock.addOption("Webs");
         placeBlock.addOption("Obsidian");
+        smartPlacement = new BooleanSetting("SmartPlacement", true);
+        maxBlocksPerCycle = new NumberSetting("MaxBlocksPerCycle", 3f, 1f, 9f);
+        keepBlocksInInventory = new NumberSetting("KeepBlocks", 8f, 0f, 64f);
+        includeDiagonals = new BooleanSetting("IncludeDiagonals", false);
 
         addSetting(range);
         addSetting(heightCheck);
@@ -69,6 +80,10 @@ public class IronDome extends Module {
         addSetting(autoSwitch);
         addSetting(arrowDelay);
         addSetting(placeBlock);
+        addSetting(smartPlacement);
+        addSetting(maxBlocksPerCycle);
+        addSetting(keepBlocksInInventory);
+        addSetting(includeDiagonals);
 
         tickCounter = 0;
         arrowTickCounter = 0;
@@ -159,6 +174,11 @@ public class IronDome extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         net.minecraft.item.Item placeItem = placeBlock.isSelected("Obsidian") ? Items.OBSIDIAN : Items.COBWEB;
+        int blockCount = countItem(placeItem);
+        int keepCount = (int) keepBlocksInInventory.getValue();
+        if (blockCount <= keepCount)
+            return;
+
         int placeSlot = findItemSlot(placeItem);
         if (placeSlot == -1)
             return;
@@ -169,11 +189,13 @@ public class IronDome extends Module {
         if (!switchToSlot(placeSlot))
             return;
 
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                BlockPos pos = targetPos.add(x, 0, z);
-                placeBlockAt(pos, placeItem);
-            }
+        int budget = Math.min((int) maxBlocksPerCycle.getValue(), blockCount - keepCount);
+        int placed = 0;
+        for (BlockPos pos : getPlacementTargets(targetPos, target.getVelocity())) {
+            if (placed >= budget)
+                break;
+            if (placeBlockAt(pos, placeItem))
+                placed++;
         }
 
         revertSlot(mc);
@@ -228,19 +250,19 @@ public class IronDome extends Module {
         return new float[] { yaw, pitch };
     }
 
-    private void placeBlockAt(BlockPos pos, net.minecraft.item.Item placeItem) {
+    private boolean placeBlockAt(BlockPos pos, net.minecraft.item.Item placeItem) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        BlockState state = mc.world.getBlockState(pos);
+        if (!canPlaceAt(pos, placeItem)) {
+            return false;
+        }
 
-        if ((placeItem == Items.COBWEB && state.getBlock() == Blocks.COBWEB)
-                || (placeItem == Items.OBSIDIAN && state.getBlock() == Blocks.OBSIDIAN))
-            return;
-        if (!state.isReplaceable())
-            return;
+        if (smartPlacement.isEnabled() && !hasSolidSupport(pos)) {
+            return false;
+        }
 
         double dist = mc.player.squaredDistanceTo(Vec3d.ofCenter(pos));
         if (dist > range.getValue() * range.getValue())
-            return;
+            return false;
 
         BlockPos belowPos = pos.down();
         Vec3d hitVec = new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
@@ -253,6 +275,72 @@ public class IronDome extends Module {
         } else {
             PacketManager.INSTANCE.send(new HandSwingC2SPacket(Hand.MAIN_HAND));
         }
+
+        return true;
+    }
+
+    private boolean canPlaceAt(BlockPos pos, net.minecraft.item.Item placeItem) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        BlockState state = mc.world.getBlockState(pos);
+
+        if ((placeItem == Items.COBWEB && state.getBlock() == Blocks.COBWEB)
+                || (placeItem == Items.OBSIDIAN && state.getBlock() == Blocks.OBSIDIAN))
+            return false;
+        if (!state.isReplaceable())
+            return false;
+
+        return true;
+    }
+
+    private boolean hasSolidSupport(BlockPos pos) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        return !mc.world.getBlockState(pos.down()).isReplaceable();
+    }
+
+    private List<BlockPos> getPlacementTargets(BlockPos center, Vec3d velocity) {
+        if (!smartPlacement.isEnabled()) {
+            List<BlockPos> full = new ArrayList<>();
+            for (int x = -1; x <= 1; x++) {
+                for (int z = -1; z <= 1; z++) {
+                    full.add(center.add(x, 0, z));
+                }
+            }
+            return full;
+        }
+
+        LinkedHashSet<BlockPos> targets = new LinkedHashSet<>();
+        targets.add(center);
+        targets.add(center.north());
+        targets.add(center.east());
+        targets.add(center.south());
+        targets.add(center.west());
+
+        int leadX = (int) Math.signum(velocity.x);
+        int leadZ = (int) Math.signum(velocity.z);
+        if (leadX != 0 || leadZ != 0) {
+            targets.add(center.add(leadX, 0, leadZ));
+        }
+
+        if (includeDiagonals.isEnabled()) {
+            targets.add(center.north().east());
+            targets.add(center.north().west());
+            targets.add(center.south().east());
+            targets.add(center.south().west());
+        }
+
+        return new ArrayList<>(targets);
+    }
+
+    private int countItem(net.minecraft.item.Item item) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        int count = 0;
+        for (int i = 0; i < 36; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() == item) {
+                count += stack.getCount();
+            }
+        }
+        return count;
     }
 
     private boolean switchToSlot(int slot) {

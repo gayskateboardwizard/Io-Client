@@ -18,6 +18,7 @@ import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -66,6 +67,10 @@ public class CrystalAuraV2 extends Module {
     private final BooleanSetting autoProtect = new BooleanSetting("AutoProtect", false);
     private final NumberSetting protectDelay = new NumberSetting("ProtectDelay", 4.0f, 0.0f, 20.0f);
     private final BooleanSetting protectOnlyGround = new BooleanSetting("ProtectOnlyGround", true);
+    private final BooleanSetting smartConserve = new BooleanSetting("SmartConserve", true);
+    private final NumberSetting keepCrystals = new NumberSetting("KeepCrystals", 4.0f, 0.0f, 64.0f);
+    private final NumberSetting keepObsidian = new NumberSetting("KeepObsidian", 16.0f, 0.0f, 256.0f);
+    private final NumberSetting minObbyDamage = new NumberSetting("MinObbyDamage", 4.0f, 0.0f, 36.0f);
 
     private final CategorySetting switchCategory = new CategorySetting("Switch");
     private final RadioSetting switchMode = new RadioSetting("Switch", "Normal");
@@ -134,6 +139,10 @@ public class CrystalAuraV2 extends Module {
         autoProtectCategory.addSetting(autoProtect);
         autoProtectCategory.addSetting(protectDelay);
         autoProtectCategory.addSetting(protectOnlyGround);
+        autoProtectCategory.addSetting(smartConserve);
+        autoProtectCategory.addSetting(keepCrystals);
+        autoProtectCategory.addSetting(keepObsidian);
+        autoProtectCategory.addSetting(minObbyDamage);
 
         addSetting(switchCategory);
         switchCategory.addSetting(switchMode);
@@ -332,6 +341,8 @@ public class CrystalAuraV2 extends Module {
     private void placeCrystal(MinecraftClient mc) {
         if (bestPlacePos == null)
             return;
+        if (smartConserve.isEnabled() && countItem(mc, Items.END_CRYSTAL) <= keepCrystals.getValue())
+            return;
 
         boolean offhand = mc.player.getOffHandStack().isOf(Items.END_CRYSTAL);
         if (!offhand && !mc.player.getMainHandStack().isOf(Items.END_CRYSTAL)) {
@@ -392,6 +403,8 @@ public class CrystalAuraV2 extends Module {
                     double selfDmg = DamageUtils.crystalDamage(mc.player, crystalPos);
                     if (!isDamageSafe(targetDmg, selfDmg, mc.player))
                         continue;
+                    if (smartConserve.isEnabled() && targetDmg < minObbyDamage.getValue())
+                        continue;
 
                     double score = targetDmg - Math.sqrt(target.getBlockPos().getSquaredDistance(pos)) * 0.25;
                     if (score > bestScore) {
@@ -441,6 +454,8 @@ public class CrystalAuraV2 extends Module {
     private void placeObsidian(MinecraftClient mc) {
         if (bestObbyPos == null)
             return;
+        if (smartConserve.isEnabled() && countItem(mc, Items.OBSIDIAN) <= keepObsidian.getValue())
+            return;
 
         boolean offhand = mc.player.getOffHandStack().isOf(Items.OBSIDIAN);
         if (!offhand && !mc.player.getMainHandStack().isOf(Items.OBSIDIAN)) {
@@ -473,6 +488,9 @@ public class CrystalAuraV2 extends Module {
 
     private boolean placeAutoProtect(MinecraftClient mc) {
         if (protectOnlyGround.isEnabled() && !mc.player.isOnGround()) {
+            return false;
+        }
+        if (smartConserve.isEnabled() && countItem(mc, Items.OBSIDIAN) <= keepObsidian.getValue()) {
             return false;
         }
 
@@ -616,6 +634,20 @@ public class CrystalAuraV2 extends Module {
                 return i;
         }
         return -1;
+    }
+
+    private int countItem(MinecraftClient mc, Item item) {
+        int count = 0;
+        for (int i = 0; i < 36; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.isOf(item)) {
+                count += stack.getCount();
+            }
+        }
+        if (mc.player.getOffHandStack().isOf(item)) {
+            count += mc.player.getOffHandStack().getCount();
+        }
+        return count;
     }
 
     private void switchBack(MinecraftClient mc) {
