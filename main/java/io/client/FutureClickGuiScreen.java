@@ -186,7 +186,8 @@ public class FutureClickGuiScreen extends Screen {
 
         private void render(DrawContext context, int mouseX, int mouseY, float delta, FuturePalette palette) {
             context.fill(x, y, x + width, y + HEADER_HEIGHT, palette.panelHeader);
-            context.fill(x, y + HEADER_HEIGHT - 1, x + width, y + HEADER_HEIGHT, palette.accentSoft);
+            int separatorAlpha = (palette.moduleDisabled >>> 24) & 0xFF;
+            context.fill(x, y + HEADER_HEIGHT - 1, x + width, y + HEADER_HEIGHT, withAlpha(palette.accentSoft & 0x00FFFFFF, separatorAlpha));
             drawGuiTextWithShadow(context, name, x + 4, y + 4, palette.textMain);
             if (!open) {
                 if (angle > 0)
@@ -198,11 +199,16 @@ public class FutureClickGuiScreen extends Screen {
             if (angle < 180)
                 angle += 8;
             drawArrow(context, x + width - 8, y + 7, angle);
-            context.fill(x, y + HEADER_HEIGHT, x + width, y + HEADER_HEIGHT + getBodyHeight(), palette.panelBody);
 
-            int rowY = y + HEADER_HEIGHT;
+            int bodyHeight = getBodyHeight();
+            int borderTop = y + HEADER_HEIGHT;
+            int borderBottom = borderTop + bodyHeight + 4;
+            context.fill(x, borderTop, x + width, borderBottom, 0xFF000000);
+            context.fill(x + 2, borderTop + 2, x + width - 2, borderBottom - 2, palette.panelBody);
+
+            int rowY = borderTop + 2;
             for (ModuleRow row : rows) {
-                row.setBounds(x, rowY, width);
+                row.setBounds(x + 2, rowY, width - 4);
                 row.render(context, mouseX, mouseY, palette);
                 rowY += row.getHeight();
             }
@@ -213,7 +219,7 @@ public class FutureClickGuiScreen extends Screen {
             for (ModuleRow row : rows) {
                 body += row.getHeight();
             }
-            return body;
+            return body + 4;
         }
 
         private void mouseClicked(int mouseX, int mouseY, int button) {
@@ -302,11 +308,13 @@ public class FutureClickGuiScreen extends Screen {
         private void render(DrawContext context, int mouseX, int mouseY, FuturePalette palette) {
             int bg = module.isEnabled() ? palette.moduleEnabled : palette.panelBody;
             context.fill(x, y, x + width, y + ROW_HEIGHT, bg);
+            int separatorAlpha = (palette.moduleDisabled >>> 24) & 0xFF;
+            context.fill(x, y + ROW_HEIGHT - 1, x + width, y + ROW_HEIGHT, withAlpha(0x000000, separatorAlpha));
             boolean hovered = hovering(mouseX, mouseY);
             if (hovered) {
                 context.fill(x, y, x + width, y + ROW_HEIGHT, palette.rowHover);
             }
-            int moduleTextColor = module.isEnabled() ? 0xFFFFFFFF : palette.moduleEnabled;
+            int moduleTextColor = module.isEnabled() ? 0xFFD9D9D9 : 0xFF999999;
             int labelStart = x + 3;
             int labelEnd = settingRows.isEmpty() ? (x + width - 3) : (x + width - 14);
             drawScrollableText(
@@ -816,21 +824,25 @@ public class FutureClickGuiScreen extends Screen {
             int settingOff = theme.sliderBackground & 0x00FFFFFF;
             int settingOn = theme.sliderForeground & 0x00FFFFFF;
             int hover = theme.hoverHighlight & 0x00FFFFFF;
+            int disabledColor = theme.moduleDisabled & 0x00FFFFFF;
+
+            int panelBodyAlpha = 180;
+            int moduleDisabledAlpha = 160;
 
             return new FuturePalette(
                     withAlpha(bgDeeper, 70),
                     withAlpha(bgDark, 170),
                     withAlpha(bgDeeper, 255),
-                    withAlpha(bgDark, 255),
+                    withAlpha(bgDark, panelBodyAlpha),
                     withAlpha(hover, 180),
                     withAlpha(accent, 235),
-                    withAlpha(theme.moduleEnabled & 0x00FFFFFF, 235),
-                    withAlpha(theme.moduleDisabled & 0x00FFFFFF, 235),
-                    withAlpha(hover, 120),
-                    withAlpha(settingOff, 255),
-                    withAlpha(settingOn, 255),
+                    withAlpha(theme.moduleEnabled & 0x00FFFFFF, moduleDisabledAlpha),
+                    withAlpha(disabledColor, moduleDisabledAlpha),
+                    withAlpha(hover, 100),
+                    withAlpha(settingOff, 180),
+                    withAlpha(settingOn, 180),
                     text,
-                    withAlpha(theme.moduleDisabled & 0x00FFFFFF, 255));
+                    withAlpha(disabledColor, 200));
         }
     }
 

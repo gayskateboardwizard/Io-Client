@@ -6,13 +6,10 @@ import io.client.Module;
 import io.client.TargetManager;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
+import io.client.settings.RadioSetting;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.Camera;
@@ -25,9 +22,9 @@ import net.minecraft.util.math.Vec3d;
 public class ESP extends Module {
     private final BooleanSetting showHP;
     private final BooleanSetting playersOnly;
+    private final BooleanSetting showArmor;
+    private final RadioSetting armorPosition;
     private final NumberSetting baseScale;
-    private int enabledColor = 0xFFc71e00;
-    private int disabledColor = 0xFFFFFFFF;
 
     public ESP() {
         super("ESP", "Basic heads on ESP", 0, Category.RENDER);
@@ -38,110 +35,16 @@ public class ESP extends Module {
         playersOnly = new BooleanSetting("PlayersOnly", false);
         addSetting(playersOnly);
 
+        showArmor = new BooleanSetting("ShowArmor", true);
+        addSetting(showArmor);
+
+        armorPosition = new io.client.settings.RadioSetting("ArmorPosition", "Bottom");
+        armorPosition.addOption("Top");
+        armorPosition.addOption("Bottom");
+        addSetting(armorPosition);
+
         baseScale = new NumberSetting("Scale", 1.0f, 0.3f, 3.0f);
         addSetting(baseScale);
-
-        loadColors();
-    }
-
-    private void loadColors() {
-        File themeFile = new File(MinecraftClient.getInstance().runDirectory, "io/modules.cfg");
-        String activeTheme = "Io";
-        if (themeFile.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(themeFile))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("Themes:setting:")) {
-                        String[] parts = line.split(":");
-                        if (parts.length == 4 && Boolean.parseBoolean(parts[3])) {
-                            activeTheme = parts[2];
-                            break;
-                        }
-                    }
-                }
-            } catch (IOException ignored) {
-            }
-        }
-
-        switch (activeTheme) {
-            case "IO":
-            case "Io":
-                enabledColor = 0xFFc71e00;
-                disabledColor = 0xFF878787;
-                break;
-            case "GANYMEDE":
-            case "Ganymede":
-                enabledColor = 0xFFD9D9D9;
-                disabledColor = 0xFFBBBBBB;
-                break;
-            case "CALLISTO":
-            case "Callisto":
-                enabledColor = 0xFF50FF50;
-                disabledColor = 0xFFAAFFAA;
-                break;
-            case "EUROPA":
-            case "Europa":
-                enabledColor = 0xFF6666FF;
-                disabledColor = 0xFFAAAAFF;
-                break;
-            case "AMALTHEA":
-            case "Amalthea":
-                enabledColor = 0xFFCC66FF;
-                disabledColor = 0xFFDDAAFF;
-                break;
-            case "THEBE":
-            case "Thebe":
-                enabledColor = 0xFFFF8C00;
-                disabledColor = 0xFFFFAA55;
-                break;
-            case "METIS":
-            case "Metis":
-                enabledColor = 0xFFC0C0C0;
-                disabledColor = 0xFFD3D3D3;
-                break;
-            case "ADRASTEA":
-            case "Adrastea":
-                enabledColor = 0xFF87CEEB;
-                disabledColor = 0xFFADD8E6;
-                break;
-            case "FUTURE":
-            case "Future":
-                enabledColor = 0xFF5A8CFF;
-                disabledColor = 0xFF6AA0FF;
-                break;
-            case "TITAN":
-            case "Titan":
-                enabledColor = 0xFFFFC857;
-                disabledColor = 0xFFFFD98A;
-                break;
-            case "PHOBOS":
-            case "Phobos":
-                enabledColor = 0xFFFF4D6D;
-                disabledColor = 0xFFFF8097;
-                break;
-            case "DEIMOS":
-            case "Deimos":
-                enabledColor = 0xFF00D1B2;
-                disabledColor = 0xFF74FFE9;
-                break;
-            case "TRITON":
-            case "Triton":
-                enabledColor = 0xFF4DB8FF;
-                disabledColor = 0xFF8AD4FF;
-                break;
-            default:
-                enabledColor = 0xFFc71e00;
-                disabledColor = 0xFF878787;
-                break;
-        }
-    }
-
-    @Override
-    public void onUpdate() {
-        if (ClickGuiScreen.opened) {
-            enabledColor = ClickGuiScreen.currentTheme.moduleEnabled;
-            disabledColor = ClickGuiScreen.currentTheme.sliderForeground;
-        }
     }
 
     public void render(DrawContext graphics, float partialTicks) {
@@ -151,6 +54,9 @@ public class ESP extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.world == null)
             return;
+
+        int enabledColor = ClickGuiScreen.currentTheme.moduleEnabled;
+        int disabledColor = ClickGuiScreen.currentTheme.sliderForeground;
 
         Camera cam = mc.gameRenderer.getCamera();
         Vec3d camPos = cam.getPos();
@@ -248,8 +154,17 @@ public class ESP extends Module {
                         getHealthColor(living.getHealth(), living.getMaxHealth(), living), true);
             }
 
-            if (e instanceof PlayerEntity player) {
-                int armorY = drawY + (showHP.isEnabled() ? 22 : 12);
+            if (showArmor.isEnabled() && e instanceof PlayerEntity player) {
+                int armorY;
+                if (armorPosition.isSelected("Top")) {
+                    armorY = drawY - 18;
+                } else {
+                    armorY = drawY + (showHP.isEnabled() ? 22 : 12);
+                }
+
+                ItemStack offhand = player.getOffHandStack();
+                ItemStack mainhand = player.getMainHandStack();
+
                 int armorCount = 0;
                 for (int i = 0; i < 4; i++) {
                     ItemStack armorStack = player.getInventory().getStack(36 + i);
@@ -258,18 +173,33 @@ public class ESP extends Module {
                     }
                 }
 
-                int armorIndex = 0;
-                int startX = -((armorCount * 16) / 2);
+                int totalWidth = armorCount * 16;
+                if (!offhand.isEmpty()) totalWidth += 16;
+                if (!mainhand.isEmpty()) totalWidth += 16;
+
+                int startX = -(totalWidth / 2);
+                int currentX = startX;
+
+                if (!offhand.isEmpty()) {
+                    graphics.drawItem(offhand, currentX, armorY);
+                    graphics.drawStackOverlay(mc.textRenderer, offhand, currentX, armorY);
+                    currentX += 16;
+                }
+
                 for (int i = 0; i < 4; i++) {
                     ItemStack armorStack = player.getInventory().getStack(36 + i);
                     if (armorStack.isEmpty()) {
                         continue;
                     }
 
-                    int armorX = startX + (armorIndex * 16);
-                    graphics.drawItem(armorStack, armorX, armorY);
-                    graphics.drawStackOverlay(mc.textRenderer, armorStack, armorX, armorY);
-                    armorIndex++;
+                    graphics.drawItem(armorStack, currentX, armorY);
+                    graphics.drawStackOverlay(mc.textRenderer, armorStack, currentX, armorY);
+                    currentX += 16;
+                }
+
+                if (!mainhand.isEmpty()) {
+                    graphics.drawItem(mainhand, currentX, armorY);
+                    graphics.drawStackOverlay(mc.textRenderer, mainhand, currentX, armorY);
                 }
             }
 

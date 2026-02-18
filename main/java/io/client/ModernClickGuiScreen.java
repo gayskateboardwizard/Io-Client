@@ -9,785 +9,666 @@ import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
 import io.client.settings.Setting;
 import io.client.settings.StringSetting;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.*;
 
 public class ModernClickGuiScreen extends Screen {
-    private final List<ModernPanel> panels = new ArrayList<>();
-    private final Map<String, Float> textScrollOffsets = new HashMap<>();
-    private final Map<String, Float> animationProgress = new HashMap<>();
-    private int tickCounter = 0;
-    private float guiScale = 1.0f;
+
+    private static final int SIDEBAR_W  = 74;
+    private static final int TOP_H      = 28;
+    private static final int CARD_H     = 22;
+    private static final int CARD_GAP   = 3;
+    private static final int CARD_COLS  = 2;
+    private static final int CARD_PAD   = 6;
+    private static final int SETTINGS_W = 160;
+    private static final int ROW_H      = 14;
+
+    private Category selectedCategory;
+    private Module   settingsTarget;
+    private boolean  typingSearch;
+    private String   searchQuery = "";
+    private float    moduleScroll;
+    private float    settingsScroll;
+    private boolean  draggingScale;
+
+    private final List<SettingRow> settingRows = new ArrayList<>();
+    private NumberRow draggingNumber;
 
     public ModernClickGuiScreen() {
-        super(Text.literal("Modern GUI"));
-
-        GUIScale guiScaleModule = ModuleManager.INSTANCE.getModule(GUIScale.class);
-        if (guiScaleModule != null) {
-            guiScale = guiScaleModule.getScale();
-        }
-
-        initializePanels();
+        super(Text.literal("GUI"));
+        Category[] cats = Category.values();
+        selectedCategory = cats.length > 0 ? cats[0] : null;
     }
 
-    private void initializePanels() {
-        panels.clear();
-        Map<Category, SavedPanelConfig> loadedConfig = ModuleManager.INSTANCE.loadUiConfig();
-        int defaultX = 12;
-
-        for (Category category : Category.values()) {
-            SavedPanelConfig config = loadedConfig.get(category);
-            ModernPanel panel;
-
-            if (config != null) {
-                panel = new ModernPanel(category.name(), category, config.x, config.y);
-                panel.open = !config.collapsed;
-            } else {
-                panel = new ModernPanel(category.name(), category, defaultX, 12);
-                defaultX += (int)(148 * guiScale);
-            }
-
-            panels.add(panel);
-        }
+    private float getScale() {
+        GUIScale g = ModuleManager.INSTANCE.getModule(GUIScale.class);
+        return g != null ? g.getScale() : 1.0f;
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        tickCounter++;
-
-        GUIScale guiScaleModule = ModuleManager.INSTANCE.getModule(GUIScale.class);
-        if (guiScaleModule != null) {
-            guiScale = guiScaleModule.getScale();
-        }
-
+    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         Theme theme = ClickGuiScreen.currentTheme;
-        ModernPalette palette = ModernPalette.fromTheme(theme);
+        float scale = getScale();
 
-        int width = this.client != null ? this.client.getWindow().getScaledWidth() : 0;
-        int height = this.client != null ? this.client.getWindow().getScaledHeight() : 0;
+        ctx.fill(0, 0, width, height, (theme.panelBackground & 0x00FFFFFF) | 0xF2000000);
 
-        renderBackdrop(context, width, height, palette);
+        renderTopBar(ctx, mouseX, mouseY, width, height, theme, scale);
 
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(guiScale, guiScale);
+        ctx.getMatrices().pushMatrix();
+        ctx.getMatrices().scale(scale, scale);
 
-        float invScale = 1.0f / guiScale;
-        int scaledMouseX = (int)(mouseX * invScale);
-        int scaledMouseY = (int)(mouseY * invScale);
-        int scaledScreenW = (int)(width * invScale);
-        int scaledScreenH = (int)(height * invScale);
+        int sw       = (int) (width  / scale);
+        int sh       = (int) (height / scale);
+        int smx      = (int) (mouseX / scale);
+        int smy      = (int) (mouseY / scale);
+        int topOff   = (int) Math.ceil(TOP_H / scale);
 
-        for (ModernPanel panel : panels) {
-            panel.clamp(scaledScreenW, scaledScreenH);
-            panel.render(context, scaledMouseX, scaledMouseY, delta, palette);
-        }
+        renderSidebar(ctx, smx, smy, sw, sh, topOff, theme);
+        renderModuleGrid(ctx, smx, smy, sw, sh, topOff, theme);
+        if (settingsTarget != null) renderSettingsPanel(ctx, smx, smy, sw, sh, topOff, theme);
 
-        context.getMatrices().popMatrix();
+        ctx.getMatrices().popMatrix();
 
-        super.render(context, mouseX, mouseY, delta);
+        super.render(ctx, mouseX, mouseY, delta);
     }
 
-    private void renderBackdrop(DrawContext context, int width, int height, ModernPalette palette) {
-        context.fillGradient(0, 0, width, height, palette.bgTop, palette.bgBottom);
+    private void renderTopBar(DrawContext ctx, int mx, int my, int sw, int sh,
+                              Theme theme, float scale) {
+        ctx.fill(0, 0, sw, TOP_H, (theme.titleBar & 0x00FFFFFF) | 0xFF000000);
+        ctx.fill(0, TOP_H - 1, sw, TOP_H, (theme.moduleEnabled & 0x00FFFFFF) | 0x44000000);
 
-        int gridSize = 60;
-        int gridColor = withAlpha(palette.accent, 8);
-        for (int x = 0; x < width; x += gridSize) {
-            context.fill(x, 0, x + 1, height, gridColor);
-        }
-        for (int y = 0; y < height; y += gridSize) {
-            context.fill(0, y, width, y + 1, gridColor);
-        }
-    }
+        ctx.drawTextWithShadow(textRenderer, "IO CLIENT",
+                SIDEBAR_W + 10, TOP_H / 2 - 4, theme.moduleEnabled);
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        float invScale = 1.0f / guiScale;
-        int scaledMouseX = (int)(mouseX * invScale);
-        int scaledMouseY = (int)(mouseY * invScale);
+        int sbW = 140, sbH = 14;
+        int sbX = sw - 10 - 110 - 10 - sbW, sbY = TOP_H / 2 - sbH / 2;
+        drawPanel(ctx, sbX, sbY, sbW, sbH, theme.panelBackground, theme.sliderBackground);
+        if (typingSearch) drawOutline(ctx, sbX, sbY, sbW, sbH, theme.moduleEnabled);
 
-        for (ModernPanel panel : panels) {
-            panel.mouseClicked(scaledMouseX, scaledMouseY, button);
-        }
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
+        String searchDisplay = typingSearch
+                ? (searchQuery.isEmpty() ? "|" : searchQuery + "|")
+                : (searchQuery.isEmpty() ? "search..." : searchQuery);
+        int sCl = searchQuery.isEmpty() && !typingSearch ? theme.moduleDisabled : theme.sliderForeground;
+        ctx.enableScissor(sbX + 3, sbY, sbX + sbW - 3, sbY + sbH);
+        ctx.drawTextWithShadow(textRenderer, searchDisplay, sbX + 5, sbY + 3, sCl);
+        ctx.disableScissor();
 
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        float invScale = 1.0f / guiScale;
-        int scaledMouseX = (int)(mouseX * invScale);
-        int scaledMouseY = (int)(mouseY * invScale);
+        int barW = 110, barH = 14;
+        int bx = sw - barW - 10, by = TOP_H / 2 - barH / 2;
+        drawPanel(ctx, bx, by, barW, barH, theme.panelBackground, theme.sliderBackground);
 
-        for (ModernPanel panel : panels) {
-            panel.mouseReleased(scaledMouseX, scaledMouseY, button);
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
+        float min = 0.5f, max = 2.0f;
+        float norm = (scale - min) / (max - min);
+        int fillW = Math.max(0, (int) (norm * (barW - 4)));
+        ctx.fill(bx + 2, by + 4, bx + 2 + fillW, by + barH - 4, theme.sliderBackground);
+        ctx.fill(bx + 2 + fillW - 1, by + 2, bx + 2 + fillW + 2, by + barH - 2, theme.sliderForeground);
 
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (button == 0) {
-            float invScale = 1.0f / guiScale;
-            int scaledMouseX = (int)(mouseX * invScale);
-            int scaledMouseY = (int)(mouseY * invScale);
+        ctx.drawTextWithShadow(textRenderer, "scale " + fmt(scale), bx + 5, by + 3, theme.moduleDisabled);
 
-            for (ModernPanel panel : panels) {
-                panel.drag(scaledMouseX, scaledMouseY);
+        if (draggingScale) {
+            GUIScale guiScale = ModuleManager.INSTANCE.getModule(GUIScale.class);
+            if (guiScale != null) {
+                float t = Math.max(0f, Math.min(1f, (mx - bx - 2f) / (barW - 4f)));
+                guiScale.getSettings().stream()
+                        .filter(s -> s instanceof NumberSetting && s.getName().equals("Scale"))
+                        .findFirst()
+                        .ifPresent(s -> ((NumberSetting) s).setValue(min + (max - min) * t));
             }
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    private void renderSidebar(DrawContext ctx, int mx, int my, int sw, int sh,
+                               int topOff, Theme theme) {
+        ctx.fill(0, topOff, SIDEBAR_W, sh, (theme.titleBar & 0x00FFFFFF) | 0xFF000000);
+        ctx.fill(SIDEBAR_W - 1, topOff, SIDEBAR_W, sh, (theme.moduleEnabled & 0x00FFFFFF) | 0x22000000);
+
+        int itemH = 26;
+        int sy = topOff + 6;
+
+        for (Category cat : Category.values()) {
+            boolean sel = cat == selectedCategory;
+            boolean hov = mx >= 0 && mx < SIDEBAR_W && my >= sy && my < sy + itemH;
+
+            if (sel || hov) ctx.fill(0, sy, SIDEBAR_W - 1, sy + itemH, theme.hoverHighlight);
+            if (sel) ctx.fill(0, sy + 2, 3, sy + itemH - 2, theme.moduleEnabled);
+
+            int count = (int) ModuleManager.INSTANCE.getModulesByCategory(cat)
+                    .stream().filter(Module::isEnabled).count();
+            int total = ModuleManager.INSTANCE.getModulesByCategory(cat).size();
+
+            int textColor = sel ? theme.sliderForeground : theme.moduleDisabled;
+            ctx.drawTextWithShadow(textRenderer, cat.name(), 9, sy + 6, textColor);
+            int badgeColor = count > 0 ? theme.moduleEnabled : theme.moduleDisabled;
+            ctx.drawTextWithShadow(textRenderer, count + "/" + total, 9, sy + 15, badgeColor);
+
+            sy += itemH + 2;
+        }
+    }
+
+    private List<Module> getDisplayModules() {
+        if (!searchQuery.isEmpty()) {
+            List<Module> all = new ArrayList<>();
+            for (Category cat : Category.values()) {
+                for (Module m : ModuleManager.INSTANCE.getModulesByCategory(cat)) {
+                    if (m.getName().toLowerCase().contains(searchQuery.toLowerCase())) {
+                        all.add(m);
+                    }
+                }
+            }
+            all.sort(Comparator.comparing(Module::getName));
+            return all;
+        }
+        if (selectedCategory == null) return Collections.emptyList();
+        List<Module> list = new ArrayList<>(ModuleManager.INSTANCE.getModulesByCategory(selectedCategory));
+        list.sort(Comparator.comparing(Module::getName));
+        return list;
+    }
+
+    private void renderModuleGrid(DrawContext ctx, int mx, int my, int sw, int sh,
+                                  int topOff, Theme theme) {
+        int settingsW = settingsTarget != null ? SETTINGS_W : 0;
+        int mainX = SIDEBAR_W + CARD_PAD;
+        int mainW = sw - SIDEBAR_W - settingsW - CARD_PAD * 2;
+        int mainY = topOff + 6;
+        int gridY  = mainY + 16;
+        int gridH  = sh - gridY - 4;
+
+        List<Module> modules = getDisplayModules();
+
+        String header = !searchQuery.isEmpty() ? "results" : (selectedCategory != null ? selectedCategory.name() : "");
+        ctx.drawTextWithShadow(textRenderer, header, mainX, mainY, theme.moduleEnabled);
+        ctx.fill(mainX, mainY + 10, mainX + textRenderer.getWidth(header) + 4, mainY + 11,
+                (theme.moduleEnabled & 0x00FFFFFF) | 0x66000000);
+
+        int colW = (mainW - CARD_GAP) / 2;
+        int rows = (modules.size() + 1) / 2;
+        int contentH = rows * (CARD_H + CARD_GAP);
+        moduleScroll = Math.max(0, Math.min(moduleScroll, Math.max(0, contentH - gridH)));
+
+        ctx.enableScissor(mainX, gridY, mainX + mainW, gridY + gridH);
+
+        for (int i = 0; i < modules.size(); i++) {
+            Module m = modules.get(i);
+            int col = i % CARD_COLS;
+            int row = i / CARD_COLS;
+            int cx = mainX + col * (colW + CARD_GAP);
+            int cy = gridY + row * (CARD_H + CARD_GAP) - (int) moduleScroll;
+            if (cy + CARD_H < gridY || cy > gridY + gridH) continue;
+            renderModuleCard(ctx, mx, my, m, cx, cy, colW, theme);
+        }
+
+        ctx.disableScissor();
+    }
+
+    private void renderModuleCard(DrawContext ctx, int mx, int my, Module m,
+                                  int cx, int cy, int cw, Theme theme) {
+        boolean hov     = mx >= cx && mx < cx + cw && my >= cy && my < cy + CARD_H;
+        boolean enabled = m.isEnabled();
+        boolean isSel   = m == settingsTarget;
+
+        int cardBg = isSel
+                ? theme.hoverHighlight
+                : enabled
+                ? (theme.panelBackground & 0x00FFFFFF) | 0xCC000000
+                : (theme.panelBackground & 0x00FFFFFF) | 0x88000000;
+        ctx.fill(cx, cy, cx + cw, cy + CARD_H, cardBg);
+
+        if (enabled)
+            ctx.fill(cx + 1, cy, cx + cw - 1, cy + 1, (theme.moduleEnabled & 0x00FFFFFF) | 0x66000000);
+
+        int borderCol = isSel
+                ? theme.moduleEnabled
+                : enabled
+                ? (theme.moduleEnabled & 0x00FFFFFF) | 0x55000000
+                : hov ? theme.sliderBackground : (theme.panelBackground & 0x00FFFFFF) | 0xFF000000;
+        drawOutline(ctx, cx, cy, cw, CARD_H, borderCol);
+
+        if (hov && !isSel) ctx.fill(cx, cy, cx + cw, cy + CARD_H, theme.hoverHighlight);
+        if (enabled) ctx.fill(cx, cy + 2, cx + 2, cy + CARD_H - 2, theme.moduleEnabled);
+
+        int nameX = cx + (enabled ? 6 : 4);
+        int nameY = cy + CARD_H / 2 - 4;
+        int nameColor = enabled ? theme.sliderForeground : theme.moduleDisabled;
+        ctx.enableScissor(nameX, cy, cx + cw - 6, cy + CARD_H);
+        ctx.drawTextWithShadow(textRenderer, m.getName(), nameX, nameY, nameColor);
+        ctx.disableScissor();
+
+        if (!m.getSettings().isEmpty()) {
+            int dotColor = isSel ? theme.moduleEnabled : theme.sliderBackground;
+            ctx.fill(cx + cw - 5, cy + 3, cx + cw - 3, cy + 5, dotColor);
+        }
+    }
+
+    private void renderSettingsPanel(DrawContext ctx, int mx, int my, int sw, int sh,
+                                     int topOff, Theme theme) {
+        int px = sw - SETTINGS_W;
+        int ph = sh - topOff;
+
+        ctx.fill(px, topOff, sw, sh, (theme.titleBar & 0x00FFFFFF) | 0xFF000000);
+        ctx.fill(px, topOff, px + 1, sh, (theme.moduleEnabled & 0x00FFFFFF) | 0x33000000);
+        ctx.fill(px, topOff, sw, topOff + 1, (theme.moduleEnabled & 0x00FFFFFF) | 0x33000000);
+
+        ctx.fill(px, topOff, sw, topOff + 22, (theme.panelBackground & 0x00FFFFFF) | 0xFF000000);
+        ctx.fill(px, topOff + 21, sw, topOff + 22, (theme.moduleEnabled & 0x00FFFFFF) | 0x44000000);
+
+        int nameColor = settingsTarget.isEnabled() ? theme.sliderForeground : theme.moduleDisabled;
+        ctx.drawTextWithShadow(textRenderer, settingsTarget.getName(), px + 8, topOff + 7, nameColor);
+        ctx.drawTextWithShadow(textRenderer, "\u00D7", sw - 12, topOff + 6, theme.moduleDisabled);
+
+        int rowY0 = topOff + 24;
+        int rowsH = ph - 26;
+        int contentH = settingRows.stream().mapToInt(SettingRow::height).sum();
+        settingsScroll = Math.max(0, Math.min(settingsScroll, Math.max(0, contentH - rowsH)));
+
+        ctx.enableScissor(px, rowY0, sw, rowY0 + rowsH);
+        int ry = rowY0 - (int) settingsScroll;
+        for (SettingRow r : settingRows) {
+            r.render(ctx, mx, my, px + 2, ry, SETTINGS_W - 4, theme);
+            ry += r.height();
+        }
+        ctx.disableScissor();
     }
 
     @Override
-    public boolean shouldPause() {
-        return false;
+    public boolean mouseClicked(double mx, double my, int btn) {
+        float scale  = getScale();
+        float inv    = 1f / scale;
+        int rawMX    = (int) mx,       rawMY    = (int) my;
+        int smx      = (int) (mx * inv), smy    = (int) (my * inv);
+        int sw       = width,           rawSW    = width;
+        int scaledSW = (int) (width  * inv);
+        int topOff   = (int) Math.ceil(TOP_H / scale);
+
+        // ── Top bar (raw screen coords) ──
+        int barW = 110;
+        int bx = rawSW - barW - 10, by = TOP_H / 2 - 7;
+        if (rawMX >= bx && rawMX < bx + barW && rawMY >= by && rawMY < by + 14) {
+            draggingScale = true;
+            return true;
+        }
+
+        int sbW = 140;
+        int sbX = rawSW - 10 - 110 - 10 - sbW, sbY = TOP_H / 2 - 7;
+        if (rawMX >= sbX && rawMX < sbX + sbW && rawMY >= sbY && rawMY < sbY + 14) {
+            typingSearch = true;
+            return true;
+        } else {
+            typingSearch = false;
+        }
+
+        // ── Sidebar (scaled coords) ──
+        int itemH = 26;
+        int sy = topOff + 6;
+        for (Category cat : Category.values()) {
+            if (smx >= 0 && smx < SIDEBAR_W && smy >= sy && smy < sy + itemH) {
+                if (selectedCategory != cat) { selectedCategory = cat; moduleScroll = 0; }
+                if (settingsTarget != null) closeSettings();
+                click();
+                return true;
+            }
+            sy += itemH + 2;
+        }
+
+        // ── Settings panel (scaled coords) ──
+        if (settingsTarget != null) {
+            int px = scaledSW - SETTINGS_W;
+            if (smx >= scaledSW - 16 && smx < scaledSW - 4 && smy >= topOff + 4 && smy < topOff + 18) {
+                closeSettings(); click(); return true;
+            }
+            int ry = topOff + 24 - (int) settingsScroll;
+            for (SettingRow r : settingRows) {
+                r.mouseClicked(smx, smy, btn, px + 2, ry, SETTINGS_W - 4);
+                ry += r.height();
+            }
+        }
+
+        // ── Module grid (scaled coords) ──
+        if (smx > SIDEBAR_W) {
+            int settingsW = settingsTarget != null ? SETTINGS_W : 0;
+            int mainX = SIDEBAR_W + CARD_PAD;
+            int mainW = scaledSW - SIDEBAR_W - settingsW - CARD_PAD * 2;
+            int colW  = (mainW - CARD_GAP) / 2;
+            int gridY = topOff + 22;
+
+            List<Module> modules = getDisplayModules();
+
+            for (int i = 0; i < modules.size(); i++) {
+                int col = i % 2;
+                int row = i / 2;
+                int cx = mainX + col * (colW + CARD_GAP);
+                int cy = gridY + row * (CARD_H + CARD_GAP) - (int) moduleScroll;
+                if (smx >= cx && smx < cx + colW && smy >= cy && smy < cy + CARD_H) {
+                    Module m = modules.get(i);
+                    if (btn == 0) { m.toggle(); click(); }
+                    else if (btn == 1) {
+                        if (settingsTarget == m) closeSettings();
+                        else openSettings(m);
+                        click();
+                    }
+                    return true;
+                }
+            }
+        }
+
+        return super.mouseClicked(mx, my, btn);
     }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int btn) {
+        if (btn == 0) {
+            draggingScale = false;
+            if (draggingNumber != null) { draggingNumber.dragging = false; draggingNumber = null; }
+        }
+        float inv = 1f / getScale();
+        int smx = (int) (mx * inv), smy = (int) (my * inv), sw = (int) (width * inv);
+        int topOff = (int) Math.ceil(TOP_H / getScale());
+        if (settingsTarget != null) {
+            int px = sw - SETTINGS_W;
+            int ry = topOff + 24 - (int) settingsScroll;
+            for (SettingRow r : settingRows) {
+                r.mouseReleased(smx, smy, btn, px + 2, ry, SETTINGS_W - 4);
+                ry += r.height();
+            }
+        }
+        return super.mouseReleased(mx, my, btn);
+    }
+
+    @Override
+    public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
+        float inv = 1f / getScale();
+        int smx = (int) (mx * inv), sw = (int) (width * inv);
+        if (draggingNumber != null && settingsTarget != null) {
+            draggingNumber.applyMouse(smx, sw - SETTINGS_W + 2, SETTINGS_W - 4);
+        }
+        return super.mouseDragged(mx, my, btn, dx, dy);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double hDelta, double vDelta) {
+        float inv = 1f / getScale();
+        int smx = (int) (mx * inv), sw = (int) (width * inv);
+        if (settingsTarget != null && smx >= sw - SETTINGS_W) {
+            settingsScroll = Math.max(0, settingsScroll - (float) (vDelta * 20));
+        } else {
+            moduleScroll = Math.max(0, moduleScroll - (float) (vDelta * 20));
+        }
+        return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (typingSearch) {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) { typingSearch = false; searchQuery = ""; return true; }
+            if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !searchQuery.isEmpty()) {
+                searchQuery = searchQuery.substring(0, searchQuery.length() - 1);
+                return true;
+            }
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE && settingsTarget != null) { closeSettings(); return true; }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        if (typingSearch) { searchQuery += chr; return true; }
+        return super.charTyped(chr, modifiers);
+    }
+
+    @Override
+    public boolean shouldPause() { return false; }
 
     @Override
     public void close() {
-        Map<Category, io.client.clickgui.CategoryPanel> configMap = new HashMap<>();
-        for (ModernPanel panel : panels) {
-            io.client.clickgui.CategoryPanel categoryPanel = new io.client.clickgui.CategoryPanel(
-                    panel.category, panel.x, panel.y, !panel.open
-            );
-            configMap.put(panel.category, categoryPanel);
+        Map<Category, io.client.clickgui.CategoryPanel> cfg = new HashMap<>();
+        int i = 0;
+        for (Category cat : Category.values()) {
+            cfg.put(cat, new io.client.clickgui.CategoryPanel(cat, i * 100, 5, false));
+            i++;
         }
-        ModuleManager.INSTANCE.saveUiConfig(configMap);
+        ModuleManager.INSTANCE.saveUiConfig(cfg);
         ModuleManager.INSTANCE.saveModules();
         ModuleManager.INSTANCE.saveTheme(ClickGuiScreen.currentTheme);
-        if (this.client != null) {
-            this.client.setScreen(null);
-        }
+        if (client != null) client.setScreen(null);
     }
 
-    private final class ModernPanel {
-        private static final int HEADER_HEIGHT = 28;
-        private final String name;
-        private final Category category;
-        private final int width = 140;
-        private final List<ModuleCard> cards = new ArrayList<>();
-        private int x;
-        private int y;
-        private int dragOffsetX;
-        private int dragOffsetY;
-        private boolean dragging;
-        private boolean open = true;
-        private float expandProgress = 1.0f;
-
-        private ModernPanel(String name, Category category, int x, int y) {
-            this.name = name;
-            this.category = category;
-            this.x = x;
-            this.y = y;
-            ModuleManager.INSTANCE.getModulesByCategory(category).stream()
-                    .sorted(Comparator.comparing(Module::getName))
-                    .forEach(module -> cards.add(new ModuleCard(module)));
-        }
-
-        private void clamp(int screenW, int screenH) {
-            x = Math.max(0, Math.min(x, screenW - width));
-            y = Math.max(0, Math.min(y, screenH - HEADER_HEIGHT));
-        }
-
-        private void render(DrawContext context, int mouseX, int mouseY, float delta, ModernPalette palette) {
-            float targetProgress = open ? 1.0f : 0.0f;
-            expandProgress += (targetProgress - expandProgress) * 0.2f;
-
-            int totalHeight = HEADER_HEIGHT + (int)(getBodyHeight() * expandProgress);
-
-            renderGlass(context, x, y, width, totalHeight, palette);
-            renderHeader(context, mouseX, mouseY, palette);
-
-            if (expandProgress > 0.01f) {
-                context.enableScissor(x, y + HEADER_HEIGHT, x + width, y + totalHeight);
-                renderBody(context, mouseX, mouseY, palette);
-                context.disableScissor();
-            }
-        }
-
-        private void renderGlass(DrawContext context, int x, int y, int width, int height, ModernPalette palette) {
-            context.fill(x, y, x + width, y + height, palette.glass);
-
-            context.fill(x, y, x + width, y + 1, palette.borderBright);
-            context.fill(x, y, x + 1, y + height, palette.borderBright);
-            context.fill(x + width - 1, y, x + width, y + height, palette.borderDim);
-            context.fill(x, y + height - 1, x + width, y + height, palette.borderDim);
-
-            int innerGlow = withAlpha(palette.accent, 15);
-            context.fill(x + 1, y + 1, x + width - 1, y + 2, innerGlow);
-        }
-
-        private void renderHeader(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            boolean headerHover = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + HEADER_HEIGHT;
-
-            if (headerHover) {
-                int hoverOverlay = withAlpha(palette.accent, 20);
-                context.fill(x, y, x + width, y + HEADER_HEIGHT, hoverOverlay);
-            }
-
-            drawGuiTextWithShadow(context, name.toUpperCase(), x + 10, y + 10, palette.textPrimary);
-
-            String icon = open ? "−" : "+";
-            int iconX = x + width - 20;
-            drawGuiTextWithShadow(context, icon, iconX, y + 10, palette.textSecondary);
-
-            context.fill(x + 8, y + HEADER_HEIGHT - 1, x + width - 8, y + HEADER_HEIGHT, palette.borderDim);
-        }
-
-        private void renderBody(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            int cardY = y + HEADER_HEIGHT + 4;
-
-            for (ModuleCard card : cards) {
-                card.setBounds(x + 4, cardY, width - 8);
-                card.render(context, mouseX, mouseY, palette);
-                cardY += (int)(card.getHeight() * expandProgress) + 3;
-            }
-        }
-
-        private int getBodyHeight() {
-            int total = 4;
-            for (ModuleCard card : cards) {
-                total += card.getHeight() + 3;
-            }
-            return total + 4;
-        }
-
-        private void mouseClicked(int mouseX, int mouseY, int button) {
-            if (hoveringHeader(mouseX, mouseY)) {
-                if (button == 0) {
-                    dragging = true;
-                    dragOffsetX = x - mouseX;
-                    dragOffsetY = y - mouseY;
-                    return;
-                }
-                if (button == 1) {
-                    open = !open;
-                    playClick();
-                    return;
-                }
-            }
-
-            if (!open || expandProgress < 0.5f) return;
-
-            for (ModuleCard card : cards) {
-                card.mouseClicked(mouseX, mouseY, button);
-            }
-        }
-
-        private void mouseReleased(int mouseX, int mouseY, int button) {
-            if (button == 0) {
-                dragging = false;
-            }
-            if (!open) return;
-            for (ModuleCard card : cards) {
-                card.mouseReleased(mouseX, mouseY, button);
-            }
-        }
-
-        private void drag(int mouseX, int mouseY) {
-            if (!dragging) return;
-
-            MinecraftClient mc = MinecraftClient.getInstance();
-            int screenWidth = (int)(mc.getWindow().getScaledWidth() / guiScale);
-            int screenHeight = (int)(mc.getWindow().getScaledHeight() / guiScale);
-
-            int newX = dragOffsetX + mouseX;
-            int newY = dragOffsetY + mouseY;
-
-            this.x = Math.max(0, Math.min(newX, screenWidth - width));
-            this.y = Math.max(0, Math.min(newY, screenHeight - HEADER_HEIGHT));
-        }
-
-        private boolean hoveringHeader(int mouseX, int mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + HEADER_HEIGHT;
-        }
+    private void openSettings(Module m) {
+        settingsTarget = m;
+        settingsScroll = 0;
+        settingRows.clear();
+        buildRows(settingRows, m.getSettings(), 0);
     }
 
-    private final class ModuleCard {
-        private static final int CARD_HEIGHT = 20;
-        private final Module module;
-        private final List<SettingRow> settingRows = new ArrayList<>();
-        private boolean open;
-        private float expandProgress = 0.0f;
-        private int x;
-        private int y;
-        private int width;
-
-        private ModuleCard(Module module) {
-            this.module = module;
-            appendSettingRows(settingRows, module.getSettings(), 0);
-        }
-
-        private void setBounds(int x, int y, int width) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-        }
-
-        private int getHeight() {
-            float settingsHeight = 0;
-            if (open && !settingRows.isEmpty()) {
-                for (SettingRow row : settingRows) {
-                    settingsHeight += row.getHeight() + 2;
-                }
-                settingsHeight += 4;
-            }
-            return CARD_HEIGHT + (int)(settingsHeight * expandProgress);
-        }
-
-        private void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            float targetProgress = (open && !settingRows.isEmpty()) ? 1.0f : 0.0f;
-            expandProgress += (targetProgress - expandProgress) * 0.15f;
-
-            boolean hovered = hovering(mouseX, mouseY);
-            int cardBg = module.isEnabled() ? palette.cardEnabled : palette.cardDisabled;
-
-            if (hovered) {
-                cardBg = blendColors(cardBg, palette.accent, 0.15f);
-            }
-
-            context.fill(x, y, x + width, y + getHeight(), cardBg);
-
-            if (module.isEnabled()) {
-                context.fill(x, y, x + 2, y + CARD_HEIGHT, palette.accent);
-            }
-
-            int textColor = module.isEnabled() ? palette.textPrimary : palette.textSecondary;
-            drawGuiTextWithShadow(context, module.getName(), x + 8, y + 6, textColor);
-
-            if (!settingRows.isEmpty()) {
-                String gear = "⚙";
-                int gearColor = open ? palette.accent : palette.textSecondary;
-                drawGuiTextWithShadow(context, gear, x + width - 14, y + 6, gearColor);
-            }
-
-            if (expandProgress > 0.01f && open) {
-                int settingY = y + CARD_HEIGHT + 4;
-                context.enableScissor(x, y + CARD_HEIGHT, x + width, y + getHeight());
-                for (SettingRow row : settingRows) {
-                    row.setBounds(x + 6, settingY, width - 12);
-                    row.render(context, mouseX, mouseY, palette);
-                    settingY += row.getHeight() + 2;
-                }
-                context.disableScissor();
-            }
-        }
-
-        private void mouseClicked(int mouseX, int mouseY, int button) {
-            if (hovering(mouseX, mouseY)) {
-                if (button == 0) {
-                    module.toggle();
-                    playClick();
-                } else if (button == 1 && !settingRows.isEmpty()) {
-                    open = !open;
-                    playClick();
-                }
-                return;
-            }
-
-            if (open && expandProgress > 0.5f) {
-                for (SettingRow row : settingRows) {
-                    row.mouseClicked(mouseX, mouseY, button);
-                }
-            }
-        }
-
-        private void mouseReleased(int mouseX, int mouseY, int button) {
-            if (!open) return;
-            for (SettingRow row : settingRows) {
-                row.mouseReleased(mouseX, mouseY, button);
-            }
-        }
-
-        private boolean hovering(int mouseX, int mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + CARD_HEIGHT;
-        }
+    private void closeSettings() {
+        settingsTarget = null;
+        settingRows.clear();
     }
 
-    private abstract static class SettingRow {
-        protected int x;
-        protected int y;
-        protected int width;
-        protected final int indent;
-
-        protected SettingRow(int indent) {
-            this.indent = indent;
-        }
-
-        void setBounds(int x, int y, int width) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-        }
-
-        abstract void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette);
-
-        void mouseClicked(int mouseX, int mouseY, int button) {}
-        void mouseReleased(int mouseX, int mouseY, int button) {}
-
-        int getHeight() {
-            return 16;
-        }
-
-        boolean hovering(int mouseX, int mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + getHeight();
-        }
+    private void drawPanel(DrawContext ctx, int x, int y, int w, int h, int bg, int border) {
+        ctx.fill(x, y, x + w, y + h, bg);
+        drawOutline(ctx, x, y, w, h, border);
     }
 
-    private final class BooleanSettingRow extends SettingRow {
-        private final BooleanSetting setting;
-
-        private BooleanSettingRow(BooleanSetting setting, int indent) {
-            super(indent);
-            this.setting = setting;
-        }
-
-        @Override
-        void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            boolean hovered = hovering(mouseX, mouseY);
-
-            if (hovered) {
-                int hoverBg = withAlpha(palette.accent, 15);
-                context.fill(x, y, x + width, y + getHeight(), hoverBg);
-            }
-
-            int checkX = x + indent;
-            int checkSize = 10;
-            int checkY = y + 3;
-
-            int checkBg = setting.isEnabled() ? palette.accent : palette.borderDim;
-            context.fill(checkX, checkY, checkX + checkSize, checkY + checkSize, checkBg);
-
-            if (setting.isEnabled()) {
-                context.fill(checkX + 2, checkY + 2, checkX + checkSize - 2, checkY + checkSize - 2, palette.textPrimary);
-            }
-
-            drawGuiTextWithShadow(context, setting.getName(), checkX + checkSize + 6, y + 4, palette.textPrimary);
-        }
-
-        @Override
-        void mouseClicked(int mouseX, int mouseY, int button) {
-            if (button == 0 && hovering(mouseX, mouseY)) {
-                setting.toggle();
-                playClick();
-            }
-        }
+    private void drawOutline(DrawContext ctx, int x, int y, int w, int h, int color) {
+        ctx.fill(x, y, x + w, y + 1, color);
+        ctx.fill(x, y + h - 1, x + w, y + h, color);
+        ctx.fill(x, y, x + 1, y + h, color);
+        ctx.fill(x + w - 1, y, x + w, y + h, color);
     }
 
-    private final class RadioSettingRow extends SettingRow {
-        private final RadioSetting setting;
-
-        private RadioSettingRow(RadioSetting setting, int indent) {
-            super(indent);
-            this.setting = setting;
-        }
-
-        @Override
-        void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            boolean hovered = hovering(mouseX, mouseY);
-
-            if (hovered) {
-                int hoverBg = withAlpha(palette.accent, 15);
-                context.fill(x, y, x + width, y + getHeight(), hoverBg);
-            }
-
-            String label = setting.getName() + ": " + setting.getSelectedOption();
-            drawGuiTextWithShadow(context, label, x + indent, y + 4, palette.textPrimary);
-
-            drawGuiTextWithShadow(context, "◀ ▶", x + width - 28, y + 4, palette.textSecondary);
-        }
-
-        @Override
-        void mouseClicked(int mouseX, int mouseY, int button) {
-            if (hovering(mouseX, mouseY)) {
-                if (button == 0) {
-                    setting.cycleNext();
-                } else if (button == 1) {
-                    List<String> options = setting.getOptions();
-                    if (!options.isEmpty()) {
-                        int current = options.indexOf(setting.getSelectedOption());
-                        int prev = (current - 1 + options.size()) % options.size();
-                        setting.setSelectedOption(options.get(prev));
-                    }
-                }
-                playClick();
-            }
-        }
+    private static String fmt(float v) {
+        return Math.abs(v - Math.round(v)) < 0.001f
+                ? Integer.toString(Math.round(v))
+                : String.format("%.2f", v);
     }
 
-    private final class NumberSettingRow extends SettingRow {
-        private final NumberSetting setting;
-        private boolean dragging;
-
-        private NumberSettingRow(NumberSetting setting, int indent) {
-            super(indent);
-            this.setting = setting;
-        }
-
-        @Override
-        void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            boolean hovered = hovering(mouseX, mouseY);
-
-            if (hovered) {
-                int hoverBg = withAlpha(palette.accent, 15);
-                context.fill(x, y, x + width, y + getHeight(), hoverBg);
-            }
-
-            String label = setting.getName() + ": " + format(setting.getValue());
-            drawGuiTextWithShadow(context, label, x + indent, y + 2, palette.textPrimary);
-
-            float range = setting.getMax() - setting.getMin();
-            float normalized = range <= 0.0f ? 0.0f : (setting.getValue() - setting.getMin()) / range;
-
-            int sliderY = y + 12;
-            int sliderHeight = 2;
-
-            context.fill(x + indent, sliderY, x + width - 2, sliderY + sliderHeight, palette.borderDim);
-
-            int fillWidth = (int)(normalized * (width - indent - 2));
-            context.fill(x + indent, sliderY, x + indent + fillWidth, sliderY + sliderHeight, palette.accent);
-
-            int thumbX = x + indent + fillWidth - 2;
-            context.fill(thumbX, sliderY - 1, thumbX + 4, sliderY + sliderHeight + 1, palette.accent);
-
-            if (dragging) {
-                setFromMouse(mouseX);
-            }
-        }
-
-        @Override
-        void mouseClicked(int mouseX, int mouseY, int button) {
-            if (button == 0 && hovering(mouseX, mouseY)) {
-                dragging = true;
-                setFromMouse(mouseX);
-                playClick();
-            }
-        }
-
-        @Override
-        void mouseReleased(int mouseX, int mouseY, int button) {
-            if (button == 0) {
-                dragging = false;
-            }
-        }
-
-        private void setFromMouse(int mouseX) {
-            int sliderWidth = width - indent - 2;
-            float t = (mouseX - (x + indent)) / (float) sliderWidth;
-            t = Math.max(0.0f, Math.min(1.0f, t));
-            float value = setting.getMin() + (setting.getMax() - setting.getMin()) * t;
-            setting.setValue(value);
-        }
-    }
-
-    private final class StringSettingRow extends SettingRow {
-        private final StringSetting setting;
-
-        private StringSettingRow(StringSetting setting, int indent) {
-            super(indent);
-            this.setting = setting;
-        }
-
-        @Override
-        void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            boolean hovered = hovering(mouseX, mouseY);
-
-            if (hovered) {
-                int hoverBg = withAlpha(palette.accent, 15);
-                context.fill(x, y, x + width, y + getHeight(), hoverBg);
-            }
-
-            String label = setting.getName() + ": \"" + setting.getValue() + "\"";
-            drawGuiTextWithShadow(context, label, x + indent, y + 4, palette.textPrimary);
-        }
-    }
-
-    private final class CategorySettingRow extends SettingRow {
-        private final CategorySetting setting;
-        private final List<SettingRow> children = new ArrayList<>();
-        private boolean open;
-        private float expandProgress = 0.0f;
-
-        private CategorySettingRow(CategorySetting setting, int indent) {
-            super(indent);
-            this.setting = setting;
-            this.open = setting.isExpanded();
-        }
-
-        @Override
-        void render(DrawContext context, int mouseX, int mouseY, ModernPalette palette) {
-            boolean hovered = hovering(mouseX, mouseY);
-
-            if (hovered) {
-                int hoverBg = withAlpha(palette.accent, 15);
-                context.fill(x, y, x + width, y + getHeight(), hoverBg);
-            }
-
-            String arrow = open ? "▼" : "▶";
-            drawGuiTextWithShadow(context, arrow, x + indent, y + 4, palette.accent);
-            drawGuiTextWithShadow(context, setting.getName(), x + indent + 12, y + 4, palette.accent);
-
-            float targetProgress = open ? 1.0f : 0.0f;
-            expandProgress += (targetProgress - expandProgress) * 0.15f;
-
-            if (expandProgress > 0.01f && open) {
-                int sy = y + 16;
-                for (SettingRow child : children) {
-                    child.setBounds(x, sy, width);
-                    child.render(context, mouseX, mouseY, palette);
-                    sy += child.getHeight() + 2;
-                }
-            }
-        }
-
-        @Override
-        int getHeight() {
-            if (!open || expandProgress < 0.01f) return 16;
-            int total = 16;
-            for (SettingRow child : children) {
-                total += (int)((child.getHeight() + 2) * expandProgress);
-            }
-            return total;
-        }
-
-        @Override
-        void mouseClicked(int mouseX, int mouseY, int button) {
-            if (hovering(mouseX, mouseY) && button == 1) {
-                open = !open;
-                setting.setExpanded(open);
-                playClick();
-                return;
-            }
-            if (!open || expandProgress < 0.5f) return;
-            for (SettingRow child : children) {
-                child.mouseClicked(mouseX, mouseY, button);
-            }
-        }
-
-        @Override
-        void mouseReleased(int mouseX, int mouseY, int button) {
-            if (!open) return;
-            for (SettingRow child : children) {
-                child.mouseReleased(mouseX, mouseY, button);
-            }
-        }
-
-        @Override
-        boolean hovering(int mouseX, int mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 16;
-        }
-    }
-
-    private void appendSettingRows(List<SettingRow> targetRows, List<?> settings, int indent) {
-        for (Object obj : settings) {
-            if (!(obj instanceof Setting setting)) continue;
-
-            if (setting instanceof CategorySetting categorySetting) {
-                CategorySettingRow categoryRow = new CategorySettingRow(categorySetting, indent);
-                appendSettingRows(categoryRow.children, categorySetting.getSettings(), indent + 8);
-                targetRows.add(categoryRow);
-            } else if (setting instanceof BooleanSetting boolSetting) {
-                targetRows.add(new BooleanSettingRow(boolSetting, indent));
-            } else if (setting instanceof RadioSetting radioSetting) {
-                targetRows.add(new RadioSettingRow(radioSetting, indent));
-            } else if (setting instanceof NumberSetting numberSetting) {
-                targetRows.add(new NumberSettingRow(numberSetting, indent));
-            } else if (setting instanceof StringSetting stringSetting) {
-                targetRows.add(new StringSettingRow(stringSetting, indent));
-            }
-        }
-    }
-
-    private static String format(float value) {
-        if (Math.abs(value - Math.round(value)) < 0.001f)
-            return Integer.toString(Math.round(value));
-        return String.format("%.2f", value);
-    }
-
-    private int getGuiTextWidth(String text) {
-        if (textRenderer == null) return 0;
-        if (!ClickGuiScreen.useJetBrainsMonoFont())
-            return textRenderer.getWidth(text);
-        return textRenderer.getWidth(ClickGuiScreen.styledGuiText(text));
-    }
-
-    private void drawGuiTextWithShadow(DrawContext context, String text, int x, int y, int color) {
-        if (textRenderer == null) return;
-        if (!ClickGuiScreen.useJetBrainsMonoFont()) {
-            context.drawTextWithShadow(textRenderer, text, x, y, color);
-            return;
-        }
-        context.drawTextWithShadow(textRenderer, ClickGuiScreen.styledGuiText(text), x, y, color);
-    }
-
-    private static int withAlpha(int color, int alpha) {
-        return (alpha << 24) | (color & 0x00FFFFFF);
-    }
-
-    private static int blendColors(int color1, int color2, float ratio) {
-        int r1 = (color1 >> 16) & 0xFF;
-        int g1 = (color1 >> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
-
-        int r2 = (color2 >> 16) & 0xFF;
-        int g2 = (color2 >> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
-
-        int r = (int)(r1 + (r2 - r1) * ratio);
-        int g = (int)(g1 + (g2 - g1) * ratio);
-        int b = (int)(b1 + (b2 - b1) * ratio);
-
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
-    }
-
-    private record ModernPalette(
-            int bgTop,
-            int bgBottom,
-            int glass,
-            int cardEnabled,
-            int cardDisabled,
-            int accent,
-            int borderBright,
-            int borderDim,
-            int textPrimary,
-            int textSecondary) {
-
-        static ModernPalette fromTheme(Theme theme) {
-            int baseAccent = theme.moduleEnabled & 0x00FFFFFF;
-            int baseBg = theme.panelBackground & 0x00FFFFFF;
-
-            return new ModernPalette(
-                    withAlpha(baseBg, 40),
-                    withAlpha(baseBg, 90),
-                    withAlpha(baseBg, 160),
-                    withAlpha(baseBg, 200),
-                    withAlpha(baseBg, 140),
-                    withAlpha(baseAccent, 255),
-                    withAlpha(0xFFFFFF, 25),
-                    withAlpha(0x000000, 40),
-                    0xFFFFFFFF,
-                    withAlpha(0xFFFFFF, 180)
-            );
-        }
-    }
-
-    private static void playClick() {
+    private static void click() {
         try {
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (client != null && client.getSoundManager() != null) {
-                client.getSoundManager().play(
-                        PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.2f)
-                );
-            }
+            MinecraftClient mc = MinecraftClient.getInstance();
+            if (mc != null && mc.getSoundManager() != null)
+                mc.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f));
         } catch (Exception ignored) {}
+    }
+
+    private abstract class SettingRow {
+        final int indent;
+        SettingRow(int indent) { this.indent = indent; }
+        abstract void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme);
+        void mouseClicked(int mx, int my, int btn, int x, int y, int w) {}
+        void mouseReleased(int mx, int my, int btn, int x, int y, int w) {}
+        int height() { return ROW_H; }
+        boolean over(int mx, int my, int x, int y, int w) {
+            return mx >= x && mx <= x + w && my >= y && my <= y + height();
+        }
+    }
+
+    private final class BoolRow extends SettingRow {
+        final BooleanSetting setting;
+        BoolRow(BooleanSetting s, int indent) { super(indent); setting = s; }
+
+        @Override
+        void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
+            boolean hov = over(mx, my, x, y, w);
+            boolean on  = setting.isEnabled();
+            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+
+            int tW = 20, tH = 7;
+            int tx = x + w - tW - 3, ty = y + ROW_H / 2 - tH / 2;
+            ctx.fill(tx, ty, tx + tW, ty + tH,
+                    on ? (theme.moduleEnabled & 0x00FFFFFF) | 0x55000000 : theme.sliderBackground);
+            drawOutline(ctx, tx, ty, tW, tH, on ? theme.moduleEnabled : theme.sliderBackground);
+            int knobX = on ? tx + tW - tH + 1 : tx + 1;
+            ctx.fill(knobX, ty + 1, knobX + tH - 2, ty + tH - 1,
+                    on ? theme.sliderForeground : theme.moduleDisabled);
+
+            ctx.drawTextWithShadow(textRenderer, setting.getName(), x + 3 + indent, y + 3,
+                    on ? theme.sliderForeground : theme.moduleDisabled);
+        }
+
+        @Override
+        void mouseClicked(int mx, int my, int btn, int x, int y, int w) {
+            if (btn == 0 && over(mx, my, x, y, w)) { setting.toggle(); click(); }
+        }
+    }
+
+    private final class RadioRow extends SettingRow {
+        final RadioSetting setting;
+        RadioRow(RadioSetting s, int indent) { super(indent); setting = s; }
+
+        @Override
+        void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
+            boolean hov = over(mx, my, x, y, w);
+            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+            String val = setting.getSelectedOption();
+            int valW = textRenderer.getWidth(val);
+            ctx.drawTextWithShadow(textRenderer, val, x + w - valW - 3, y + 3, theme.moduleEnabled);
+            ctx.drawTextWithShadow(textRenderer, setting.getName(), x + 3 + indent, y + 3, theme.moduleDisabled);
+        }
+
+        @Override
+        void mouseClicked(int mx, int my, int btn, int x, int y, int w) {
+            if (!over(mx, my, x, y, w)) return;
+            if (btn == 0) setting.cycleNext();
+            else if (btn == 1) {
+                List<String> opts = setting.getOptions();
+                if (!opts.isEmpty()) {
+                    int cur = opts.indexOf(setting.getSelectedOption());
+                    setting.setSelectedOption(opts.get((cur - 1 + opts.size()) % opts.size()));
+                }
+            }
+            click();
+        }
+    }
+
+    private final class NumberRow extends SettingRow {
+        final NumberSetting setting;
+        boolean dragging;
+        NumberRow(NumberSetting s, int indent) { super(indent); setting = s; }
+
+        @Override
+        int height() { return ROW_H + 6; }
+
+        @Override
+        void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
+            boolean hov = over(mx, my, x, y, w);
+            ctx.fill(x, y, x + w, y + height(), hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+
+            ctx.drawTextWithShadow(textRenderer, setting.getName(), x + 3 + indent, y + 3, theme.moduleDisabled);
+            String val = fmt(setting.getValue());
+            ctx.drawTextWithShadow(textRenderer, val, x + w - textRenderer.getWidth(val) - 3, y + 3, theme.moduleEnabled);
+
+            int trackX = x + 3 + indent, trackW = w - 6 - indent;
+            int trackY = y + ROW_H;
+            float norm  = (setting.getValue() - setting.getMin()) / (setting.getMax() - setting.getMin());
+            int fillW  = (int) (norm * trackW);
+
+            ctx.fill(trackX, trackY, trackX + trackW, trackY + 3, theme.sliderBackground);
+            ctx.fill(trackX, trackY, trackX + fillW, trackY + 3, theme.sliderForeground);
+            ctx.fill(trackX + fillW - 1, trackY - 1, trackX + fillW + 2, trackY + 4, theme.sliderForeground);
+
+            if (dragging) applyMouse(mx, x, w);
+        }
+
+        @Override
+        void mouseClicked(int mx, int my, int btn, int x, int y, int w) {
+            if (btn == 0 && over(mx, my, x, y, w)) {
+                dragging = true;
+                draggingNumber = this;
+                applyMouse(mx, x, w);
+            }
+        }
+
+        @Override
+        void mouseReleased(int mx, int my, int btn, int x, int y, int w) {
+            if (btn == 0) dragging = false;
+        }
+
+        void applyMouse(int mx, int x, int w) {
+            int trackX = x + 3 + indent, trackW = w - 6 - indent;
+            float t = Math.max(0f, Math.min(1f, (mx - trackX) / (float) trackW));
+            setting.setValue(setting.getMin() + (setting.getMax() - setting.getMin()) * t);
+        }
+    }
+
+    private final class StringRow extends SettingRow {
+        final StringSetting setting;
+        StringRow(StringSetting s, int indent) { super(indent); setting = s; }
+
+        @Override
+        void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
+            boolean hov = over(mx, my, x, y, w);
+            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+            String val = "\"" + setting.getValue() + "\"";
+            int valW = textRenderer.getWidth(val);
+            ctx.drawTextWithShadow(textRenderer, val, x + w - valW - 3, y + 3, theme.moduleEnabled);
+            ctx.drawTextWithShadow(textRenderer, setting.getName(), x + 3 + indent, y + 3, theme.moduleDisabled);
+        }
+    }
+
+    private final class CategoryRow extends SettingRow {
+        final CategorySetting setting;
+        final List<SettingRow> children = new ArrayList<>();
+        boolean open;
+
+        CategoryRow(CategorySetting s, int indent) { super(indent); setting = s; open = s.isExpanded(); }
+
+        @Override
+        int height() {
+            if (!open) return ROW_H;
+            return ROW_H + children.stream().mapToInt(SettingRow::height).sum();
+        }
+
+        @Override
+        void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
+            boolean hov = mx >= x && mx <= x + w && my >= y && my <= y + ROW_H;
+            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x77000000);
+            ctx.fill(x, y, x + 2, y + ROW_H, theme.moduleEnabled);
+            ctx.drawTextWithShadow(textRenderer, (open ? "\u2212 " : "\u002B ") + setting.getName(),
+                    x + 5 + indent, y + 3, theme.sliderForeground);
+            if (!open) return;
+            int sy = y + ROW_H;
+            for (SettingRow r : children) {
+                r.render(ctx, mx, my, x, sy, w, theme);
+                sy += r.height();
+            }
+        }
+
+        @Override
+        void mouseClicked(int mx, int my, int btn, int x, int y, int w) {
+            if (mx >= x && mx <= x + w && my >= y && my <= y + ROW_H && btn == 1) {
+                open = !open; setting.setExpanded(open); click(); return;
+            }
+            if (!open) return;
+            int sy = y + ROW_H;
+            for (SettingRow r : children) { r.mouseClicked(mx, my, btn, x, sy, w); sy += r.height(); }
+        }
+
+        @Override
+        void mouseReleased(int mx, int my, int btn, int x, int y, int w) {
+            if (!open) return;
+            int sy = y + ROW_H;
+            for (SettingRow r : children) { r.mouseReleased(mx, my, btn, x, sy, w); sy += r.height(); }
+        }
+    }
+
+    private void buildRows(List<SettingRow> target, List<?> settings, int indent) {
+        for (Object obj : settings) {
+            if (!(obj instanceof Setting s)) continue;
+            if (s instanceof CategorySetting cs) {
+                CategoryRow cr = new CategoryRow(cs, indent);
+                buildRows(cr.children, cs.getSettings(), indent + 5);
+                target.add(cr);
+            } else if (s instanceof BooleanSetting bs) target.add(new BoolRow(bs, indent));
+            else if (s instanceof RadioSetting rs)     target.add(new RadioRow(rs, indent));
+            else if (s instanceof NumberSetting ns)    target.add(new NumberRow(ns, indent));
+            else if (s instanceof StringSetting ss)    target.add(new StringRow(ss, indent));
+        }
     }
 }

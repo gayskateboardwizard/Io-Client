@@ -17,7 +17,7 @@ public class ThemeChanger extends Module {
     private String lastSelectedClickGuiMode = ClickGuiModeRegistry.getDefaultModeName();
 
     public ThemeChanger() {
-        super("Themes", "Change the UI colors", -1, Category.SETTINGS);
+        super("Themes", "Change the UI looks", -1, Category.SETTINGS);
         themeSelect.addOption("Io");
         themeSelect.addOption("Ganymede");
         themeSelect.addOption("Callisto");
@@ -27,6 +27,7 @@ public class ThemeChanger extends Module {
         themeSelect.addOption("Metis");
         themeSelect.addOption("Adrastea");
         themeSelect.addOption("Future");
+        themeSelect.addOption("RedFuture");
         themeSelect.addOption("Titan");
         themeSelect.addOption("Phobos");
         themeSelect.addOption("Deimos");
@@ -90,6 +91,7 @@ public class ThemeChanger extends Module {
             case "Metis" -> ClickGuiScreen.currentTheme = Theme.METIS;
             case "Adrastea" -> ClickGuiScreen.currentTheme = Theme.ADRASTEA;
             case "Future" -> ClickGuiScreen.currentTheme = Theme.FUTURE;
+            case "RedFuture" -> ClickGuiScreen.currentTheme = Theme.FUTURE_RED;
             case "Titan" -> ClickGuiScreen.currentTheme = Theme.TITAN;
             case "Phobos" -> ClickGuiScreen.currentTheme = Theme.PHOBOS;
             case "Deimos" -> ClickGuiScreen.currentTheme = Theme.DEIMOS;

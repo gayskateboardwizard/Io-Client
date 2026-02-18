@@ -13,7 +13,7 @@
     "PlayerMixin",
     "PanoramaRendererMixin",
     "ForceSplashMixin",
-    "EntityRenderMixin",
+    "EntityRendererMixin",
     "WorldRendererMixin"
   ],
   "injectors": {

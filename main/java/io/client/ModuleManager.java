@@ -93,8 +93,7 @@ public class ModuleManager {
         modules.add(new ModuleHUD());
         modules.add(new GUIScale());
         modules.add(new Targets());
-        // modules.add(new );
-        // modules.add(new );
+        modules.add(new IronDome());
         // modules.add(new );
         // modules.add(new );
 
