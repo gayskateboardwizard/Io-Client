@@ -1,10 +1,10 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import io.client.mixin.IMinecraftAccessor;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.CrossbowItem;
@@ -116,4 +116,6 @@ public class FastUse extends Module {
         ((IMinecraftAccessor) mc).setItemUseCooldown(value);
     }
 }
+
+
 

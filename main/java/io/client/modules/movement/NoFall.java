@@ -1,7 +1,7 @@
 package io.client.modules.movement;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.RadioSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.Fluids;
@@ -117,3 +117,5 @@ public class NoFall extends Module {
         return -64;
     }
 }
+
+

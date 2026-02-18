@@ -46,3 +46,4 @@ public class CategorySetting extends Setting {
         settings.clear();
     }
 }
+

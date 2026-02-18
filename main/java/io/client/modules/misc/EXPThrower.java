@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
@@ -36,4 +36,6 @@ public class EXPThrower extends Module {
         return -1;
     }
 }
+
+
 

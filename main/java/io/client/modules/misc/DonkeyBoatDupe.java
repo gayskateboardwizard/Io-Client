@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.*;
 import java.util.Comparator;
 import java.util.List;
@@ -924,3 +924,5 @@ public class DonkeyBoatDupe extends Module {
         this.markedChest = pos;
     }
 }
+
+

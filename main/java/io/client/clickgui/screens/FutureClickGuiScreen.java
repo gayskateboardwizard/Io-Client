@@ -1,8 +1,11 @@
-package io.client;
+package io.client.clickgui.screens;
 
+import io.client.modules.templates.Module;
 import io.client.clickgui.SavedPanelConfig;
 import io.client.clickgui.Theme;
+import io.client.managers.ModuleManager;
 import io.client.modules.settings.GUIScale;
+import io.client.modules.templates.Category;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
@@ -55,7 +58,7 @@ public class FutureClickGuiScreen extends Screen {
                 panel.open = !config.collapsed;
             } else {
                 panel = new Panel(category.name(), category, defaultX, 8);
-                defaultX += (int)(96 * guiScale);
+                defaultX += (int) (96 * guiScale);
             }
 
             panels.add(panel);
@@ -80,10 +83,10 @@ public class FutureClickGuiScreen extends Screen {
         context.getMatrices().scale(guiScale, guiScale);
 
         float invScale = 1.0f / guiScale;
-        int scaledMouseX = (int)(mouseX * invScale);
-        int scaledMouseY = (int)(mouseY * invScale);
-        int scaledScreenW = (int)(width * invScale);
-        int scaledScreenH = (int)(height * invScale);
+        int scaledMouseX = (int) (mouseX * invScale);
+        int scaledMouseY = (int) (mouseY * invScale);
+        int scaledScreenW = (int) (width * invScale);
+        int scaledScreenH = (int) (height * invScale);
 
         for (Panel panel : panels) {
             panel.clamp(scaledScreenW, scaledScreenH);
@@ -98,8 +101,8 @@ public class FutureClickGuiScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         float invScale = 1.0f / guiScale;
-        int scaledMouseX = (int)(mouseX * invScale);
-        int scaledMouseY = (int)(mouseY * invScale);
+        int scaledMouseX = (int) (mouseX * invScale);
+        int scaledMouseY = (int) (mouseY * invScale);
 
         for (Panel panel : panels) {
             panel.mouseClicked(scaledMouseX, scaledMouseY, button);
@@ -110,8 +113,8 @@ public class FutureClickGuiScreen extends Screen {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         float invScale = 1.0f / guiScale;
-        int scaledMouseX = (int)(mouseX * invScale);
-        int scaledMouseY = (int)(mouseY * invScale);
+        int scaledMouseX = (int) (mouseX * invScale);
+        int scaledMouseY = (int) (mouseY * invScale);
 
         for (Panel panel : panels) {
             panel.mouseReleased(scaledMouseX, scaledMouseY, button);
@@ -123,8 +126,8 @@ public class FutureClickGuiScreen extends Screen {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (button == 0) {
             float invScale = 1.0f / guiScale;
-            int scaledMouseX = (int)(mouseX * invScale);
-            int scaledMouseY = (int)(mouseY * invScale);
+            int scaledMouseX = (int) (mouseX * invScale);
+            int scaledMouseY = (int) (mouseY * invScale);
 
             for (Panel panel : panels) {
                 panel.drag(scaledMouseX, scaledMouseY);
@@ -143,8 +146,7 @@ public class FutureClickGuiScreen extends Screen {
         Map<Category, io.client.clickgui.CategoryPanel> configMap = new HashMap<>();
         for (Panel panel : panels) {
             io.client.clickgui.CategoryPanel categoryPanel = new io.client.clickgui.CategoryPanel(
-                    panel.category, panel.x, panel.y, !panel.open
-            );
+                    panel.category, panel.x, panel.y, !panel.open);
             configMap.put(panel.category, categoryPanel);
         }
         ModuleManager.INSTANCE.saveUiConfig(configMap);
@@ -187,7 +189,8 @@ public class FutureClickGuiScreen extends Screen {
         private void render(DrawContext context, int mouseX, int mouseY, float delta, FuturePalette palette) {
             context.fill(x, y, x + width, y + HEADER_HEIGHT, palette.panelHeader);
             int separatorAlpha = (palette.moduleDisabled >>> 24) & 0xFF;
-            context.fill(x, y + HEADER_HEIGHT - 1, x + width, y + HEADER_HEIGHT, withAlpha(palette.accentSoft & 0x00FFFFFF, separatorAlpha));
+            context.fill(x, y + HEADER_HEIGHT - 1, x + width, y + HEADER_HEIGHT,
+                    withAlpha(palette.accentSoft & 0x00FFFFFF, separatorAlpha));
             drawGuiTextWithShadow(context, name, x + 4, y + 4, palette.textMain);
             if (!open) {
                 if (angle > 0)
@@ -259,8 +262,8 @@ public class FutureClickGuiScreen extends Screen {
                 return;
 
             MinecraftClient mc = MinecraftClient.getInstance();
-            int screenWidth = (int)(mc.getWindow().getScaledWidth() / guiScale);
-            int screenHeight = (int)(mc.getWindow().getScaledHeight() / guiScale);
+            int screenWidth = (int) (mc.getWindow().getScaledWidth() / guiScale);
+            int screenHeight = (int) (mc.getWindow().getScaledHeight() / guiScale);
 
             int newX = dragOffsetX + mouseX;
             int newY = dragOffsetY + mouseY;
@@ -876,9 +879,9 @@ public class FutureClickGuiScreen extends Screen {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client != null && client.getSoundManager() != null) {
                 client.getSoundManager().play(
-                        PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f)
-                );
+                        PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK.value(), 1.0f));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 }

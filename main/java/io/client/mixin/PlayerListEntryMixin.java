@@ -26,3 +26,5 @@ public abstract class PlayerListEntryMixin {
         cir.setReturnValue(IoUserCapeService.withIoCapeIfEligible(profile.getName(), original));
     }
 }
+
+

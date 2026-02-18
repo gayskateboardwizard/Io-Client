@@ -18,3 +18,5 @@ public class HelpCommand implements Command {
         CommandManager.INSTANCE.sendMessage("§d|help §7- Shows this message");
     }
 }
+
+

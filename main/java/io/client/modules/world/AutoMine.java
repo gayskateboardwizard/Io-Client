@@ -1,7 +1,7 @@
 package io.client.modules.world;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -38,3 +38,5 @@ public class AutoMine extends Module {
         }
     }
 }
+
+

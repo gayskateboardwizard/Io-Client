@@ -1,9 +1,9 @@
 package io.client.clickgui;
 
-import io.client.BasicClickGuiScreen;
-import io.client.ClickGuiScreen;
-import io.client.FutureClickGuiScreen;
-import io.client.ModernClickGuiScreen;
+import io.client.clickgui.screens.BasicClickGuiScreen;
+import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.clickgui.screens.FutureClickGuiScreen;
+import io.client.clickgui.screens.ModernClickGuiScreen;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,3 +79,5 @@ public final class ClickGuiModeRegistry {
         }
     }
 }
+
+

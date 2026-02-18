@@ -1,4 +1,4 @@
-package io.client;
+package io.client.modules.templates;
 
 public enum Category {
     COMBAT,
@@ -9,3 +9,4 @@ public enum Category {
     MISC,
     MACROS;
 }
+

@@ -1,7 +1,7 @@
 package io.client.modules.settings;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 
@@ -26,5 +26,7 @@ public class CapeSettings extends Module {
     public void toggle() {
     }
 }
+
+
 
 

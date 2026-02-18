@@ -1,7 +1,7 @@
 package io.client.modules.movement;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.NumberSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -49,3 +49,5 @@ public class GuiMove extends Module {
         return new Vec3d(-Math.sin(rad), 0, Math.cos(rad));
     }
 }
+
+

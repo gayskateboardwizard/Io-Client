@@ -1,8 +1,8 @@
 package io.client.clickgui;
 
-import io.client.Category;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.*;
 import java.util.List;
 import java.util.Map;
@@ -239,3 +239,4 @@ public class InputHandler {
         return null;
     }
 }
+

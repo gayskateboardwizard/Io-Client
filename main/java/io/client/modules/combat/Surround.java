@@ -1,7 +1,7 @@
 package io.client.modules.combat;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.RadioSetting;
@@ -339,3 +339,5 @@ public class Surround extends Module {
         return new float[]{yaw, pitch};
     }
 }
+
+

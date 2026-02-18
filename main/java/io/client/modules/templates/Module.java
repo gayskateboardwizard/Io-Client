@@ -1,4 +1,4 @@
-package io.client;
+package io.client.modules.templates;
 
 import io.client.settings.Setting;
 
@@ -86,3 +86,4 @@ public abstract class Module {
         this.enabled = enabled;
     }
 }
+

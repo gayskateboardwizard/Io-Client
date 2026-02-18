@@ -2,6 +2,9 @@ package io.client;
 
 import io.client.commands.CommandManager;
 import io.client.modules.combat.OffHand;
+import io.client.managers.KeyManager;
+import io.client.managers.ModuleManager;
+import io.client.clickgui.screens.ClickGuiScreen;
 import io.client.modules.render.ModuleHUD;
 import io.client.modules.render.ArmorHud;
 import io.client.modules.render.ESP;
@@ -15,7 +18,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;

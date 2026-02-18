@@ -2,7 +2,7 @@ package io.client.utils.render.postprocess;
 
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
 import io.client.modules.render.Chams;
 import io.client.renderer.MeshRenderer;
 import net.minecraft.client.gl.DynamicUniformStorage;
@@ -72,6 +72,8 @@ public class ChamsShader extends EntityShader {
         }
     }
 }
+
+
 
 
 

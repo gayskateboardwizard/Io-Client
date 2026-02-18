@@ -28,3 +28,5 @@ public class SplashTexts {
         return SELECTED_SPLASH;
     }
 }
+
+

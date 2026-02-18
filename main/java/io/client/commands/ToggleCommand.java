@@ -1,9 +1,9 @@
 package io.client.commands;
 
-import io.client.MacroManager;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.managers.MacroManager;
+import io.client.managers.ModuleManager;
 import io.client.modules.macros.Macro;
+import io.client.modules.templates.Module;
 
 public class ToggleCommand implements Command {
     @Override
@@ -44,3 +44,5 @@ public class ToggleCommand implements Command {
         ModuleManager.INSTANCE.saveModules();
     }
 }
+
+

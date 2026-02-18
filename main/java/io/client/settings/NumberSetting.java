@@ -28,3 +28,4 @@ public class NumberSetting extends Setting {
         return max;
     }
 }
+

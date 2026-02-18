@@ -24,3 +24,4 @@ public abstract class PlayerMixin {
         PlayerEvents.LEVEL_CHANGE.invoker().onLevelChange((PlayerEntity) (Object) this, amount);
     }
 }
+

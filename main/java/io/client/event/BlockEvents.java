@@ -36,3 +36,4 @@ public class BlockEvents {
         boolean onBlockPlaced(BlockPos position, Entity entity, BlockState placed, BlockState placedAgainst);
     }
 }
+

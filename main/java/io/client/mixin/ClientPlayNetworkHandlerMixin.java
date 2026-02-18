@@ -1,6 +1,6 @@
 package io.client.mixin;
 
-import io.client.event.PacketEvents;
+import io.client.managers.PacketManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
@@ -14,17 +14,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onChunkData", at = @At("TAIL"))
     private void io_client$onChunkData(ChunkDataS2CPacket packet, CallbackInfo ci) {
-        PacketEvents.fireReceive(packet);
+        PacketManager.INSTANCE.fireReceive(packet);
     }
 
     @Inject(method = "onChunkDeltaUpdate", at = @At("TAIL"))
     private void io_client$onChunkDeltaUpdate(ChunkDeltaUpdateS2CPacket packet, CallbackInfo ci) {
-        PacketEvents.fireReceive(packet);
+        PacketManager.INSTANCE.fireReceive(packet);
     }
 
     @Inject(method = "onBlockUpdate", at = @At("TAIL"))
     private void io_client$onBlockUpdate(BlockUpdateS2CPacket packet, CallbackInfo ci) {
-        PacketEvents.fireReceive(packet);
+        PacketManager.INSTANCE.fireReceive(packet);
     }
 }
+
+
 

@@ -1,6 +1,6 @@
 package io.client.commands;
 
-import io.client.TargetManager;
+import io.client.managers.TargetManager;
 
 import java.util.Set;
 
@@ -20,3 +20,4 @@ public class FriendListCommand implements Command {
         }
     }
 }
+

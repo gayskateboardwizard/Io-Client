@@ -1,8 +1,8 @@
 package io.client.modules.render;
 
-import io.client.Category;
-import io.client.Module;
-import io.client.TargetManager;
+import io.client.managers.TargetManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
@@ -140,3 +140,4 @@ public class Chams extends Module {
         return new int[]{r, g, b, a};
     }
 }
+

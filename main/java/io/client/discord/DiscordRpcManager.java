@@ -67,3 +67,5 @@ public final class DiscordRpcManager {
         }
     }
 }
+
+

@@ -1,9 +1,9 @@
 package io.client.modules.render;
 
-import io.client.Category;
-import io.client.ClickGuiScreen;
-import io.client.Module;
-import io.client.TargetManager;
+import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.managers.TargetManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -127,4 +127,6 @@ public class Tracers extends Module {
         }
     }
 }
+
+
 

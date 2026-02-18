@@ -16,3 +16,4 @@ public class StringSetting extends Setting {
         this.value = value;
     }
 }
+

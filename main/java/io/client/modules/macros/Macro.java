@@ -1,8 +1,8 @@
 package io.client.modules.macros;
 
-import io.client.Category;
-import io.client.Module;
 import io.client.commands.CommandManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
@@ -76,3 +76,5 @@ public class Macro extends Module {
         return true;
     }
 }
+
+

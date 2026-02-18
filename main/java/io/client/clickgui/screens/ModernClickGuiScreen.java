@@ -1,8 +1,11 @@
-package io.client;
+package io.client.clickgui.screens;
 
+import io.client.modules.templates.Module;
 import io.client.clickgui.SavedPanelConfig;
 import io.client.clickgui.Theme;
+import io.client.managers.ModuleManager;
 import io.client.modules.settings.GUIScale;
+import io.client.modules.templates.Category;
 import io.client.settings.BooleanSetting;
 import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
@@ -672,3 +675,5 @@ public class ModernClickGuiScreen extends Screen {
         }
     }
 }
+
+

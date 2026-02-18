@@ -1,8 +1,8 @@
 package io.client.modules.movement;
 
-import io.client.Category;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.NumberSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -81,4 +81,6 @@ public class BoatFlight extends Module {
         return GLFW.glfwGetKey(MinecraftClient.getInstance().getWindow().getHandle(), key) == GLFW.GLFW_PRESS;
     }
 }
+
+
 

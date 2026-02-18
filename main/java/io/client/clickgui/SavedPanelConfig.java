@@ -10,3 +10,4 @@ public class SavedPanelConfig {
         this.collapsed = collapsed;
     }
 }
+

@@ -21,3 +21,4 @@ public class MiscEvents {
         boolean onCommandExecuted(ParseResults<ServerCommandSource> results);
     }
 }
+

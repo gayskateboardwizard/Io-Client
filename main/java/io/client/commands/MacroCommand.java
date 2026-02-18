@@ -1,6 +1,6 @@
 package io.client.commands;
 
-import io.client.MacroManager;
+import io.client.managers.MacroManager;
 import io.client.modules.macros.Macro;
 import org.lwjgl.glfw.GLFW;
 
@@ -218,4 +218,6 @@ public class MacroCommand implements Command {
         };
     }
 }
+
+
 

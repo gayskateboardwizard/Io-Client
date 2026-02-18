@@ -47,3 +47,4 @@ public class RadioSetting extends Setting {
         selectedOption = options.get(nextIndex);
     }
 }
+

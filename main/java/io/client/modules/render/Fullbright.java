@@ -1,5 +1,7 @@
-package io.client;
+package io.client.modules.render;
 
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.RadioSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -15,7 +17,6 @@ public class Fullbright extends Module {
     public Fullbright() {
         super("FullBright", "Brights up the entire world", -1, Category.RENDER);
 
-
         modeSetting = new RadioSetting("Mode", "Gamma");
         modeSetting.addOption("Gamma");
         modeSetting.addOption("Potion");
@@ -24,7 +25,8 @@ public class Fullbright extends Module {
 
     @Override
     public void onEnable() {
-        if (mc.player == null || mc.options == null) return;
+        if (mc.player == null || mc.options == null)
+            return;
 
         if (modeSetting.isSelected("Gamma")) {
             this.originalGamma = mc.options.getGamma().getValue();
@@ -35,7 +37,8 @@ public class Fullbright extends Module {
 
     @Override
     public void onDisable() {
-        if (mc.player == null || mc.options == null) return;
+        if (mc.player == null || mc.options == null)
+            return;
 
         if (modeSetting.isSelected("Gamma")) {
             mc.options.getGamma().setValue(this.originalGamma);
@@ -49,7 +52,8 @@ public class Fullbright extends Module {
 
     @Override
     public void onUpdate() {
-        if (mc.player == null) return;
+        if (mc.player == null)
+            return;
 
         if (modeSetting.isSelected("Potion")) {
             if (!mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) {

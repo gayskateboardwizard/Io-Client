@@ -1,6 +1,6 @@
 package io.client.commands;
 
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
 import io.client.modules.misc.DonkeyBoatDupe;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -47,3 +47,5 @@ public class MarkChestCommand implements Command {
         CommandManager.INSTANCE.sendMessage("§aMarked chest at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
     }
 }
+
+

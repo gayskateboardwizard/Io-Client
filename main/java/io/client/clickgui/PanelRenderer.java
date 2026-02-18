@@ -1,9 +1,9 @@
 package io.client.clickgui;
 
-import io.client.Category;
-import io.client.ClickGuiScreen;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.managers.ModuleManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.*;
 import java.util.HashMap;
 import java.util.List;
@@ -466,3 +466,5 @@ public class PanelRenderer {
         graphics.drawText(font, ClickGuiScreen.styledGuiText(text), x, y, color, shadow);
     }
 }
+
+

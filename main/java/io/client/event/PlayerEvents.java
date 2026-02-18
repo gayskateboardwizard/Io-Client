@@ -40,3 +40,4 @@ public class PlayerEvents {
         boolean onPickupXp(Entity entity);
     }
 }
+

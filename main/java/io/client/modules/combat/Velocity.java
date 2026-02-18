@@ -1,7 +1,7 @@
 package io.client.modules.combat;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3d;
 
@@ -25,3 +25,5 @@ public class Velocity extends Module {
         }
     }
 }
+
+

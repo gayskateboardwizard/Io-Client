@@ -1,7 +1,7 @@
 package io.client.modules.movement;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.NumberSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,4 +40,6 @@ public class Speed extends Module {
         player.setVelocity(motionX, player.getVelocity().y, motionZ);
     }
 }
+
+
 

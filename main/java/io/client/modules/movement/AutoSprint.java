@@ -1,7 +1,7 @@
 package io.client.modules.movement;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 
@@ -43,3 +43,5 @@ public class AutoSprint extends Module {
         }
     }
 }
+
+

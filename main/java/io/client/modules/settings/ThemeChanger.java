@@ -1,9 +1,9 @@
 package io.client.modules.settings;
 
-import io.client.Category;
-import io.client.ClickGuiScreen;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.managers.ModuleManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.clickgui.ClickGuiModeRegistry;
 import io.client.clickgui.Theme;
 import io.client.settings.RadioSetting;
@@ -120,3 +120,4 @@ public class ThemeChanger extends Module {
         ModuleManager.INSTANCE.saveModules();
     }
 }
+

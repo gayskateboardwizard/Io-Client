@@ -1,4 +1,4 @@
-package io.client;
+package io.client.managers;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,3 +27,5 @@ public class KeyManager {
         pressedKeys.clear();
     }
 }
+
+

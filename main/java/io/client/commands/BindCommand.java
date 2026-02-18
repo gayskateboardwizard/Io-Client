@@ -1,7 +1,8 @@
 package io.client.commands;
 
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
+import io.client.modules.templates.Module;
+
 import org.lwjgl.glfw.GLFW;
 
 public class BindCommand implements Command {
@@ -61,3 +62,4 @@ public class BindCommand implements Command {
         };
     }
 }
+

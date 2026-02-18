@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.RadioSetting;
 import io.client.settings.StringSetting;
@@ -76,4 +76,6 @@ public class IoSwag extends Module {
     }
 
 }
+
+
 

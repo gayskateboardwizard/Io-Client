@@ -1,4 +1,4 @@
-package io.client;
+package io.client.managers;
 
 import java.io.*;
 import java.util.EnumMap;
@@ -214,3 +214,5 @@ public class TargetManager {
         }
     }
 }
+
+

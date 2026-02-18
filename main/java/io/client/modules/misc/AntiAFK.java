@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.client.MinecraftClient;
 
 public class AntiAFK extends Module {
@@ -33,4 +33,6 @@ public class AntiAFK extends Module {
         mc.options.forwardKey.setPressed(false);
     }
 }
+
+
 

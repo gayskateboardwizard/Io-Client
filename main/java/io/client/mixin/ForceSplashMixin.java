@@ -20,3 +20,4 @@ public class ForceSplashMixin {
         this.splashText = new SplashTextRenderer(SplashTexts.getRandomSplash());
     }
 }
+

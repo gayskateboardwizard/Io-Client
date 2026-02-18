@@ -20,3 +20,5 @@ public abstract class AbstractClientPlayerEntityMixin {
         cir.setReturnValue(IoUserCapeService.withIoCapeIfEligible(profile.getName(), cir.getReturnValue()));
     }
 }
+
+

@@ -1,8 +1,8 @@
 package io.client.modules.settings;
 
-import io.client.Category;
-import io.client.Module;
 import io.client.clickgui.PanelRenderer;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.NumberSetting;
 
 public class GUIScale extends Module {
@@ -36,3 +36,5 @@ public class GUIScale extends Module {
     public void toggle() {
     }
 }
+
+

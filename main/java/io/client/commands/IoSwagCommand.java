@@ -1,6 +1,6 @@
 package io.client.commands;
 
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
 import io.client.modules.misc.IoSwag;
 import java.util.Locale;
 
@@ -74,4 +74,6 @@ public class IoSwagCommand implements Command {
         CommandManager.INSTANCE.sendMessage("§d|ioswag clear §7- Remove custom suffix and use preset");
     }
 }
+
+
 

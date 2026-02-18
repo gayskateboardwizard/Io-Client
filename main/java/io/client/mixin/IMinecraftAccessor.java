@@ -12,3 +12,4 @@ public interface IMinecraftAccessor {
     @Accessor("itemUseCooldown")
     void setItemUseCooldown(int value);
 }
+

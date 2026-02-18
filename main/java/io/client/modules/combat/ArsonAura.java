@@ -1,8 +1,8 @@
 package io.client.modules.combat;
 
-import io.client.Category;
-import io.client.Module;
-import io.client.TargetManager;
+import io.client.managers.TargetManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import java.util.List;
@@ -154,4 +154,6 @@ public class ArsonAura extends Module {
         }
     }
 }
+
+
 

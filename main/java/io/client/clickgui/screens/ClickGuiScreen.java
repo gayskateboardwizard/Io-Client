@@ -1,7 +1,11 @@
-package io.client;
+package io.client.clickgui.screens;
 
+import io.client.modules.templates.Module;
 import io.client.clickgui.*;
+import io.client.managers.ModuleManager;
 import io.client.modules.settings.ThemeChanger;
+import io.client.modules.templates.Category;
+
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -176,3 +180,6 @@ public class ClickGuiScreen extends Screen {
         }
     }
 }
+
+
+

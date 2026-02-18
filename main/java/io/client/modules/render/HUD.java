@@ -1,10 +1,10 @@
 package io.client.modules.render;
 
-import io.client.Category;
-import io.client.ClickGuiScreen;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.managers.ModuleManager;
 import io.client.modules.settings.GUIScale;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.RadioSetting;
 import java.util.ArrayList;
@@ -223,3 +223,5 @@ public class HUD extends Module {
         graphics.getMatrices().popMatrix();
     }
 }
+
+

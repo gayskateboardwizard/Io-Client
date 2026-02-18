@@ -11,3 +11,4 @@ public abstract class Setting {
         return name;
     }
 }
+

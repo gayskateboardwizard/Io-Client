@@ -1,6 +1,6 @@
 package io.client.clickgui;
 
-import io.client.Category;
+import io.client.modules.templates.Category;
 
 public class CategoryPanel {
     public final Category category;
@@ -15,3 +15,4 @@ public class CategoryPanel {
         this.collapsed = collapsed;
     }
 }
+

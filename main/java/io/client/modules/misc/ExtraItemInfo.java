@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.NumberSetting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -49,3 +49,5 @@ public class ExtraItemInfo extends Module {
         return 0;
     }
 }
+
+

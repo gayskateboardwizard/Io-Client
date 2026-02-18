@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import net.minecraft.client.MinecraftClient;
@@ -169,4 +169,6 @@ public class Restock extends Module {
         }
     }
 }
+
+
 

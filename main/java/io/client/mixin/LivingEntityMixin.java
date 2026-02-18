@@ -79,3 +79,4 @@ public abstract class LivingEntityMixin {
         LivingEntityEvents.ENTITY_JUMP.invoker().onEntityJump((LivingEntity) (Object) this);
     }
 }
+

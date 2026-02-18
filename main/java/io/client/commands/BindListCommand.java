@@ -1,9 +1,10 @@
 package io.client.commands;
 
-import io.client.ClickGuiScreen;
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.managers.ModuleManager;
 import io.client.modules.macros.Macro;
+import io.client.modules.templates.Module;
+
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -76,3 +77,5 @@ public class BindListCommand implements Command {
         };
     }
 }
+
+

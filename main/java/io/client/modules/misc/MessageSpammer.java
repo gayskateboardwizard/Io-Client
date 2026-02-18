@@ -1,7 +1,7 @@
 package io.client.modules.misc;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.NumberSetting;
 import io.client.settings.StringSetting;
 import net.minecraft.client.MinecraftClient;
@@ -35,3 +35,5 @@ public class MessageSpammer extends Module {
         message.setValue(msg);
     }
 }
+
+

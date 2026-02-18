@@ -1,4 +1,4 @@
-package io.client;
+package io.client.managers;
 
 import io.client.modules.macros.Macro;
 
@@ -90,4 +90,7 @@ public class MacroManager {
         }
     }
 }
+
+
+
 

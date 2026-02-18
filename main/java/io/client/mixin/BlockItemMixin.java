@@ -22,3 +22,4 @@ public abstract class BlockItemMixin {
             cir.setReturnValue(ActionResult.FAIL);
     }
 }
+

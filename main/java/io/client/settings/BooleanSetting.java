@@ -28,3 +28,4 @@ public class BooleanSetting extends Setting {
         this.OnChange = OnChange;
     }
 }
+

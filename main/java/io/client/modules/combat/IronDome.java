@@ -1,24 +1,22 @@
 package io.client.modules.combat;
 
-import io.client.Category;
-import io.client.Module;
-import io.client.TargetManager;
+import io.client.managers.TargetManager;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
+import io.client.managers.PacketManager;
 import io.client.settings.BooleanSetting;
-import io.client.settings.CategorySetting;
 import io.client.settings.NumberSetting;
+import io.client.settings.RadioSetting;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.util.Hand;
@@ -38,6 +36,7 @@ public class IronDome extends Module {
     private final BooleanSetting slowFallingArrows;
     private final BooleanSetting autoSwitch;
     private final NumberSetting arrowDelay;
+    private final RadioSetting placeBlock;
 
     private int tickCounter;
     private int arrowTickCounter;
@@ -56,6 +55,9 @@ public class IronDome extends Module {
         slowFallingArrows = new BooleanSetting("SlowFalling", false);
         autoSwitch = new BooleanSetting("AutoSwitch", true);
         arrowDelay = new NumberSetting("ArrowDelay", 10f, 0f, 40f);
+        placeBlock = new RadioSetting("PlaceBlock", "Webs");
+        placeBlock.addOption("Webs");
+        placeBlock.addOption("Obsidian");
 
         addSetting(range);
         addSetting(heightCheck);
@@ -66,6 +68,7 @@ public class IronDome extends Module {
         addSetting(slowFallingArrows);
         addSetting(autoSwitch);
         addSetting(arrowDelay);
+        addSetting(placeBlock);
 
         tickCounter = 0;
         arrowTickCounter = 0;
@@ -92,7 +95,8 @@ public class IronDome extends Module {
     @Override
     public void onUpdate() {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.world == null)
+            return;
 
         Entity target = findTargetAbove();
         if (target == null) {
@@ -109,7 +113,7 @@ public class IronDome extends Module {
                 arrowTickCounter = 0;
             }
 
-            placeWebs(target);
+            placeBlocks(target);
             tickCounter = 0;
         }
     }
@@ -124,20 +128,24 @@ public class IronDome extends Module {
                 playerPos.z - range.getValue(),
                 playerPos.x + range.getValue(),
                 playerPos.y + heightCheck.getValue(),
-                playerPos.z + range.getValue()
-        );
+                playerPos.z + range.getValue());
 
         for (Entity e : mc.world.getOtherEntities(mc.player, searchBox)) {
-            if (!(e instanceof LivingEntity living)) continue;
-            if (!living.isAlive() || living.isDead()) continue;
+            if (!(e instanceof LivingEntity living))
+                continue;
+            if (!living.isAlive() || living.isDead())
+                continue;
 
-            if (onlyPlayers.isEnabled() && !(e instanceof PlayerEntity)) continue;
+            if (onlyPlayers.isEnabled() && !(e instanceof PlayerEntity))
+                continue;
 
             if (e instanceof PlayerEntity player) {
-                if (TargetManager.INSTANCE.isFriend(player.getName().getString())) continue;
+                if (TargetManager.INSTANCE.isFriend(player.getName().getString()))
+                    continue;
             }
 
-            if (!TargetManager.INSTANCE.isValidTarget(e)) continue;
+            if (!TargetManager.INSTANCE.isValidTarget(e))
+                continue;
 
             if (e.getY() > mc.player.getY() + 2) {
                 return e;
@@ -147,21 +155,24 @@ public class IronDome extends Module {
         return null;
     }
 
-    private void placeWebs(Entity target) {
+    private void placeBlocks(Entity target) {
         MinecraftClient mc = MinecraftClient.getInstance();
 
-        int webSlot = findItemSlot(Items.COBWEB);
-        if (webSlot == -1) return;
+        net.minecraft.item.Item placeItem = placeBlock.isSelected("Obsidian") ? Items.OBSIDIAN : Items.COBWEB;
+        int placeSlot = findItemSlot(placeItem);
+        if (placeSlot == -1)
+            return;
 
         Vec3d predictedPos = predictPosition(target);
         BlockPos targetPos = BlockPos.ofFloored(predictedPos).up(3);
 
-        if (!switchToSlot(webSlot)) return;
+        if (!switchToSlot(placeSlot))
+            return;
 
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
                 BlockPos pos = targetPos.add(x, 0, z);
-                placeWeb(pos);
+                placeBlockAt(pos, placeItem);
             }
         }
 
@@ -172,12 +183,15 @@ public class IronDome extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         int bowSlot = findBowSlot();
-        if (bowSlot == -1) return;
+        if (bowSlot == -1)
+            return;
 
         int arrowSlot = findSlowFallingArrowSlot();
-        if (arrowSlot == -1) return;
+        if (arrowSlot == -1)
+            return;
 
-        if (!switchToSlot(bowSlot)) return;
+        if (!switchToSlot(bowSlot))
+            return;
 
         Vec3d predictedPos = predictPosition(target);
         float[] angles = calculateAngles(mc.player.getEyePos(), predictedPos);
@@ -185,7 +199,7 @@ public class IronDome extends Module {
         mc.player.setPitch(angles[1]);
         mc.player.setYaw(angles[0]);
 
-        mc.getNetworkHandler().sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, 0, angles[0], angles[1]));
+        PacketManager.INSTANCE.send(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, 0, angles[0], angles[1]));
 
         for (int i = 0; i < 3; i++) {
             mc.player.getInventory().setSelectedSlot(bowSlot);
@@ -195,7 +209,8 @@ public class IronDome extends Module {
     }
 
     private Vec3d predictPosition(Entity target) {
-        if (prediction.getValue() == 0) return target.getPos();
+        if (prediction.getValue() == 0)
+            return target.getPos();
 
         Vec3d velocity = target.getVelocity();
         Vec3d pos = target.getPos();
@@ -210,39 +225,46 @@ public class IronDome extends Module {
         float yaw = (float) Math.toDegrees(Math.atan2(diff.z, diff.x)) - 90f;
         float pitch = (float) -Math.toDegrees(Math.atan2(diff.y, dist));
 
-        return new float[]{yaw, pitch};
+        return new float[] { yaw, pitch };
     }
 
-    private void placeWeb(BlockPos pos) {
+    private void placeBlockAt(BlockPos pos, net.minecraft.item.Item placeItem) {
         MinecraftClient mc = MinecraftClient.getInstance();
         BlockState state = mc.world.getBlockState(pos);
 
-        if (state.getBlock() == Blocks.COBWEB) return;
-        if (!state.isReplaceable()) return;
+        if ((placeItem == Items.COBWEB && state.getBlock() == Blocks.COBWEB)
+                || (placeItem == Items.OBSIDIAN && state.getBlock() == Blocks.OBSIDIAN))
+            return;
+        if (!state.isReplaceable())
+            return;
 
         double dist = mc.player.squaredDistanceTo(Vec3d.ofCenter(pos));
-        if (dist > range.getValue() * range.getValue()) return;
+        if (dist > range.getValue() * range.getValue())
+            return;
 
         BlockPos belowPos = pos.down();
         Vec3d hitVec = new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, belowPos, false);
 
-        mc.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, 0));
+        PacketManager.INSTANCE.send(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, 0));
 
         if (renderSwing.isEnabled()) {
             mc.player.swingHand(Hand.MAIN_HAND);
         } else {
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            PacketManager.INSTANCE.send(new HandSwingC2SPacket(Hand.MAIN_HAND));
         }
     }
 
     private boolean switchToSlot(int slot) {
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (!autoSwitch.isEnabled()) return false;
-        if (slot == -1) return false;
+        if (!autoSwitch.isEnabled())
+            return false;
+        if (slot == -1)
+            return false;
 
         int current = mc.player.getInventory().getSelectedSlot();
-        if (slot == current) return true;
+        if (slot == current)
+            return true;
 
         if (!hasSwitched) {
             previousSlot = current;
@@ -254,8 +276,10 @@ public class IronDome extends Module {
     }
 
     private void revertSlot(MinecraftClient mc) {
-        if (!autoSwitch.isEnabled()) return;
-        if (!hasSwitched || previousSlot == -1) return;
+        if (!autoSwitch.isEnabled())
+            return;
+        if (!hasSwitched || previousSlot == -1)
+            return;
 
         mc.player.getInventory().setSelectedSlot(previousSlot);
         previousSlot = -1;

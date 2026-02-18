@@ -1,6 +1,6 @@
 package io.client.commands;
 
-import io.client.TargetManager;
+import io.client.managers.TargetManager;
 
 public class FriendCommand implements Command {
     @Override
@@ -20,3 +20,4 @@ public class FriendCommand implements Command {
         }
     }
 }
+

@@ -1,7 +1,7 @@
 package io.client.modules.world;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -73,3 +73,5 @@ public class Nuker extends Module {
         currentTarget = null;
     }
 }   
+
+

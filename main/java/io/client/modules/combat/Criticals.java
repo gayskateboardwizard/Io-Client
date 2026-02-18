@@ -1,7 +1,7 @@
 package io.client.modules.combat;
 
-import io.client.Category;
-import io.client.Module;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import net.minecraft.client.MinecraftClient;
@@ -74,3 +74,5 @@ public class Criticals extends Module {
                 x, y, z, false, mc.player.horizontalCollision));
     }
 }
+
+

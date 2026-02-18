@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
 import io.client.modules.settings.CapeSettings;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SkinTextures;
@@ -133,4 +133,6 @@ public final class IoUserCapeService {
         }
     }
 }
+
+
 

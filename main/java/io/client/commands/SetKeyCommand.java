@@ -1,7 +1,7 @@
 package io.client.commands;
 
-import io.client.Module;
-import io.client.ModuleManager;
+import io.client.managers.ModuleManager;
+import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
 import io.client.settings.NumberSetting;
 import io.client.settings.Setting;
@@ -67,3 +67,4 @@ public class SetKeyCommand implements Command {
         }
     }
 }
+

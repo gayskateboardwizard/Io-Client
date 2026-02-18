@@ -1,5 +1,6 @@
-package io.client;
+package io.client.managers;
 
+import io.client.clickgui.screens.ClickGuiScreen;
 import io.client.clickgui.CategoryPanel;
 import io.client.clickgui.SavedPanelConfig;
 import io.client.clickgui.Theme;
@@ -9,7 +10,10 @@ import io.client.modules.macros.Macro;
 import io.client.modules.misc.*;
 import io.client.modules.movement.*;
 import io.client.modules.render.*;
+import io.client.modules.render.Fullbright;
 import io.client.modules.settings.*;
+import io.client.modules.templates.Category;
+import io.client.modules.templates.Module;
 import io.client.modules.world.*;
 import io.client.settings.*;
 import org.lwjgl.glfw.GLFW;
