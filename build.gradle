@@ -24,6 +24,7 @@ dependencies {
 }
 
 loom {
+    accessWidenerPath = file("main/resources/META-INF/io_client.accesswidener")
     mixin {
         defaultRefmapName = "io_client.refmap.json"
     }

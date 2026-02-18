@@ -24,6 +24,7 @@
   "mixins": [
     "io_client.mixins.json"
   ],
+  "accessWidener": "META-INF/io_client.accesswidener",
   "depends": {
     "fabricloader": ">=0.17.2",
     "minecraft": ">=1.21.8",
