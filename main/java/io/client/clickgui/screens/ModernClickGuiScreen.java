@@ -60,7 +60,7 @@ public class ModernClickGuiScreen extends Screen {
         Theme theme = ClickGuiScreen.currentTheme;
         float scale = getScale();
 
-        ctx.fill(0, 0, width, height, (theme.panelBackground & 0x00FFFFFF) | 0xF2000000);
+        ctx.fill(0, 0, width, height, 0xF2000000 | (theme.panelBackground & 0x00FFFFFF));
 
         renderTopBar(ctx, mouseX, mouseY, width, height, theme, scale);
 
@@ -84,15 +84,16 @@ public class ModernClickGuiScreen extends Screen {
 
     private void renderTopBar(DrawContext ctx, int mx, int my, int sw, int sh,
                               Theme theme, float scale) {
-        ctx.fill(0, 0, sw, TOP_H, (theme.titleBar & 0x00FFFFFF) | 0xFF000000);
-        ctx.fill(0, TOP_H - 1, sw, TOP_H, (theme.moduleEnabled & 0x00FFFFFF) | 0x44000000);
+        ctx.fill(0, 0, sw, TOP_H, 0xFF000000 | (theme.titleBar & 0x00FFFFFF));
+        ctx.fill(0, TOP_H - 1, sw, TOP_H, 0x44000000 | (theme.moduleEnabled & 0x00FFFFFF));
 
         ctx.drawTextWithShadow(textRenderer, "IO CLIENT",
                 SIDEBAR_W + 10, TOP_H / 2 - 4, theme.moduleEnabled);
 
         int sbW = 140, sbH = 14;
         int sbX = sw - 10 - 110 - 10 - sbW, sbY = TOP_H / 2 - sbH / 2;
-        drawPanel(ctx, sbX, sbY, sbW, sbH, theme.panelBackground, theme.sliderBackground);
+        ctx.fill(sbX, sbY, sbX + sbW, sbY + sbH, theme.panelBackground);
+        drawOutline(ctx, sbX, sbY, sbW, sbH, theme.sliderBackground);
         if (typingSearch) drawOutline(ctx, sbX, sbY, sbW, sbH, theme.moduleEnabled);
 
         String searchDisplay = typingSearch
@@ -105,7 +106,8 @@ public class ModernClickGuiScreen extends Screen {
 
         int barW = 110, barH = 14;
         int bx = sw - barW - 10, by = TOP_H / 2 - barH / 2;
-        drawPanel(ctx, bx, by, barW, barH, theme.panelBackground, theme.sliderBackground);
+        ctx.fill(bx, by, bx + barW, by + barH, theme.panelBackground);
+        drawOutline(ctx, bx, by, barW, barH, theme.sliderBackground);
 
         float min = 0.5f, max = 2.0f;
         float norm = (scale - min) / (max - min);
@@ -129,12 +131,12 @@ public class ModernClickGuiScreen extends Screen {
 
     private void renderSidebar(DrawContext ctx, int mx, int my, int sw, int sh,
                                int topOff, Theme theme) {
-        ctx.fill(0, topOff, SIDEBAR_W, sh, (theme.titleBar & 0x00FFFFFF) | 0xFF000000);
-        ctx.fill(SIDEBAR_W - 1, topOff, SIDEBAR_W, sh, (theme.moduleEnabled & 0x00FFFFFF) | 0x22000000);
+        ctx.fill(0, topOff, SIDEBAR_W, sh, 0xFF000000 | (theme.titleBar & 0x00FFFFFF));
 
         int itemH = 26;
         int sy = topOff + 6;
 
+        ctx.enableScissor(0, topOff, SIDEBAR_W, sh);
         for (Category cat : Category.values()) {
             boolean sel = cat == selectedCategory;
             boolean hov = mx >= 0 && mx < SIDEBAR_W && my >= sy && my < sy + itemH;
@@ -153,6 +155,9 @@ public class ModernClickGuiScreen extends Screen {
 
             sy += itemH + 2;
         }
+        ctx.disableScissor();
+
+        ctx.fill(SIDEBAR_W - 1, topOff, SIDEBAR_W, sh, 0x22000000 | (theme.moduleEnabled & 0x00FFFFFF));
     }
 
     private List<Module> getDisplayModules() {
@@ -188,7 +193,7 @@ public class ModernClickGuiScreen extends Screen {
         String header = !searchQuery.isEmpty() ? "results" : (selectedCategory != null ? selectedCategory.name() : "");
         ctx.drawTextWithShadow(textRenderer, header, mainX, mainY, theme.moduleEnabled);
         ctx.fill(mainX, mainY + 10, mainX + textRenderer.getWidth(header) + 4, mainY + 11,
-                (theme.moduleEnabled & 0x00FFFFFF) | 0x66000000);
+                0x66000000 | (theme.moduleEnabled & 0x00FFFFFF));
 
         int colW = (mainW - CARD_GAP) / 2;
         int rows = (modules.size() + 1) / 2;
@@ -219,61 +224,79 @@ public class ModernClickGuiScreen extends Screen {
         int cardBg = isSel
                 ? theme.hoverHighlight
                 : enabled
-                ? (theme.panelBackground & 0x00FFFFFF) | 0xCC000000
-                : (theme.panelBackground & 0x00FFFFFF) | 0x88000000;
-        ctx.fill(cx, cy, cx + cw, cy + CARD_H, cardBg);
-
-        if (enabled)
-            ctx.fill(cx + 1, cy, cx + cw - 1, cy + 1, (theme.moduleEnabled & 0x00FFFFFF) | 0x66000000);
+                ? (0xFF000000 | (theme.panelBackground & 0x00FFFFFF))
+                : (0xFF000000 | (theme.titleBar & 0x00FFFFFF));
 
         int borderCol = isSel
                 ? theme.moduleEnabled
                 : enabled
-                ? (theme.moduleEnabled & 0x00FFFFFF) | 0x55000000
-                : hov ? theme.sliderBackground : (theme.panelBackground & 0x00FFFFFF) | 0xFF000000;
+                ? (0x55000000 | (theme.moduleEnabled & 0x00FFFFFF))
+                : hov ? theme.sliderBackground : (0x44000000 | (theme.sliderBackground & 0x00FFFFFF));
+
+        ctx.fill(cx, cy, cx + cw, cy + CARD_H, cardBg);
         drawOutline(ctx, cx, cy, cw, CARD_H, borderCol);
 
-        if (hov && !isSel) ctx.fill(cx, cy, cx + cw, cy + CARD_H, theme.hoverHighlight);
-        if (enabled) ctx.fill(cx, cy + 2, cx + 2, cy + CARD_H - 2, theme.moduleEnabled);
+        if (hov && !isSel) ctx.fill(cx + 1, cy + 1, cx + cw - 1, cy + CARD_H - 1, theme.hoverHighlight);
+
+        if (enabled) {
+            ctx.fill(cx + 1, cy + 2, cx + 3, cy + CARD_H - 2, theme.moduleEnabled);
+            ctx.fill(cx + 2, cy + 1, cx + cw - 2, cy + 2, 0x66000000 | (theme.moduleEnabled & 0x00FFFFFF));
+        }
 
         int nameX = cx + (enabled ? 6 : 4);
         int nameY = cy + CARD_H / 2 - 4;
         int nameColor = enabled ? theme.sliderForeground : theme.moduleDisabled;
-        ctx.enableScissor(nameX, cy, cx + cw - 6, cy + CARD_H);
+        ctx.enableScissor(nameX, cy + 1, cx + cw - 6, cy + CARD_H - 1);
         ctx.drawTextWithShadow(textRenderer, m.getName(), nameX, nameY, nameColor);
         ctx.disableScissor();
 
         if (!m.getSettings().isEmpty()) {
             int dotColor = isSel ? theme.moduleEnabled : theme.sliderBackground;
-            ctx.fill(cx + cw - 5, cy + 3, cx + cw - 3, cy + 5, dotColor);
+            ctx.fill(cx + cw - 6, cy + 4, cx + cw - 4, cy + 6, dotColor);
         }
     }
 
     private void renderSettingsPanel(DrawContext ctx, int mx, int my, int sw, int sh,
                                      int topOff, Theme theme) {
         int px = sw - SETTINGS_W;
-        int ph = sh - topOff;
 
-        ctx.fill(px, topOff, sw, sh, (theme.titleBar & 0x00FFFFFF) | 0xFF000000);
-        ctx.fill(px, topOff, px + 1, sh, (theme.moduleEnabled & 0x00FFFFFF) | 0x33000000);
-        ctx.fill(px, topOff, sw, topOff + 1, (theme.moduleEnabled & 0x00FFFFFF) | 0x33000000);
+        ctx.fill(px + 1, topOff + 1, sw, sh, 0xFF000000 | (theme.titleBar & 0x00FFFFFF));
+        ctx.fill(px, topOff, px + 1, sh, 0x33000000 | (theme.moduleEnabled & 0x00FFFFFF));
+        ctx.fill(px, topOff, sw, topOff + 1, 0x33000000 | (theme.moduleEnabled & 0x00FFFFFF));
 
-        ctx.fill(px, topOff, sw, topOff + 22, (theme.panelBackground & 0x00FFFFFF) | 0xFF000000);
-        ctx.fill(px, topOff + 21, sw, topOff + 22, (theme.moduleEnabled & 0x00FFFFFF) | 0x44000000);
+        ctx.fill(px + 1, topOff + 1, sw, topOff + 22, 0xFF000000 | (theme.panelBackground & 0x00FFFFFF));
+        ctx.fill(px, topOff + 21, sw, topOff + 22, 0x44000000 | (theme.moduleEnabled & 0x00FFFFFF));
 
         int nameColor = settingsTarget.isEnabled() ? theme.sliderForeground : theme.moduleDisabled;
         ctx.drawTextWithShadow(textRenderer, settingsTarget.getName(), px + 8, topOff + 7, nameColor);
         ctx.drawTextWithShadow(textRenderer, "\u00D7", sw - 12, topOff + 6, theme.moduleDisabled);
 
-        int rowY0 = topOff + 24;
-        int rowsH = ph - 26;
+        int tooltipY = topOff + 24;
+        String desc = settingsTarget.getDescription();
+        if (desc != null && !desc.isEmpty()) {
+            List<String> wrapped = wrapText(desc, SETTINGS_W - 12);
+            int tooltipH = wrapped.size() * 9 + 6;
+
+            ctx.fill(px + 5, tooltipY + 1, sw - 5, tooltipY + tooltipH - 1, 0xFF000000 | (theme.titleBar & 0x00FFFFFF));
+            drawOutline(ctx, px + 4, tooltipY, SETTINGS_W - 8, tooltipH, 0x44000000 | (theme.moduleEnabled & 0x00FFFFFF));
+
+            int ty = tooltipY + 3;
+            for (String line : wrapped) {
+                ctx.drawTextWithShadow(textRenderer, line, px + 7, ty, theme.moduleDisabled);
+                ty += 9;
+            }
+            tooltipY += tooltipH + 4;
+        }
+
+        int rowY0 = tooltipY;
+        int rowsH = sh - rowY0;
         int contentH = settingRows.stream().mapToInt(SettingRow::height).sum();
         settingsScroll = Math.max(0, Math.min(settingsScroll, Math.max(0, contentH - rowsH)));
 
-        ctx.enableScissor(px, rowY0, sw, rowY0 + rowsH);
+        ctx.enableScissor(px + 4, rowY0, sw - 4, sh - 4);
         int ry = rowY0 - (int) settingsScroll;
         for (SettingRow r : settingRows) {
-            r.render(ctx, mx, my, px + 2, ry, SETTINGS_W - 4, theme);
+            r.render(ctx, mx, my, px + 4, ry, SETTINGS_W - 8, theme);
             ry += r.height();
         }
         ctx.disableScissor();
@@ -289,7 +312,6 @@ public class ModernClickGuiScreen extends Screen {
         int scaledSW = (int) (width  * inv);
         int topOff   = (int) Math.ceil(TOP_H / scale);
 
-        // ── Top bar (raw screen coords) ──
         int barW = 110;
         int bx = rawSW - barW - 10, by = TOP_H / 2 - 7;
         if (rawMX >= bx && rawMX < bx + barW && rawMY >= by && rawMY < by + 14) {
@@ -306,7 +328,6 @@ public class ModernClickGuiScreen extends Screen {
             typingSearch = false;
         }
 
-        // ── Sidebar (scaled coords) ──
         int itemH = 26;
         int sy = topOff + 6;
         for (Category cat : Category.values()) {
@@ -319,20 +340,27 @@ public class ModernClickGuiScreen extends Screen {
             sy += itemH + 2;
         }
 
-        // ── Settings panel (scaled coords) ──
         if (settingsTarget != null) {
             int px = scaledSW - SETTINGS_W;
             if (smx >= scaledSW - 16 && smx < scaledSW - 4 && smy >= topOff + 4 && smy < topOff + 18) {
                 closeSettings(); click(); return true;
             }
-            int ry = topOff + 24 - (int) settingsScroll;
+
+            int tooltipY = topOff + 24;
+            String desc = settingsTarget.getDescription();
+            if (desc != null && !desc.isEmpty()) {
+                List<String> wrapped = wrapText(desc, SETTINGS_W - 12);
+                int tooltipH = wrapped.size() * 9 + 6;
+                tooltipY += tooltipH + 4;
+            }
+
+            int ry = tooltipY - (int) settingsScroll;
             for (SettingRow r : settingRows) {
-                r.mouseClicked(smx, smy, btn, px + 2, ry, SETTINGS_W - 4);
+                r.mouseClicked(smx, smy, btn, px + 4, ry, SETTINGS_W - 8);
                 ry += r.height();
             }
         }
 
-        // ── Module grid (scaled coords) ──
         if (smx > SIDEBAR_W) {
             int settingsW = settingsTarget != null ? SETTINGS_W : 0;
             int mainX = SIDEBAR_W + CARD_PAD;
@@ -374,9 +402,18 @@ public class ModernClickGuiScreen extends Screen {
         int topOff = (int) Math.ceil(TOP_H / getScale());
         if (settingsTarget != null) {
             int px = sw - SETTINGS_W;
-            int ry = topOff + 24 - (int) settingsScroll;
+
+            int tooltipY = topOff + 24;
+            String desc = settingsTarget.getDescription();
+            if (desc != null && !desc.isEmpty()) {
+                List<String> wrapped = wrapText(desc, SETTINGS_W - 12);
+                int tooltipH = wrapped.size() * 9 + 6;
+                tooltipY += tooltipH + 4;
+            }
+
+            int ry = tooltipY - (int) settingsScroll;
             for (SettingRow r : settingRows) {
-                r.mouseReleased(smx, smy, btn, px + 2, ry, SETTINGS_W - 4);
+                r.mouseReleased(smx, smy, btn, px + 4, ry, SETTINGS_W - 8);
                 ry += r.height();
             }
         }
@@ -388,7 +425,7 @@ public class ModernClickGuiScreen extends Screen {
         float inv = 1f / getScale();
         int smx = (int) (mx * inv), sw = (int) (width * inv);
         if (draggingNumber != null && settingsTarget != null) {
-            draggingNumber.applyMouse(smx, sw - SETTINGS_W + 2, SETTINGS_W - 4);
+            draggingNumber.applyMouse(smx, sw - SETTINGS_W + 4, SETTINGS_W - 8);
         }
         return super.mouseDragged(mx, my, btn, dx, dy);
     }
@@ -454,16 +491,35 @@ public class ModernClickGuiScreen extends Screen {
         settingRows.clear();
     }
 
-    private void drawPanel(DrawContext ctx, int x, int y, int w, int h, int bg, int border) {
-        ctx.fill(x, y, x + w, y + h, bg);
-        drawOutline(ctx, x, y, w, h, border);
-    }
-
     private void drawOutline(DrawContext ctx, int x, int y, int w, int h, int color) {
         ctx.fill(x, y, x + w, y + 1, color);
         ctx.fill(x, y + h - 1, x + w, y + h, color);
         ctx.fill(x, y, x + 1, y + h, color);
         ctx.fill(x + w - 1, y, x + w, y + h, color);
+    }
+
+    private List<String> wrapText(String text, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder current = new StringBuilder();
+
+        for (String word : words) {
+            String test = current.length() == 0 ? word : current + " " + word;
+            if (textRenderer.getWidth(test) <= maxWidth) {
+                current = new StringBuilder(test);
+            } else {
+                if (current.length() > 0) {
+                    lines.add(current.toString());
+                    current = new StringBuilder(word);
+                } else {
+                    lines.add(word);
+                }
+            }
+        }
+        if (current.length() > 0) {
+            lines.add(current.toString());
+        }
+        return lines;
     }
 
     private static String fmt(float v) {
@@ -500,12 +556,15 @@ public class ModernClickGuiScreen extends Screen {
         void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
             boolean hov = over(mx, my, x, y, w);
             boolean on  = setting.isEnabled();
-            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+
+            if (hov) {
+                ctx.fill(x, y, x + w, y + ROW_H, theme.hoverHighlight);
+            }
 
             int tW = 20, tH = 7;
             int tx = x + w - tW - 3, ty = y + ROW_H / 2 - tH / 2;
             ctx.fill(tx, ty, tx + tW, ty + tH,
-                    on ? (theme.moduleEnabled & 0x00FFFFFF) | 0x55000000 : theme.sliderBackground);
+                    on ? (0x55000000 | (theme.moduleEnabled & 0x00FFFFFF)) : theme.sliderBackground);
             drawOutline(ctx, tx, ty, tW, tH, on ? theme.moduleEnabled : theme.sliderBackground);
             int knobX = on ? tx + tW - tH + 1 : tx + 1;
             ctx.fill(knobX, ty + 1, knobX + tH - 2, ty + tH - 1,
@@ -528,7 +587,11 @@ public class ModernClickGuiScreen extends Screen {
         @Override
         void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
             boolean hov = over(mx, my, x, y, w);
-            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+
+            if (hov) {
+                ctx.fill(x, y, x + w, y + ROW_H, theme.hoverHighlight);
+            }
+
             String val = setting.getSelectedOption();
             int valW = textRenderer.getWidth(val);
             ctx.drawTextWithShadow(textRenderer, val, x + w - valW - 3, y + 3, theme.moduleEnabled);
@@ -561,7 +624,10 @@ public class ModernClickGuiScreen extends Screen {
         @Override
         void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
             boolean hov = over(mx, my, x, y, w);
-            ctx.fill(x, y, x + w, y + height(), hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+
+            if (hov) {
+                ctx.fill(x, y, x + w, y + height(), theme.hoverHighlight);
+            }
 
             ctx.drawTextWithShadow(textRenderer, setting.getName(), x + 3 + indent, y + 3, theme.moduleDisabled);
             String val = fmt(setting.getValue());
@@ -607,7 +673,11 @@ public class ModernClickGuiScreen extends Screen {
         @Override
         void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
             boolean hov = over(mx, my, x, y, w);
-            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x55000000);
+
+            if (hov) {
+                ctx.fill(x, y, x + w, y + ROW_H, theme.hoverHighlight);
+            }
+
             String val = "\"" + setting.getValue() + "\"";
             int valW = textRenderer.getWidth(val);
             ctx.drawTextWithShadow(textRenderer, val, x + w - valW - 3, y + 3, theme.moduleEnabled);
@@ -631,7 +701,12 @@ public class ModernClickGuiScreen extends Screen {
         @Override
         void render(DrawContext ctx, int mx, int my, int x, int y, int w, Theme theme) {
             boolean hov = mx >= x && mx <= x + w && my >= y && my <= y + ROW_H;
-            ctx.fill(x, y, x + w, y + ROW_H, hov ? theme.hoverHighlight : (theme.panelBackground & 0x00FFFFFF) | 0x77000000);
+            ctx.fill(x, y, x + w, y + ROW_H, 0xFF000000 | (theme.panelBackground & 0x00FFFFFF));
+
+            if (hov) {
+                ctx.fill(x, y, x + w, y + ROW_H, theme.hoverHighlight);
+            }
+
             ctx.fill(x, y, x + 2, y + ROW_H, theme.moduleEnabled);
             ctx.drawTextWithShadow(textRenderer, (open ? "\u2212 " : "\u002B ") + setting.getName(),
                     x + 5 + indent, y + 3, theme.sliderForeground);
@@ -675,5 +750,3 @@ public class ModernClickGuiScreen extends Screen {
         }
     }
 }
-
-
