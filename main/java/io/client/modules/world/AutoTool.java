@@ -1,5 +1,7 @@
 package io.client.modules.world;
 
+import io.client.managers.ItemSwapManager;
+import io.client.managers.SwapPriority;
 import io.client.modules.templates.Category;
 import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
@@ -13,6 +15,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 
 public class AutoTool extends Module {
+    private static final String SWAP_OWNER = "AutoTool";
     private boolean wasPressed = false;
     private boolean shouldSwitch = false;
     private int ticks = 0;
@@ -85,6 +88,7 @@ public class AutoTool extends Module {
     private void swapTo(int slot) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
+        if (!ItemSwapManager.INSTANCE.acquire(SWAP_OWNER, SwapPriority.LOW, 120L)) return;
         int current = mc.player.getInventory().getSelectedSlot();
         if (!hasSwitched) {
             previousSlot = current;
@@ -98,6 +102,7 @@ public class AutoTool extends Module {
             mc.player.getInventory().setSelectedSlot(previousSlot);
             previousSlot = -1;
             hasSwitched = false;
+            ItemSwapManager.INSTANCE.release(SWAP_OWNER);
         }
     }
 
@@ -107,6 +112,7 @@ public class AutoTool extends Module {
         if (mc.player != null && previousSlot != -1) {
             mc.player.getInventory().setSelectedSlot(previousSlot);
         }
+        ItemSwapManager.INSTANCE.release(SWAP_OWNER);
     }
 }
 

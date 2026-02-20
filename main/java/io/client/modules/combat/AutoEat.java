@@ -1,6 +1,8 @@
 
 package io.client.modules.combat;
 
+import io.client.managers.ItemSwapManager;
+import io.client.managers.SwapPriority;
 import io.client.modules.templates.Category;
 import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
@@ -18,6 +20,7 @@ import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 
 public class AutoEat extends Module {
+    private static final String SWAP_OWNER = "AutoEat";
     private static final long SWAP_DELAY_MS = 100;
     private static final Set<Item> FOOD_BLACKLIST = Set.of(
             Items.ROTTEN_FLESH,
@@ -164,6 +167,8 @@ public class AutoEat extends Module {
 
     private void startEating(MinecraftClient mc, ClientPlayerEntity player, FoodSlot foodSlot, long now) {
         if (foodSlot.hand == Hand.MAIN_HAND) {
+            if (!ItemSwapManager.INSTANCE.acquire(SWAP_OWNER, SwapPriority.NORMAL, 400L))
+                return;
             int currSlot = player.getInventory().getSelectedSlot();
             if (currSlot != foodSlot.slot) {
                 previousSlot = currSlot;
@@ -192,6 +197,7 @@ public class AutoEat extends Module {
         }
 
         isEating = false;
+        ItemSwapManager.INSTANCE.release(SWAP_OWNER);
     }
 
     @Override
@@ -202,6 +208,7 @@ public class AutoEat extends Module {
 
             previousSlot = -1;
             hasSwitchedSlot = false;
+            ItemSwapManager.INSTANCE.release(SWAP_OWNER);
         }
     }
 

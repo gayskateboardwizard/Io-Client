@@ -3,6 +3,7 @@ package io.client.discord;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
+import net.fabricmc.loader.api.FabricLoader;
 
 public final class DiscordRpcManager {
     private static final String APPLICATION_ID = System.getProperty("ioClientDiscordAppId", "1473119387337883763");
@@ -25,7 +26,7 @@ public final class DiscordRpcManager {
             DiscordRichPresence presence = new DiscordRichPresence();
             presence.startTimestamp = System.currentTimeMillis() / 1000L;
             presence.details = "Playing IO Client";
-            presence.state = "Indev";
+            presence.state = getCurrentVersion();
             presence.largeImageKey = "io";
             presence.largeImageText = "IO Client";
             rpc.Discord_UpdatePresence(presence);
@@ -64,6 +65,21 @@ public final class DiscordRpcManager {
         try {
             DiscordRPC.INSTANCE.Discord_Shutdown();
         } catch (Throwable ignored) {
+        }
+    }
+
+    public static boolean isRunning() {
+        return running;
+    }
+
+    private static String getCurrentVersion() {
+        try {
+            return FabricLoader.getInstance()
+                    .getModContainer("io_client")
+                    .map(container -> container.getMetadata().getVersion().getFriendlyString())
+                    .orElse("unknown");
+        } catch (Throwable ignored) {
+            return "unknown";
         }
     }
 }

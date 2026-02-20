@@ -1,6 +1,7 @@
 package io.client.modules.render;
 
 import io.client.clickgui.screens.ClickGuiScreen;
+import io.client.managers.ModuleManager;
 import io.client.managers.TargetManager;
 import io.client.modules.templates.Category;
 import io.client.modules.templates.Module;
@@ -25,6 +26,7 @@ public class ESP extends Module {
     private final BooleanSetting showArmor;
     private final RadioSetting armorPosition;
     private final NumberSetting baseScale;
+    private final BooleanSetting disableVanillaNametags;
 
     public ESP() {
         super("ESP", "Basic heads on ESP", 0, Category.RENDER);
@@ -45,6 +47,9 @@ public class ESP extends Module {
 
         baseScale = new NumberSetting("Scale", 1.0f, 0.3f, 3.0f);
         addSetting(baseScale);
+
+        disableVanillaNametags = new BooleanSetting("DisableVanillaNametags", true);
+        addSetting(disableVanillaNametags);
     }
 
     public void render(DrawContext graphics, float partialTicks) {
@@ -226,6 +231,15 @@ public class ESP extends Module {
 
         return 0xFFFF0000;
 
+    }
+
+    public boolean shouldDisableVanillaNametags() {
+        return disableVanillaNametags.isEnabled();
+    }
+
+    public static boolean shouldHideVanillaPlayerNametags() {
+        ESP esp = ModuleManager.INSTANCE.getModule(ESP.class);
+        return esp != null && esp.isEnabled() && esp.shouldDisableVanillaNametags();
     }
 }
 

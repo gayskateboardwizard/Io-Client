@@ -1,6 +1,8 @@
 package io.client.modules.combat;
 
 import io.client.managers.ModuleManager;
+import io.client.managers.ItemSwapManager;
+import io.client.managers.SwapPriority;
 import io.client.modules.templates.Category;
 import io.client.modules.templates.Module;
 import io.client.settings.BooleanSetting;
@@ -18,7 +20,7 @@ import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.slot.SlotActionType;
 
 public class OffHand extends Module {
-
+    private static final String SWAP_OWNER = "OffHand";
     private static final int OFFHAND_CONTAINER_SLOT = 45;
     
     // Settings
@@ -39,8 +41,8 @@ public class OffHand extends Module {
     
     private boolean isClicking = false;
     private boolean sentMessage = false;
-    private boolean isSwapping = false;
     public boolean locked = false;
+    private long swapCooldownUntilMs = 0L;
     
     private int ticks = 0;
     private ItemType currentItem;
@@ -78,10 +80,17 @@ public class OffHand extends Module {
     }
 
     @Override
+    public void onDisable() {
+        ItemSwapManager.INSTANCE.release(SWAP_OWNER);
+        swapCooldownUntilMs = 0L;
+    }
+
+    @Override
     public void onUpdate() {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.getNetworkHandler() == null || mc.player.currentScreenHandler == null) return;
-        if (isSwapping) return;
+        if (mc.currentScreen != null) return;
+        if (System.currentTimeMillis() < swapCooldownUntilMs) return;
 
         int totems = countItem(mc.player.getInventory(), Items.TOTEM_OF_UNDYING);
         
@@ -185,36 +194,20 @@ public class OffHand extends Module {
 
     private void swapItem(MinecraftClient mc, int inventorySlot) {
         if (inventorySlot == -1) return;
-        
-        isSwapping = true;
-        
+        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) return;
+        if (!ItemSwapManager.INSTANCE.acquire(SWAP_OWNER, SwapPriority.HIGH, 250L)) return;
+
         int containerSlot;
         if (inventorySlot >= 0 && inventorySlot <= 8) {
             containerSlot = inventorySlot + 36;
         } else if (inventorySlot >= 9 && inventorySlot <= 35) {
             containerSlot = inventorySlot;
         } else {
-            isSwapping = false;
+            ItemSwapManager.INSTANCE.release(SWAP_OWNER);
             return;
         }
 
-        mc.interactionManager.clickSlot(
-                mc.player.currentScreenHandler.syncId,
-                containerSlot,
-                0,
-                SlotActionType.PICKUP,
-                mc.player
-        );
-
-        mc.interactionManager.clickSlot(
-                mc.player.currentScreenHandler.syncId,
-                OFFHAND_CONTAINER_SLOT,
-                0,
-                SlotActionType.PICKUP,
-                mc.player
-        );
-
-        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+        try {
             mc.interactionManager.clickSlot(
                     mc.player.currentScreenHandler.syncId,
                     containerSlot,
@@ -222,16 +215,28 @@ public class OffHand extends Module {
                     SlotActionType.PICKUP,
                     mc.player
             );
-        }
 
-        new Thread(() -> {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            mc.interactionManager.clickSlot(
+                    mc.player.currentScreenHandler.syncId,
+                    OFFHAND_CONTAINER_SLOT,
+                    0,
+                    SlotActionType.PICKUP,
+                    mc.player
+            );
+
+            if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                mc.interactionManager.clickSlot(
+                        mc.player.currentScreenHandler.syncId,
+                        containerSlot,
+                        0,
+                        SlotActionType.PICKUP,
+                        mc.player
+                );
             }
-            isSwapping = false;
-        }).start();
+        } finally {
+            ItemSwapManager.INSTANCE.release(SWAP_OWNER);
+            swapCooldownUntilMs = System.currentTimeMillis() + 150L;
+        }
     }
     
     public void setClicking(boolean clicking) {

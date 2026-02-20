@@ -16,7 +16,6 @@ public class IoClientModClient implements ClientModInitializer {
         ModuleManager.INSTANCE.init();
         IoClientEventHandler.getInstance().registerEvents();
         PostProcessShaders.init();
-        DiscordRpcManager.init();
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRpcManager::shutdown));
     }
 }

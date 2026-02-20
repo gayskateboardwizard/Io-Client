@@ -70,6 +70,8 @@ public class ModuleManager {
         modules.add(new AutoMine());
         modules.add(new AutoTool());
         modules.add(new EXPThrower());
+        modules.add(new FakePlayerModule());
+        modules.add(new DiscordRPCModule());
         modules.add(new IoSwag());
         modules.add(new CrystalAura());
         modules.add(new CrystalAuraV2());
@@ -100,6 +102,8 @@ public class ModuleManager {
         modules.add(new IronDome());
         // modules.add(new );
         // modules.add(new );
+
+        AddonManager.INSTANCE.loadAddons(this);
 
         System.out.println("Loaded " + modules.size() + " modules");
 
