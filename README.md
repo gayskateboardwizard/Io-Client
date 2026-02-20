@@ -1,8 +1,10 @@
 # IO 
-A lightweight minecraft utility mod for fabric 1.21.8.
+A lightweight Minecraft utility mod for Fabric 1.21.8.
 (clickgui keybind is backslash)
+
 # Features
 30+ modules in a range of categories like combat, movement, render, world and more mostly tested on 8b8t.me.
+
 # Looks
 UI
 <img width="1920" height="1058" alt="image" src="https://github.com/user-attachments/assets/9f93cd8f-b1bd-4ce8-8842-27a0c1b809b0" />
