@@ -88,6 +88,7 @@ public class ModuleManager {
         modules.add(new Tracers());
         modules.add(new Chams());
         modules.add(new ArsonAura());
+        modules.add(new FastFall());
         modules.add(new Surround());
         modules.add(new Burrow());
         modules.add(new DonkeyBoatDupe());
