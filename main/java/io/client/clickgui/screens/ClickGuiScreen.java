@@ -5,10 +5,14 @@ import io.client.clickgui.*;
 import io.client.managers.ModuleManager;
 import io.client.modules.settings.ThemeChanger;
 import io.client.modules.templates.Category;
+import io.client.settings.CategorySetting;
+import io.client.settings.Setting;
 
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.client.MinecraftClient;
@@ -94,6 +98,7 @@ public class ClickGuiScreen extends Screen {
     public void render(DrawContext graphics, int mouseX, int mouseY, float partialTicks) {
         opened = true;
         renderer.setTheme(currentTheme);
+        resolvePanelOverlaps();
 
         String hoveredDescription = null;
 
@@ -178,6 +183,91 @@ public class ClickGuiScreen extends Screen {
         if (this.client != null) {
             this.client.setScreen(null);
         }
+    }
+
+    private void resolvePanelOverlaps() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        int screenWidth = mc.getWindow().getScaledWidth();
+        int screenHeight = mc.getWindow().getScaledHeight();
+        int panelWidth = PanelRenderer.getPanelWidth();
+        int panelGap = 3;
+        int attemptLimit = Math.max(1, panels.size() * 8);
+
+        List<CategoryPanel> orderedPanels = new ArrayList<>(panels.values());
+        List<CategoryPanel> placedPanels = new ArrayList<>();
+        for (CategoryPanel panel : orderedPanels) {
+            clampPanelToScreen(panel, screenWidth, screenHeight, panelWidth);
+
+            int attempts = 0;
+            while (attempts < attemptLimit) {
+                CategoryPanel overlap = firstOverlap(panel, placedPanels, panelWidth);
+                if (overlap == null) {
+                    break;
+                }
+
+                int maxY = Math.max(0, screenHeight - getPanelHeight(panel));
+                int nextY = overlap.y + getPanelHeight(overlap) + panelGap;
+                if (nextY <= maxY) {
+                    panel.y = nextY;
+                } else {
+                    int maxX = Math.max(0, screenWidth - panelWidth);
+                    int nextX = panel.x + panelWidth + panelGap;
+                    panel.x = nextX > maxX ? 0 : nextX;
+                    panel.y = 0;
+                }
+
+                clampPanelToScreen(panel, screenWidth, screenHeight, panelWidth);
+                attempts++;
+            }
+            placedPanels.add(panel);
+        }
+    }
+
+    private void clampPanelToScreen(CategoryPanel panel, int screenWidth, int screenHeight, int panelWidth) {
+        int titleBarHeight = PanelRenderer.getTitleBarHeight();
+        panel.x = Math.max(0, Math.min(panel.x, screenWidth - panelWidth));
+        panel.y = Math.max(0, Math.min(panel.y, screenHeight - titleBarHeight));
+    }
+
+    private CategoryPanel firstOverlap(CategoryPanel panel, List<CategoryPanel> placedPanels, int panelWidth) {
+        for (CategoryPanel other : placedPanels) {
+            if (panelsIntersect(panel, other, panelWidth)) {
+                return other;
+            }
+        }
+        return null;
+    }
+
+    private boolean panelsIntersect(CategoryPanel a, CategoryPanel b, int panelWidth) {
+        int ax2 = a.x + panelWidth;
+        int ay2 = a.y + getPanelHeight(a);
+        int bx2 = b.x + panelWidth;
+        int by2 = b.y + getPanelHeight(b);
+        return a.x < bx2 && ax2 > b.x && a.y < by2 && ay2 > b.y;
+    }
+
+    private int getPanelHeight(CategoryPanel panel) {
+        if (panel.collapsed) {
+            return PanelRenderer.getTitleBarHeight();
+        }
+
+        int contentHeight = 0;
+        List<Module> modules = ModuleManager.INSTANCE.getModulesByCategory(panel.category);
+        for (Module module : modules) {
+            contentHeight += PanelRenderer.getModuleHeight();
+            if (!module.isExtended()) {
+                continue;
+            }
+
+            for (Setting setting : module.getSettings()) {
+                contentHeight += PanelRenderer.getSettingHeight();
+                if (setting instanceof CategorySetting categorySetting && categorySetting.isExpanded()) {
+                    contentHeight += categorySetting.getSettings().size() * PanelRenderer.getSettingHeight();
+                }
+            }
+        }
+
+        return PanelRenderer.getTitleBarHeight() + 2 + contentHeight;
     }
 }
 

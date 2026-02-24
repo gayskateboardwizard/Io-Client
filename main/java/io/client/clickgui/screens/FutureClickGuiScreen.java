@@ -88,6 +88,7 @@ public class FutureClickGuiScreen extends Screen {
         int scaledScreenW = (int) (width * invScale);
         int scaledScreenH = (int) (height * invScale);
 
+        resolvePanelOverlaps(scaledScreenW, scaledScreenH);
         for (Panel panel : panels) {
             panel.clamp(scaledScreenW, scaledScreenH);
             panel.render(context, scaledMouseX, scaledMouseY, delta, palette);
@@ -223,6 +224,13 @@ public class FutureClickGuiScreen extends Screen {
                 body += row.getHeight();
             }
             return body + 4;
+        }
+
+        private int getRenderHeight() {
+            if (!open) {
+                return HEADER_HEIGHT;
+            }
+            return HEADER_HEIGHT + getBodyHeight() + 4;
         }
 
         private void mouseClicked(int mouseX, int mouseY, int button) {
@@ -738,6 +746,56 @@ public class FutureClickGuiScreen extends Screen {
         if (Math.abs(value - Math.round(value)) < 0.001f)
             return Integer.toString(Math.round(value));
         return String.format("%.2f", value);
+    }
+
+    private void resolvePanelOverlaps(int screenW, int screenH) {
+        final int panelGap = 3;
+        final int attemptLimit = Math.max(1, panels.size() * 8);
+
+        List<Panel> placedPanels = new ArrayList<>();
+        for (Panel panel : panels) {
+            panel.clamp(screenW, screenH);
+
+            int attempts = 0;
+            while (attempts < attemptLimit) {
+                Panel overlap = firstOverlap(panel, placedPanels);
+                if (overlap == null) {
+                    break;
+                }
+
+                int maxY = Math.max(0, screenH - panel.getRenderHeight());
+                int nextY = overlap.y + overlap.getRenderHeight() + panelGap;
+                if (nextY <= maxY) {
+                    panel.y = nextY;
+                } else {
+                    int maxX = Math.max(0, screenW - panel.width);
+                    int nextX = panel.x + panel.width + panelGap;
+                    panel.x = nextX > maxX ? 0 : nextX;
+                    panel.y = 0;
+                }
+
+                panel.clamp(screenW, screenH);
+                attempts++;
+            }
+            placedPanels.add(panel);
+        }
+    }
+
+    private Panel firstOverlap(Panel panel, List<Panel> placedPanels) {
+        for (Panel other : placedPanels) {
+            if (panelsIntersect(panel, other)) {
+                return other;
+            }
+        }
+        return null;
+    }
+
+    private boolean panelsIntersect(Panel a, Panel b) {
+        int ax2 = a.x + a.width;
+        int ay2 = a.y + a.getRenderHeight();
+        int bx2 = b.x + b.width;
+        int by2 = b.y + b.getRenderHeight();
+        return a.x < bx2 && ax2 > b.x && a.y < by2 && ay2 > b.y;
     }
 
     private void drawScrollableText(

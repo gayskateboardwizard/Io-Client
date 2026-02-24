@@ -85,6 +85,9 @@ public class BasicClickGuiScreen extends Screen {
         context.getMatrices().pushMatrix();
         context.getMatrices().scale(scale, scale);
 
+        int scaledSW = (int) (sw * invScale);
+        int scaledSH = (int) (sh * invScale);
+        resolvePanelOverlaps(scaledSW, scaledSH);
         for (Panel p : panels) {
             p.clamp(sw, sh);
             p.render(context, scaledMX, scaledMY, theme);
@@ -403,6 +406,10 @@ public class BasicClickGuiScreen extends Screen {
         boolean overHeader(int mx, int my) {
             return mx >= x && mx <= x + PANEL_WIDTH && my >= y && my <= y + HEADER_HEIGHT;
         }
+
+        int renderHeight() {
+            return HEADER_HEIGHT + bodyHeight();
+        }
     }
 
     private final class ModuleRow {
@@ -698,6 +705,58 @@ public class BasicClickGuiScreen extends Screen {
 
     private static String fmt(float v) {
         return Math.abs(v - Math.round(v)) < 0.001f ? Integer.toString(Math.round(v)) : String.format("%.2f", v);
+    }
+
+    private void resolvePanelOverlaps(int scaledScreenW, int scaledScreenH) {
+        final int panelGap = 3;
+        final int attemptLimit = Math.max(1, panels.size() * 8);
+
+        List<Panel> placedPanels = new ArrayList<>();
+        for (Panel panel : panels) {
+            panel.x = Math.max(0, Math.min(panel.x, scaledScreenW - PANEL_WIDTH));
+            panel.y = Math.max(0, Math.min(panel.y, scaledScreenH - HEADER_HEIGHT));
+
+            int attempts = 0;
+            while (attempts < attemptLimit) {
+                Panel overlap = firstOverlap(panel, placedPanels);
+                if (overlap == null) {
+                    break;
+                }
+
+                int maxY = Math.max(0, scaledScreenH - panel.renderHeight());
+                int nextY = overlap.y + overlap.renderHeight() + panelGap;
+                if (nextY <= maxY) {
+                    panel.y = nextY;
+                } else {
+                    int maxX = Math.max(0, scaledScreenW - PANEL_WIDTH);
+                    int nextX = panel.x + PANEL_WIDTH + panelGap;
+                    panel.x = nextX > maxX ? 0 : nextX;
+                    panel.y = 0;
+                }
+
+                panel.x = Math.max(0, Math.min(panel.x, scaledScreenW - PANEL_WIDTH));
+                panel.y = Math.max(0, Math.min(panel.y, scaledScreenH - HEADER_HEIGHT));
+                attempts++;
+            }
+            placedPanels.add(panel);
+        }
+    }
+
+    private Panel firstOverlap(Panel panel, List<Panel> placedPanels) {
+        for (Panel other : placedPanels) {
+            if (panelsIntersect(panel, other)) {
+                return other;
+            }
+        }
+        return null;
+    }
+
+    private boolean panelsIntersect(Panel a, Panel b) {
+        int ax2 = a.x + PANEL_WIDTH;
+        int ay2 = a.y + a.renderHeight();
+        int bx2 = b.x + PANEL_WIDTH;
+        int by2 = b.y + b.renderHeight();
+        return a.x < bx2 && ax2 > b.x && a.y < by2 && ay2 > b.y;
     }
 
     private static void click() {
