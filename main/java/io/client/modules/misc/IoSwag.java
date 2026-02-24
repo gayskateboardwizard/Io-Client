@@ -17,7 +17,8 @@ public class IoSwag extends Module {
         super("IoSwag", "Show Them", -1, Category.MISC);
         suffix.addOption("<IO>");
         suffix.addOption("<IO on crack!>");
-        suffix.addOption("<[Remote Acces Trojan] On Crack!>");
+        suffix.addOption("<[Remote Acces Trojan] on Crack!>");
+        suffix.addOption("<[RAT] on Crack!>");
         suffix.addOption("<WK>");
         suffix.addOption("-𝖂𝕶");
         suffix.addOption("木卫一客户端");
