@@ -15,7 +15,8 @@
     "PanoramaRendererMixin",
     "ForceSplashMixin",
     "EntityRendererMixin",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "MinecraftClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1
