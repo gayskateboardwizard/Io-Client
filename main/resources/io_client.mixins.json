@@ -8,6 +8,7 @@
     "BoneMealItemMixin",
     "CommandsMixin",
     "ExperienceOrbMixin",
+    "EndermanEntityMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
     "PlayerMixin",

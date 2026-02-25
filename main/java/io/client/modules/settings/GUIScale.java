@@ -11,7 +11,7 @@ public class GUIScale extends Module {
     public GUIScale() {
         super("GUIScale", "Adjust clickgui size", -1, Category.SETTINGS);
 
-        scale = new NumberSetting("Scale", 1.0f, 0.5f, 2.0f);
+        scale = new NumberSetting("Scale", 1.0f, 0.5f, 1.4f);
         addSetting(scale);
 
         scale.setValue(1.0f);

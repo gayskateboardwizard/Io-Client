@@ -78,6 +78,7 @@ public class ModuleManager {
         modules.add(new HoleFiller());
         modules.add(new AutoEat());
         modules.add(new AntiAFK());
+        modules.add(new EndermanLook());
         modules.add(new MessageSpammer());
         modules.add(new GuiMove());
         modules.add(new Safety());

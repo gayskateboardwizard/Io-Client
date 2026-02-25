@@ -109,7 +109,7 @@ public class ModernClickGuiScreen extends Screen {
         ctx.fill(bx, by, bx + barW, by + barH, theme.panelBackground);
         drawOutline(ctx, bx, by, barW, barH, theme.sliderBackground);
 
-        float min = 0.5f, max = 2.0f;
+        float min = 0.5f, max = 1.4f;
         float norm = (scale - min) / (max - min);
         int fillW = Math.max(0, (int) (norm * (barW - 4)));
         ctx.fill(bx + 2, by + 4, bx + 2 + fillW, by + barH - 4, theme.sliderBackground);

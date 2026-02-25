@@ -3,6 +3,7 @@ package io.client.clickgui.screens;
 import io.client.modules.templates.Module;
 import io.client.clickgui.*;
 import io.client.managers.ModuleManager;
+import io.client.modules.settings.GUIScale;
 import io.client.modules.settings.ThemeChanger;
 import io.client.modules.templates.Category;
 import io.client.settings.CategorySetting;
@@ -97,12 +98,16 @@ public class ClickGuiScreen extends Screen {
     @Override
     public void render(DrawContext graphics, int mouseX, int mouseY, float partialTicks) {
         opened = true;
+        GUIScale guiScale = ModuleManager.INSTANCE.getModule(GUIScale.class);
+        if (guiScale != null) {
+            PanelRenderer.setScale(guiScale.getScale());
+        }
         renderer.setTheme(currentTheme);
         resolvePanelOverlaps();
 
         String hoveredDescription = null;
 
-        for (CategoryPanel panel : panels.values()) {
+        for (CategoryPanel panel : getOrderedPanels()) {
             String desc = renderer.renderPanel(graphics, textRenderer, panel, mouseX, mouseY);
             if (desc != null)
                 hoveredDescription = desc;
@@ -193,7 +198,7 @@ public class ClickGuiScreen extends Screen {
         int panelGap = 3;
         int attemptLimit = Math.max(1, panels.size() * 8);
 
-        List<CategoryPanel> orderedPanels = new ArrayList<>(panels.values());
+        List<CategoryPanel> orderedPanels = getOrderedPanels();
         List<CategoryPanel> placedPanels = new ArrayList<>();
         for (CategoryPanel panel : orderedPanels) {
             clampPanelToScreen(panel, screenWidth, screenHeight, panelWidth);
@@ -268,6 +273,17 @@ public class ClickGuiScreen extends Screen {
         }
 
         return PanelRenderer.getTitleBarHeight() + 2 + contentHeight;
+    }
+
+    private List<CategoryPanel> getOrderedPanels() {
+        List<CategoryPanel> ordered = new ArrayList<>();
+        for (Category category : Category.values()) {
+            CategoryPanel panel = panels.get(category);
+            if (panel != null) {
+                ordered.add(panel);
+            }
+        }
+        return ordered;
     }
 }
 

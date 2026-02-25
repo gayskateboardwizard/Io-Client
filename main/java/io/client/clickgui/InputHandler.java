@@ -4,6 +4,7 @@ import io.client.managers.ModuleManager;
 import io.client.modules.templates.Category;
 import io.client.modules.templates.Module;
 import io.client.settings.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.MinecraftClient;
@@ -18,7 +19,7 @@ public class InputHandler {
     }
 
     public boolean handleMouseClick(Map<Category, CategoryPanel> panels, double mouseX, double mouseY, int button) {
-        for (CategoryPanel panel : panels.values()) {
+        for (CategoryPanel panel : getOrderedPanels(panels)) {
             int panelWidth = PanelRenderer.getPanelWidth();
             int titleBarHeight = PanelRenderer.getTitleBarHeight();
 
@@ -171,7 +172,7 @@ public class InputHandler {
             return true;
         }
 
-        for (CategoryPanel panel : panels.values()) {
+        for (CategoryPanel panel : getOrderedPanels(panels)) {
             if (panel.dragging) {
                 ModuleManager.INSTANCE.saveUiConfig(panels);
             }
@@ -190,7 +191,7 @@ public class InputHandler {
             return true;
         }
 
-        for (CategoryPanel panel : panels.values()) {
+        for (CategoryPanel panel : getOrderedPanels(panels)) {
             if (panel.dragging) {
                 MinecraftClient mc = MinecraftClient.getInstance();
                 int screenWidth = mc.getWindow().getScaledWidth();
@@ -218,7 +219,7 @@ public class InputHandler {
     }
 
     private CategoryPanel findPanelForSetting(Map<Category, CategoryPanel> panels, NumberSetting setting) {
-        for (CategoryPanel panel : panels.values()) {
+        for (CategoryPanel panel : getOrderedPanels(panels)) {
             List<Module> modules = ModuleManager.INSTANCE.getModulesByCategory(panel.category);
             for (Module module : modules) {
                 for (Setting s : module.getSettings()) {
@@ -237,6 +238,17 @@ public class InputHandler {
             }
         }
         return null;
+    }
+
+    private List<CategoryPanel> getOrderedPanels(Map<Category, CategoryPanel> panels) {
+        List<CategoryPanel> ordered = new ArrayList<>();
+        for (Category category : Category.values()) {
+            CategoryPanel panel = panels.get(category);
+            if (panel != null) {
+                ordered.add(panel);
+            }
+        }
+        return ordered;
     }
 }
 

@@ -114,7 +114,7 @@ public class BasicClickGuiScreen extends Screen {
         ctx.fill(bx + barW - 1, by, bx + barW, by + barH, 0x22FFFFFF);
         renderOutline(ctx, bx, by, barW, barH, (theme.moduleDisabled & 0x00FFFFFF) | 0x66000000);
 
-        float min = 0.5f, max = 2.0f;
+        float min = 0.5f, max = 1.4f;
         float norm = (scale - min) / (max - min);
         int fillW = (int) (norm * (barW - 4));
         ctx.fill(bx + 2, by + 3, bx + 2 + fillW, by + barH - 3, (theme.moduleEnabled & 0x00FFFFFF) | 0xBB000000);
