@@ -282,7 +282,7 @@ public class DonkeyBoatDupe extends Module {
             state = State.OPEN_DONKEY;
             ticks = 0;
         } else {
-            lookAt(targetDonkey.getPos());
+            lookAt(targetDonkey.getEntityPos());
             pressForward();
         }
     }
@@ -293,7 +293,7 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        lookAt(targetDonkey.getPos());
+        lookAt(targetDonkey.getEntityPos());
         mc.options.sneakKey.setPressed(true);
 
         if (ticks > 5) {
@@ -394,7 +394,7 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        double distToChest = mc.player.getPos().distanceTo(Vec3d.ofCenter(markedChest));
+        double distToChest = mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(markedChest));
 
         if (distToChest < 4.5) {
             releaseAllKeys();
@@ -528,7 +528,7 @@ public class DonkeyBoatDupe extends Module {
             state = State.OPEN_DONKEY;
             ticks = 0;
         } else {
-            lookAt(targetDonkey.getPos());
+            lookAt(targetDonkey.getEntityPos());
             pressForward();
         }
     }
@@ -539,7 +539,7 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        lookAt(targetDonkey.getPos());
+        lookAt(targetDonkey.getEntityPos());
         mc.options.sneakKey.setPressed(true);
 
         if (ticks > 5) {
@@ -585,12 +585,12 @@ public class DonkeyBoatDupe extends Module {
         double distance = mc.player.distanceTo(targetBoat);
         if (distance < 3.5) {
             releaseAllKeys();
-            lookAt(targetBoat.getPos());
+            lookAt(targetBoat.getEntityPos());
             mc.interactionManager.interactEntity(mc.player, targetBoat, mc.player.getActiveHand());
             state = State.WAIT_BOAT_MOUNT;
             ticks = 0;
         } else {
-            lookAt(targetBoat.getPos());
+            lookAt(targetBoat.getEntityPos());
             pressForward();
         }
     }
@@ -598,7 +598,7 @@ public class DonkeyBoatDupe extends Module {
     private void waitBoatMount() {
         if (mc.player.getVehicle() instanceof BoatEntity) {
             if (boatEntryPos == null) {
-                boatEntryPos = mc.player.getVehicle().getPos();
+                boatEntryPos = mc.player.getVehicle().getEntityPos();
             }
             state = State.MOVE_FORWARD;
             ticks = 0;
@@ -629,7 +629,7 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        double distFromHome = boat.getPos().distanceTo(boatEntryPos);
+        double distFromHome = boat.getEntityPos().distanceTo(boatEntryPos);
         double speed = boat.getVelocity().horizontalLength();
         double targetDist = distanceSetting.getValue();
 
@@ -720,7 +720,7 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        double distFromHome = boat.getPos().distanceTo(boatEntryPos);
+        double distFromHome = boat.getEntityPos().distanceTo(boatEntryPos);
         double speed = boat.getVelocity().horizontalLength();
 
         boolean nearHome = distFromHome <= 3.0;
@@ -771,7 +771,7 @@ public class DonkeyBoatDupe extends Module {
             return;
         }
 
-        double distToChest = mc.player.getPos().distanceTo(Vec3d.ofCenter(markedChest));
+        double distToChest = mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(markedChest));
 
         if (distToChest < 4.5) {
             releaseAllKeys();
@@ -887,7 +887,7 @@ public class DonkeyBoatDupe extends Module {
         Vec3d moveVec = new Vec3d(-Math.sin(rad), 0, Math.cos(rad)).multiply(speed);
         entity.setVelocity(moveVec.x, entity.getVelocity().y, moveVec.z);
         if (entity instanceof net.minecraft.client.network.ClientPlayerEntity) {
-            ((net.minecraft.client.network.ClientPlayerEntity) entity).velocityModified = true;
+            entity.velocityModified = true;
         }
     }
 

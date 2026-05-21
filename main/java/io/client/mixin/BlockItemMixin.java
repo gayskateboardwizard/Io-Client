@@ -17,7 +17,7 @@ public abstract class BlockItemMixin {
     public void useOn(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
         ItemPlacementContext placeContext = new ItemPlacementContext(context);
         boolean result = BlockEvents.BLOCK_PLACE.invoker().onBlockPlaced(context.getBlockPos(), (Entity) placeContext.getPlayer(), ((BlockItem) placeContext.getStack().getItem()).getBlock().getDefaultState(),
-                placeContext.getPlayer().getWorld().getBlockState(context.getBlockPos()));
+                context.getWorld().getBlockState(context.getBlockPos()));
         if (!result)
             cir.setReturnValue(ActionResult.FAIL);
     }

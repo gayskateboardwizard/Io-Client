@@ -20,6 +20,7 @@ import java.util.Map;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -100,7 +101,10 @@ public class FutureClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean isShiftDown) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
         float invScale = 1.0f / guiScale;
         int scaledMouseX = (int) (mouseX * invScale);
         int scaledMouseY = (int) (mouseY * invScale);
@@ -108,11 +112,14 @@ public class FutureClickGuiScreen extends Screen {
         for (Panel panel : panels) {
             panel.mouseClicked(scaledMouseX, scaledMouseY, button);
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, isShiftDown);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
         float invScale = 1.0f / guiScale;
         int scaledMouseX = (int) (mouseX * invScale);
         int scaledMouseY = (int) (mouseY * invScale);
@@ -120,11 +127,14 @@ public class FutureClickGuiScreen extends Screen {
         for (Panel panel : panels) {
             panel.mouseReleased(scaledMouseX, scaledMouseY, button);
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
         if (button == 0) {
             float invScale = 1.0f / guiScale;
             int scaledMouseX = (int) (mouseX * invScale);
@@ -134,7 +144,7 @@ public class FutureClickGuiScreen extends Screen {
                 panel.drag(scaledMouseX, scaledMouseY);
             }
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, deltaX, deltaY);
     }
 
     @Override

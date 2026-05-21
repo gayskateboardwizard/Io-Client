@@ -24,7 +24,7 @@ public abstract class PostProcessShader {
 
     public void init(RenderPipeline pipeline) {
         if (mc == null) return;
-        vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
+        vertexConsumerProvider = new OutlineVertexConsumerProvider();
         framebuffer = new SimpleFramebuffer(
                 "io_client-post-process",
                 mc.getWindow().getFramebufferWidth(),

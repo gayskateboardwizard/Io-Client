@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -152,27 +153,27 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (inputHandler.handleMouseClick(panels, mouseX, mouseY, button)) {
+    public boolean mouseClicked(Click click, boolean isShiftDown) {
+        if (inputHandler.handleMouseClick(panels, click.x(), click.y(), click.button())) {
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, isShiftDown);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (inputHandler.handleMouseRelease(panels, mouseX, mouseY, button)) {
+    public boolean mouseReleased(Click click) {
+        if (inputHandler.handleMouseRelease(panels, click.x(), click.y(), click.button())) {
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (inputHandler.handleMouseDrag(panels, mouseX, mouseY, button, dragX, dragY)) {
+    public boolean mouseDragged(Click click, double dragX, double dragY) {
+        if (inputHandler.handleMouseDrag(panels, click.x(), click.y(), click.button(), dragX, dragY)) {
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(click, dragX, dragY);
     }
 
     @Override

@@ -267,16 +267,16 @@ public class CrystalAuraV2 extends Module {
             if (minCrystalAge.getValue() > 0 && crystal.age < minCrystalAge.getValue())
                 continue;
 
-            double dist = mc.player.getEyePos().distanceTo(crystal.getPos());
+            double dist = mc.player.getEyePos().distanceTo(crystal.getEntityPos());
             if (dist > maxBreak)
                 continue;
 
-            boolean canSee = canSee(mc, crystal.getPos().add(0, crystal.getHeight() * 0.5, 0));
+            boolean canSee = canSee(mc, crystal.getEntityPos().add(0, crystal.getHeight() * 0.5, 0));
             if (!canSee && sq(dist) > maxWallBreakSq)
                 continue;
 
-            double targetDmg = DamageUtils.crystalDamage(target, crystal.getPos());
-            double selfDmg = DamageUtils.crystalDamage(mc.player, crystal.getPos());
+            double targetDmg = DamageUtils.crystalDamage(target, crystal.getEntityPos());
+            double selfDmg = DamageUtils.crystalDamage(mc.player, crystal.getEntityPos());
             if (!isDamageSafe(targetDmg, selfDmg, mc.player))
                 continue;
 
@@ -332,7 +332,7 @@ public class CrystalAuraV2 extends Module {
         if (bestCrystal == null)
             return;
         if (rotate.isEnabled())
-            applyRotation(mc, bestCrystal.getPos().add(0, bestCrystal.getHeight() * 0.5, 0));
+            applyRotation(mc, bestCrystal.getEntityPos().add(0, bestCrystal.getHeight() * 0.5, 0));
 
         mc.interactionManager.attackEntity(mc.player, bestCrystal);
         mc.player.swingHand(Hand.MAIN_HAND);

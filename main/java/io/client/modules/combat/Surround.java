@@ -98,7 +98,7 @@ public class Surround extends Module {
                     centerVec.x + 0.2, centerVec.y + 0.1, centerVec.z + 0.2
             );
 
-            if (!centerBox.contains(mc.player.getPos())) {
+            if (!centerBox.contains(mc.player.getEntityPos())) {
                 Vec3d motion = new Vec3d(
                         (centerVec.x - mc.player.getX()) / 2,
                         0,

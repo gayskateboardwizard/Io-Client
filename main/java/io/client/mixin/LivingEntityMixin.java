@@ -8,7 +8,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -57,7 +57,7 @@ public abstract class LivingEntityMixin {
     @Inject(method = "dropExperience", at = @At("HEAD"), cancellable = true)
     public void dropExperience(ServerWorld serverLevel, Entity entity, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (!self.isExperienceDroppingDisabled() && (this.shouldAlwaysDropExperience() || this.playerHitTimer > 0 && self.shouldDropExperience() && serverLevel.getGameRules().getBoolean(GameRules.DO_MOB_LOOT))) {
+        if (!self.isExperienceDroppingDisabled() && (this.shouldAlwaysDropExperience() || this.playerHitTimer > 0 && self.shouldDropExperience() && serverLevel.getGameRules().get(GameRules.DO_MOB_LOOT).get())) {
             if (!LivingEntityEvents.ENTITY_DROP_XP.invoker().onEntityDropXp(self, self.getAttackingPlayer(), (double) self.getExperienceToDrop(serverLevel, entity)))
                 ci.cancel();
         }

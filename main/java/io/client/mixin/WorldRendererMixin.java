@@ -24,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin implements IWorldRenderer {
-    @Shadow
-    protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
+    //@Shadow
+    //protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
     @Shadow
     private Framebuffer entityOutlineFramebuffer;
@@ -51,7 +51,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         PostProcessShaders.beginRender();
     }
 
-    @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void io_client$onRender(CallbackInfo ci) {
         PostProcessShaders.endRender();
     }
@@ -96,8 +96,9 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         io_client$pushEntityOutlineFramebuffer(shader.framebuffer);
         PostProcessShaders.rendering = true;
         try {
-            shader.vertexConsumerProvider.setColor(rgba[0], rgba[1], rgba[2], rgba[3]);
-            renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, shader.vertexConsumerProvider);
+            int argb = ((rgba[3] & 0xFF) << 24) | ((rgba[0] & 0xFF) << 16) | ((rgba[1] & 0xFF) << 8) | (rgba[2] & 0xFF);
+            shader.vertexConsumerProvider.setColor(argb);
+            // renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, shader.vertexConsumerProvider);
         } finally {
             PostProcessShaders.rendering = false;
             io_client$popEntityOutlineFramebuffer();

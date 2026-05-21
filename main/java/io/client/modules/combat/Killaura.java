@@ -31,6 +31,7 @@ public class Killaura extends Module {
     public final RadioSetting multiTask = new RadioSetting("MultiTask", "None");
     public final RadioSetting delayMode = new RadioSetting("Delay", "Cooldown");
     public final NumberSetting attackSpeed = new NumberSetting("AttackSpeed", 20.0F, 0.1F, 20.0F);
+    public final NumberSetting spearAttackSpeed = new NumberSetting("SpearSpeed", 10.0F, 0.1F, 20.0F);
     public final BooleanSetting autoSwitch = new BooleanSetting("AutoSwitch", false);
     public final BooleanSetting onlySword = new BooleanSetting("OnlyWeapon", true);
     public final BooleanSetting rotate = new BooleanSetting("Rotate", true);
@@ -112,6 +113,7 @@ public class Killaura extends Module {
         general.addSetting(multiTask);
         general.addSetting(delayMode);
         general.addSetting(attackSpeed);
+        general.addSetting(spearAttackSpeed);
         general.addSetting(autoSwitch);
         general.addSetting(onlySword);
         general.addSetting(rotate);
@@ -252,11 +254,13 @@ public class Killaura extends Module {
                 canAttack = true;
 
                 if (enabled.isEnabled() && variableTiming.isEnabled()) {
-                    double baseDelay = 1000.0 / attackSpeed.getValue();
+                    double speed = isHoldingSpear(mc) ? spearAttackSpeed.getValue() : attackSpeed.getValue();
+                    double baseDelay = 1000.0 / speed;
                     double variation = baseDelay * (timingVariation.getValue() / 100.0);
                     nextAttackDelay = (long)(baseDelay + (random.nextDouble() - 0.5) * variation);
                 } else {
-                    nextAttackDelay = (long)(1000.0 / attackSpeed.getValue());
+                    double speed = isHoldingSpear(mc) ? spearAttackSpeed.getValue() : attackSpeed.getValue();
+                    nextAttackDelay = (long)(1000.0 / speed);
                 }
             }
         }
@@ -522,7 +526,7 @@ public class Killaura extends Module {
     }
 
     private Vec3d getAttackRotateVec(Entity entity, MinecraftClient mc) {
-        Vec3d feetPos = entity.getPos();
+        Vec3d feetPos = entity.getEntityPos();
 
         return switch (rotateType.getSelectedOption()) {
             case "Feet" -> feetPos;
@@ -554,10 +558,17 @@ public class Killaura extends Module {
         return new float[]{yaw, pitch};
     }
 
+    private boolean isHoldingSpear(MinecraftClient mc) {
+        ItemStack stack = mc.player.getMainHandStack();
+        return stack.getItem().toString().toLowerCase().contains("spear");
+    }
+
     private boolean isHoldingWeapon(MinecraftClient mc) {
         ItemStack stack = mc.player.getMainHandStack();
-        return stack.getItem().toString().toLowerCase().contains("sword") ||
-                stack.getItem().toString().toLowerCase().contains("axe") ||
+        String itemName = stack.getItem().toString().toLowerCase();
+        return itemName.contains("sword") ||
+                itemName.contains("axe") ||
+                itemName.contains("spear") ||
                 stack.getItem() == Items.TRIDENT;
     }
 
@@ -581,7 +592,7 @@ public class Killaura extends Module {
 
             String itemName = stack.getItem().toString().toLowerCase();
             if (itemName.contains("sword") || itemName.contains("axe") ||
-                    stack.getItem() == Items.TRIDENT) {
+                    itemName.contains("spear") || stack.getItem() == Items.TRIDENT) {
                 return i;
             }
         }

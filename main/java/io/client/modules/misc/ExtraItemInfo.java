@@ -39,9 +39,9 @@ public class ExtraItemInfo extends Module {
     public static int getItemSize(ItemStack stack) {
         try {
             var result = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, stack).result();
-            if (result.isPresent() && result.get() instanceof NbtCompound compound) {
+            if (result.isPresent() && result.get() instanceof net.minecraft.nbt.NbtElement nbt) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                NbtIo.writeCompound(compound, new DataOutputStream(baos));
+                net.minecraft.nbt.NbtIo.write(nbt, new DataOutputStream(baos));
                 return baos.size();
             }
         } catch (Exception ignored) {

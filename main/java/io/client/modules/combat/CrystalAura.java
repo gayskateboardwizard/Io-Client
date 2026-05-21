@@ -312,14 +312,14 @@ public class CrystalAura extends Module {
                 if (timeSinceAttackTicks < 10L) continue;
             }
 
-            double dist = mc.player.getEyePos().distanceTo(crystal.getPos());
+            double dist = mc.player.getEyePos().distanceTo(crystal.getEntityPos());
             if (dist > maxBreakRange) continue;
 
             boolean canSee = canSeeCrystal(mc, crystal);
             if (!canSee && sq(dist) > maxWallRangeSq) continue;
 
-            double targetDmg = calculateDamage(crystal.getPos(), target);
-            double selfDmg = calculateDamage(crystal.getPos(), mc.player);
+            double targetDmg = calculateDamage(crystal.getEntityPos(), target);
+            double selfDmg = calculateDamage(crystal.getEntityPos(), mc.player);
 
             if (!isDamageSafe(targetDmg, selfDmg, mc.player)) continue;
 
@@ -559,7 +559,7 @@ public class CrystalAura extends Module {
         boolean switched = switchForWeakness(mc);
 
         if (rotate.isEnabled()) {
-            Vec3d vec = bestCrystal.getPos().add(0, bestCrystal.getHeight() / 2, 0);
+            Vec3d vec = bestCrystal.getEntityPos().add(0, bestCrystal.getHeight() / 2, 0);
             applyRotation(mc, vec);
         }
 
@@ -701,7 +701,7 @@ public class CrystalAura extends Module {
 
     private boolean canSeeCrystal(MinecraftClient mc, EndCrystalEntity crystal) {
         Vec3d start = mc.player.getEyePos();
-        Vec3d end = crystal.getPos().add(0, crystal.getHeight() / 2, 0);
+        Vec3d end = crystal.getEntityPos().add(0, crystal.getHeight() / 2, 0);
         return !isLineBlocked(mc, start, end);
     }
 
@@ -715,7 +715,7 @@ public class CrystalAura extends Module {
     private double calculateDamage(Vec3d crystalPos, LivingEntity target) {
         if (target == null) return 0.0;
 
-        double distance = target.getPos().distanceTo(crystalPos);
+        double distance = target.getEntityPos().distanceTo(crystalPos);
         if (distance > MAX_CRYSTAL_DAMAGE_DISTANCE) return 0.0;
 
         double exposure = 1.0 - (distance / MAX_CRYSTAL_DAMAGE_DISTANCE);

@@ -164,7 +164,7 @@ public class WebAura extends Module {
         updateTarget();
         if (target == null) return;
 
-        Vec3d targetPos = target.getPos();
+        Vec3d targetPos = target.getEntityPos();
 
         if (predictMovement.isEnabled()) {
             Vec3d vel = target.getVelocity();

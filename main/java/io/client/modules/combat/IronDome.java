@@ -135,7 +135,7 @@ public class IronDome extends Module {
 
     private Entity findTargetAbove() {
         MinecraftClient mc = MinecraftClient.getInstance();
-        Vec3d playerPos = mc.player.getPos();
+        Vec3d playerPos = mc.player.getEntityPos();
 
         Box searchBox = new Box(
                 playerPos.x - range.getValue(),
@@ -232,10 +232,10 @@ public class IronDome extends Module {
 
     private Vec3d predictPosition(Entity target) {
         if (prediction.getValue() == 0)
-            return target.getPos();
+            return target.getEntityPos();
 
         Vec3d velocity = target.getVelocity();
-        Vec3d pos = target.getPos();
+        Vec3d pos = target.getEntityPos();
 
         return pos.add(velocity.multiply(prediction.getValue()));
     }

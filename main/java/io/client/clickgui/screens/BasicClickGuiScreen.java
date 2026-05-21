@@ -14,6 +14,9 @@ import io.client.settings.Setting;
 import io.client.settings.StringSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -157,7 +160,10 @@ public class BasicClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int btn) {
+    public boolean mouseClicked(Click click, boolean isShiftDown) {
+        double mx = click.x();
+        double my = click.y();
+        int btn = click.button();
         int bx = width / 2 - 60;
 
         int sby = height - 18;
@@ -180,11 +186,14 @@ public class BasicClickGuiScreen extends Screen {
         int smy = (int) (my * invScale);
 
         for (Panel p : panels) p.mouseClicked(smx, smy, btn);
-        return super.mouseClicked(mx, my, btn);
+        return super.mouseClicked(click, isShiftDown);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int btn) {
+    public boolean mouseReleased(Click click) {
+        double mx = click.x();
+        double my = click.y();
+        int btn = click.button();
         if (btn == 0) draggingScale = false;
 
         GUIScale guiScale = ModuleManager.INSTANCE.getModule(GUIScale.class);
@@ -193,11 +202,14 @@ public class BasicClickGuiScreen extends Screen {
         int smy = (int) (my * invScale);
 
         for (Panel p : panels) p.mouseReleased(smx, smy, btn);
-        return super.mouseReleased(mx, my, btn);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
+    public boolean mouseDragged(Click click, double dx, double dy) {
+        double mx = click.x();
+        double my = click.y();
+        int btn = click.button();
         if (btn == 0) {
             GUIScale guiScale = ModuleManager.INSTANCE.getModule(GUIScale.class);
             float invScale = 1.0f / (guiScale != null ? guiScale.getScale() : 1.0f);
@@ -205,11 +217,12 @@ public class BasicClickGuiScreen extends Screen {
             int smy = (int) (my * invScale);
             for (Panel p : panels) p.drag(smx, smy);
         }
-        return super.mouseDragged(mx, my, btn, dx, dy);
+        return super.mouseDragged(click, dx, dy);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
+        int keyCode = input.key();
         if (typingSearch) {
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 typingSearch = false;
@@ -222,16 +235,16 @@ public class BasicClickGuiScreen extends Screen {
             }
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharInput input) {
         if (typingSearch) {
-            searchQuery += chr;
+            searchQuery += (char) input.codepoint();
             return true;
         }
-        return super.charTyped(chr, modifiers);
+        return super.charTyped(input);
     }
 
     @Override

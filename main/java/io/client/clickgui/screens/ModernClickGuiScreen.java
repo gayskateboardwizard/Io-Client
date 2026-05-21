@@ -14,6 +14,9 @@ import io.client.settings.Setting;
 import io.client.settings.StringSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -303,7 +306,10 @@ public class ModernClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int btn) {
+    public boolean mouseClicked(Click click, boolean isShiftDown) {
+        double mx = click.x();
+        double my = click.y();
+        int btn = click.button();
         float scale  = getScale();
         float inv    = 1f / scale;
         int rawMX    = (int) mx,       rawMY    = (int) my;
@@ -388,11 +394,14 @@ public class ModernClickGuiScreen extends Screen {
             }
         }
 
-        return super.mouseClicked(mx, my, btn);
+        return super.mouseClicked(click, isShiftDown);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int btn) {
+    public boolean mouseReleased(Click click) {
+        double mx = click.x();
+        double my = click.y();
+        int btn = click.button();
         if (btn == 0) {
             draggingScale = false;
             if (draggingNumber != null) { draggingNumber.dragging = false; draggingNumber = null; }
@@ -417,17 +426,20 @@ public class ModernClickGuiScreen extends Screen {
                 ry += r.height();
             }
         }
-        return super.mouseReleased(mx, my, btn);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int btn, double dx, double dy) {
+    public boolean mouseDragged(Click click, double dx, double dy) {
+        double mx = click.x();
+        double my = click.y();
+        int btn = click.button();
         float inv = 1f / getScale();
         int smx = (int) (mx * inv), sw = (int) (width * inv);
         if (draggingNumber != null && settingsTarget != null) {
             draggingNumber.applyMouse(smx, sw - SETTINGS_W + 4, SETTINGS_W - 8);
         }
-        return super.mouseDragged(mx, my, btn, dx, dy);
+        return super.mouseDragged(click, dx, dy);
     }
 
     @Override
@@ -443,7 +455,8 @@ public class ModernClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
+        int keyCode = input.key();
         if (typingSearch) {
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) { typingSearch = false; searchQuery = ""; return true; }
             if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !searchQuery.isEmpty()) {
@@ -453,13 +466,13 @@ public class ModernClickGuiScreen extends Screen {
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_ESCAPE && settingsTarget != null) { closeSettings(); return true; }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (typingSearch) { searchQuery += chr; return true; }
-        return super.charTyped(chr, modifiers);
+    public boolean charTyped(CharInput input) {
+        if (typingSearch) { searchQuery += (char) input.codepoint(); return true; }
+        return super.charTyped(input);
     }
 
     @Override

@@ -126,7 +126,7 @@ public class MeshRenderer {
                 pass.setUniform(entry.getKey(), entry.getValue());
             }
             for (var entry : samplers.entrySet()) {
-                pass.bindSampler(entry.getKey(), entry.getValue());
+                pass.bindTexture(entry.getKey(), entry.getValue(), net.minecraft.client.gl.GpuSampler.SAMPLER_NEAREST);
             }
 
             pass.setVertexBuffer(0, vertexBuffer);

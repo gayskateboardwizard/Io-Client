@@ -3,6 +3,7 @@ package io.client.mixin;
 import io.client.SplashTexts;
 import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +18,7 @@ public class ForceSplashMixin {
 
     @Inject(method = "init()V", at = @At("TAIL"))
     private void forceSplash(CallbackInfo ci) {
-        this.splashText = new SplashTextRenderer(SplashTexts.getRandomSplash());
+        this.splashText = new SplashTextRenderer(Text.literal(SplashTexts.getRandomSplash()));
     }
 }
 

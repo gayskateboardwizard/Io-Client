@@ -128,7 +128,7 @@ public class Tracers extends Module {
                 if (!TargetManager.INSTANCE.isValidTarget(e))
                     continue;
             }
-
+            
             double distSq = mc.player.squaredDistanceTo(e);
             if (distSq > maxRangeSq)
                 continue;
